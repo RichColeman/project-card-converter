@@ -22,10 +22,10 @@ The digital build let us run **thousands of automated playthroughs**. Things tha
 
 - **Two competing win paths per level** (Survive vs. Escape) with distinct rewards. Sims +
   human play confirm both are viable and genuinely tension against each other.
-- **Goal-lock rule** (found via playtest): goals are checked when the player ends their
-  week, *before* the Friday reckoning. A reached goal cannot be un-reached by Friday
-  penalties. Without this rule the game feels like theft — we shipped that bug and a
-  player hit it in one session.
+- **Goal-end rule** (found via playtest): the moment PIP reaches the goal, the level ends
+  — the review happens same-day. Friday penalties can never unmake a reached goal, and
+  there are no dead weeks of soaking events after the work is done. We shipped both bugs;
+  a player hit both in single sessions.
 - **Telegraphed boss moves.** The manager's Friday action is visible all week. This is
   load-bearing: it converts Friday from random punishment into planning.
 - **Encounter design principle:** every event attacks a *different* subsystem (PIP, MH,
@@ -59,7 +59,9 @@ What digital **cannot** answer — this is your domain:
       cards (optional), next week.
 
 **Deliverables:** 2 active at start of level (deadlines Wk 3 and Wk 4), capped at 3 open.
-Each has a work cost (2–4), a deadline week, and a PIP reward (3–6). Bosses add more.
+Each has a work cost (2–4), a deadline week, and a PIP reward (3–6). Bosses add more, and
+**management refills an empty queue at week start** (new deliverable, due +2 weeks) — the
+pile never empties, so the PIP goal is always reachable.
 
 **Resources:**
 
@@ -74,7 +76,8 @@ Each has a work cost (2–4), a deadline week, and a PIP reward (3–6). Bosses 
 
 ## 4. The fork: Survive vs. Escape
 
-Checked at the end of the week the player closes (goal-lock), offered every Friday held:
+**Hitting the PIP goal ends the level on the spot** (mid-week included). If the Job goal
+is also held (Week 3+), choose a door. Escape-only offers arrive at Fridays:
 
 - **Survive** — reach the PIP goal → *take the review*: stay, climb one level at this
   company, draft 1 of 3 **Company Perks** (each company has an exclusive 5-perk pool).

@@ -849,7 +849,7 @@ function onPlay(idx){ if(R.phase!=="play"||R.over) return; const c=CARDS[R.hand[
   if(c.choose){ openNetwork(idx); return; } if(c.target){ R.selecting={idx,target:c.target}; render(); return; } resolvePlay(idx,null); }
 function chooseTarget(d){ if(!R.selecting) return; const idx=R.selecting.idx; R.selecting=null; resolvePlay(idx,d); }
 function resolvePlay(idx,target){ const cid=R.hand[idx], c=CARDS[cid]; R.focus-=c.cost; const log=c.play(g,target);
-  R.hand.splice(idx,1); dpush(cid); R.selecting=null; render(); $("#hint").innerHTML=log; checkLossContinuous(); }
+  R.hand.splice(idx,1); dpush(cid); R.selecting=null; render(); $("#hint").innerHTML=log; if(checkLossContinuous()) return; checkGoals(); }
 function openNetwork(idx){
   const cid=R.hand[idx], big = cid==="powerlunch" ? 2 : 1;
   const extFx = escapeUnlocked ? "+"+big+" Job · −2 Heat" : "−2 Heat";
@@ -858,7 +858,7 @@ function openNetwork(idx){
     +"<button class='btn cap' id='n-ext'><span class='bl'>External</span><span class='bd'>"+extFx+"</span></button>"
     +"<button class='btn plain' id='n-cancel'><span class='bl'>Cancel</span></button></div></div>";
   $("#veil").classList.add("show"); let done=false;
-  const fin=make=>{ if(done) return; done=true; $("#veil").classList.remove("show"); R.focus-=CARDS[cid].cost; R.hand.splice(idx,1); dpush(cid); const log=make(); render(); $("#hint").innerHTML=log; checkLossContinuous(); };
+  const fin=make=>{ if(done) return; done=true; $("#veil").classList.remove("show"); R.focus-=CARDS[cid].cost; R.hand.splice(idx,1); dpush(cid); const log=make(); render(); $("#hint").innerHTML=log; if(checkLossContinuous()) return; checkGoals(); };
   $("#n-int").onclick=()=>fin(()=>g.hit("cap",big)+" "+g.hit("pip",1));
   $("#n-ext").onclick=()=>fin(()=>g.hit("js",big)+" "+g.hit("heat",-2));
   $("#n-cancel").onclick=()=>{ if(done) return; done=true; $("#veil").classList.remove("show"); };
@@ -926,23 +926,29 @@ function afterHeat(){
   renderLive();
   const survived = R.pip>=R.pipGoal || R.pipSnapshot>=R.pipGoal;
   const canEscape = escapeUnlocked && R.week>=3 && (R.js>=R.jsGoal || R.jsSnapshot>=R.jsGoal);
-  if(survived && R.week>=MAX_WEEKS && !canEscape) return doSurvive();
-  if(survived || canEscape) return offerFridayChoice(survived, canEscape);
+  if(survived) return endLevelByGoal();
+  if(canEscape) return offerFridayChoice();
   if(R.week>=MAX_WEEKS) return gameOver("fired","Fired","Four weeks. No PIP, no exit. The plan worked as designed.");
   offerCardDraft(()=>advanceWeek());
 }
 
 /* ============ PATH CHOICE ============ */
-function offerFridayChoice(survived, canEscape){
+function offerFridayChoice(){ // Job goal held, PIP not: an outside offer
   R.phase="choice"; const isLast=R.companyIdx>=COMPANIES.length-1; const next=COMPANIES[R.companyIdx+1];
-  const choices=[];
-  if(survived) choices.push({cls:"primary", label:"Take the review → Office Perk", act:()=>doSurvive()});
-  if(canEscape) choices.push({cls:"esc", label:isLast?"Walk out — for good":"Leave for "+next.name+" → Rare card", act:()=>doEscape()});
+  const choices=[{cls:"esc", label:isLast?"Walk out — for good":"Leave for "+next.name+" → Rare card", act:()=>doEscape()}];
   if(R.week<MAX_WEEKS) choices.push({cls:"plain", label:"Keep working", act:()=>offerCardDraft(()=>advanceWeek())});
-  else if(!survived) choices.push({cls:"plain", label:"Turn it down (fired)", act:()=>gameOver("fired","Fired","Turned down the exit, missed the PIP.")});
-  const title = survived&&canEscape ? "Two Doors" : (survived ? "Review Available" : "A Firm Offer");
-  choiceModal(canEscape?"escape2":"good2", title, survived?"You hit your number.":"An offer is on the table.", choices);
+  else choices.push({cls:"plain", label:"Turn it down (fired)", act:()=>gameOver("fired","Fired","Turned down the exit, missed the PIP.")});
+  choiceModal("escape2","A Firm Offer","An offer is on the table.",choices);
 }
+function endLevelByGoal(){ // PIP goal reached: the review happens now
+  const canEscape = escapeUnlocked && R.week>=3 && (R.js>=R.jsGoal || R.jsSnapshot>=R.jsGoal);
+  if(!canEscape) return doSurvive();
+  R.phase="choice"; const isLast=R.companyIdx>=COMPANIES.length-1; const next=COMPANIES[R.companyIdx+1];
+  choiceModal("escape2","Two Doors","You hit your number.",[
+    {cls:"primary", label:"Take the review → Office Perk", act:()=>doSurvive()},
+    {cls:"esc", label:isLast?"Walk out — for good":"Leave for "+next.name+" → Rare card", act:()=>doEscape()}]);
+}
+function checkGoals(){ if(R.over||R.phase!=="play") return false; if(R.pip>=R.pipGoal){ endLevelByGoal(); return true; } return false; }
 function doEscape(){ R.phase="cleared"; R.journey.push({co:R.company.name,lvl:R.level,out:"esc"}); offerRareDraft(()=>jumpCompany()); }
 function doSurvive(){ R.phase="cleared"; R.journey.push({co:R.company.name,lvl:R.level,out:"surv"}); offerPerkDraft(()=>levelUp()); }
 
@@ -1013,6 +1019,7 @@ function offerPerkDraft(done){
 /* ============ WEEK ADVANCE ============ */
 function advanceWeek(){
   R.week++; R.focus=Math.max(1,BASE_FOCUS-R.nextFocusPenalty); R.nextFocusPenalty=0; R.completedThisWeek=0; R.skipIntent=false; R.phase="play";
+  if(!R.deliverables.some(d=>!d.done&&!d.missed)) addDeliverable(Math.min(R.week+2,MAX_WEEKS)); // the pile never empties
   chooseIntent(); drawHand();
   $("#veil").classList.remove("show"); render();
 }
