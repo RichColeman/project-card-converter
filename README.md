@@ -30,23 +30,33 @@ Deliberate monospace type makes the whole thing read like a PIP memo you're trap
 
 ## How it plays
 
-Each **job** is a 4-week PIP. Each **week** is a turn:
+A **career** climbs three companies — **RedFlonic** (a Series-C startup), **SailHorse**
+(a legacy megacorp), then **McCrapsey** (an elite consultancy) — each meaner than the last,
+with its own manager bosses and its own exclusive Office Perks. Each company has up to
+**5 levels**; each level is a 4-week PIP. Each **week** is a turn:
 
-- **Draw a hand** of 5 cards and spend **Focus** (≈ your 4 workdays) playing them.
-  Powerful cards cost more; unplayed cards discard.
+- **Draw a hand** of 5 cards and spend **Focus** (≈ your 4 workdays). Powerful cards cost
+  more; unplayed cards discard. *Grinding deliverables drains Mental Health* — being on a
+  PIP is exhausting, so pace yourself.
 - **Friday — the Reckoning.** Your **Manager boss** acts (its next move is *telegraphed*,
-  so plan ahead), then office **encounter cards** hit. Escalates across the four weeks.
+  so plan ahead), then an office **encounter** hits.
 
-### Two ways to win a job, in direct conflict
+### Two paths, two different rewards — decide upfront
 
-| Path | Win condition |
-|------|---------------|
-| **Survive the PIP** | Reach the PIP-Progress goal by Friday of Week 4. |
-| **Escape** | Reach the Job-Search goal — but you can only cash the offer from **Week 3** (nobody starts a new job in four days). |
+At the end of a level you commit to a path, and you can see each one's reward on the HUD:
 
-Clear a job and you climb a rung: draft an **Office Perk**, then face a new company,
-a new manager, and higher goals. **It's permadeath** — get fired, burn out, or let your
-**Heat** hit the ceiling and the run is over. Your score is how far you climbed.
+| Path | How | Reward |
+|------|-----|--------|
+| **Survive** | Hit the **PIP** goal by Week 4 | Keep your seat, climb a level *here*, and draft a **Company Perk** — a relic you can only earn by staying. The *tall, tenure* build. |
+| **Escape** | Hit the **Job-Search** goal (Week 3+) | A headhunter pulls you to the **next company** — skipping its remaining levels — with a **Rare card**. The *fast, mercenary* build. |
+
+So every level is a real fork: *grind this place for its unique perk set, or bail for a
+rare card and skip ahead.* **Win the run** by clearing all three companies — escape
+McCrapsey (freedom) or survive to the top of it (partner).
+
+**It's permadeath** — get fired, burn out, or let your **Heat** hit the ceiling and the run
+is over. Your deck, perks, and Mental Health carry the whole way; Heat and deadlines reset
+each level. Your score is how far you climbed.
 
 ### The deck
 
@@ -58,33 +68,30 @@ a new manager, and higher goals. **It's permadeath** — get fired, burn out, or
   (launder Heat into standing).
 - **Recover / Tempo** — *Breathe*, *Therapy*, *Overtime*, *Skip the Meeting*, *Ghost a Task*.
 
-Between weeks you **draft** a new card; between jobs you draft a passive **Office Perk**
-(Two Monitors, Noise-Cancelling Headphones, The One Ally, Corporate Card…). Your deck,
-perks, and **Mental Health persist across the whole career** — Heat and deliverables reset.
+Between weeks you **draft** a new card into your deck. **Surviving** a level lets you draft
+a **Company Perk** (only that company's pool — Move Fast, Ping-Pong Table, Corporate Card,
+Union Rep, The Rolodex, Billable Hours…). **Escaping** hands you a **Rare card** you can't
+get any other way (Insider Referral, Portfolio Piece, Burn Bridge…). Deck, perks, and
+Mental Health persist the whole career; Heat and deliverables reset each level.
 
 ### The antagonists
 
-Manager bosses each play differently — **The Micromanager** steals Focus and nitpicks,
-**The Ghost** pulls deadlines forward and dumps rush work, **The Empire Builder** buries
-you, **The Nice One** is wonderfully supportive until Week 3. The encounter deck attacks
-different systems (PIP, mental health, exposure, tempo, coworker politics), and the best
-cards present a **decision**, not just a tax.
-
-### Hybrid unlocks
-
-Climbing the ladder unlocks new bosses, roles (Engineer / Designer / Account Executive),
-and cards into the pool for future runs — **variety, not power**. Runs stay honest; the
-game grows as you play.
+Each company fields its own managers, and they play differently — the startup's **Founder**
+pivots the roadmap and pulls deadlines in; the megacorp's **Middle Manager** steals Focus
+and nitpicks; the consultancy's **Partner** runs up-or-out reviews that gut your PIP. Their
+Friday move is always telegraphed. The encounter deck attacks different systems (PIP,
+mental health, exposure, tempo, coworker politics), and the best cards present a
+**decision**, not just a tax.
 
 ## Tuning & design
 
 Built to be **brutal but fair** (the theme is "the system is designed for you to fail").
 The design was validated by driving thousands of automated playthroughs in a headless
-browser across distinct strategies — confirming both win paths are viable, that the
-hybrid line is strongest (the two paths genuinely compete), and that losses are earned
-near-misses rather than cheap deaths. All tuning lives as plain data at the top of the
-`<script>` block in `index.html`: thresholds, the card/relic/boss/role pools, and the
-encounter deck — easy to retune.
+browser across distinct strategies — confirming both reward paths are viable, that grinding
+deliverables genuinely trades Mental Health for progress, and that losses are earned
+near-misses (Fired / Burned Out) rather than cheap deaths. All tuning lives as plain data at
+the top of the `<script>` block in `index.html`: the company/level structure, difficulty
+curve, card pool, per-company perk and boss pools, and the encounter deck — easy to retune.
 
 ---
 

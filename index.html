@@ -7,36 +7,26 @@
 <style>
 /* ============================================================
    PIP — a roguelike deckbuilder about surviving an unwinnable
-   system. Climb the corporate ladder one Performance
-   Improvement Plan at a time. Self-contained: no build/deps.
+   system. Climb three companies, one Performance Improvement
+   Plan at a time. Self-contained: no build/deps.
    Visual world: a CRT terminal in a monitor bezel.
    ============================================================ */
 :root{
   --ground:#080b0e; --panel:#111a1c; --panel-2:#0d1416; --grid:#1b2a2b;
   --ink:#d6e2cf; --ink-dim:#7f938a; --ink-faint:#465651;
-  --phosphor:#41e08a;   /* PIP */
-  --escape:#49d6e6;     /* Job search */
-  --amber:#f2b13c;      /* Mental health */
-  --danger:#ff4d5e;     /* Heat / termination */
-  --capital:#c79bff;    /* Political capital */
-  --focus:#ffd45e;      /* Focus / energy */
+  --phosphor:#41e08a; --escape:#49d6e6; --amber:#f2b13c; --danger:#ff4d5e;
+  --capital:#c79bff; --focus:#ffd45e;
   --rare:#ffb03a; --uncommon:#5fd0ff; --common:#c7d3c8; --curse:#c65b8a;
   --font: ui-monospace,"SF Mono","SFMono-Regular",Menlo,Consolas,"Liberation Mono",monospace;
 }
 *{box-sizing:border-box}
 html,body{height:100%}
-body{
-  margin:0; background:radial-gradient(120% 90% at 50% 0%,#0e1518 0%,var(--ground) 60%,#04060700 100%),var(--ground);
-  color:var(--ink); font-family:var(--font); font-size:15px; line-height:1.45;
-  -webkit-font-smoothing:antialiased; overflow-x:hidden;
-}
+body{ margin:0; background:radial-gradient(120% 90% at 50% 0%,#0e1518 0%,var(--ground) 60%,#04060700 100%),var(--ground);
+  color:var(--ink); font-family:var(--font); font-size:15px; line-height:1.45; -webkit-font-smoothing:antialiased; overflow-x:hidden; }
 .monitor{ min-height:100%; padding:clamp(8px,2vw,30px); display:flex; justify-content:center; align-items:flex-start; }
-.screen{
-  position:relative; width:min(1120px,100%); min-height:clamp(560px,94vh,980px);
+.screen{ position:relative; width:min(1120px,100%); min-height:clamp(560px,94vh,980px);
   background:linear-gradient(180deg,#0c1315,#0a1012); border-radius:16px; padding:clamp(12px,2vw,24px);
-  box-shadow:0 0 0 6px #1c1a14,0 0 0 10px #0b0a07,0 0 0 12px #241f16,0 26px 60px rgba(0,0,0,.7),inset 0 0 120px rgba(0,40,20,.14);
-  overflow:hidden;
-}
+  box-shadow:0 0 0 6px #1c1a14,0 0 0 10px #0b0a07,0 0 0 12px #241f16,0 26px 60px rgba(0,0,0,.7),inset 0 0 120px rgba(0,40,20,.14); overflow:hidden; }
 .screen::before{ content:""; position:absolute; inset:0; z-index:60; pointer-events:none; mix-blend-mode:multiply;
   background:repeating-linear-gradient(to bottom,rgba(0,0,0,0) 0,rgba(0,0,0,0) 2px,rgba(0,0,0,.18) 3px,rgba(0,0,0,0) 4px); }
 .screen::after{ content:""; position:absolute; inset:0; z-index:61; pointer-events:none;
@@ -46,19 +36,19 @@ body{
 @media (prefers-reduced-motion:reduce){ .screen::after{animation:none} *{animation-duration:.001ms!important;animation-iteration-count:1!important} }
 .glow{ text-shadow:0 0 8px rgba(65,224,138,.45),0 0 2px rgba(73,214,230,.35); }
 
-/* ---- top bar ---- */
 .top{ display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center; border-bottom:2px dashed var(--ink-faint); padding-bottom:10px; margin-bottom:12px; }
 .stamp{ font-size:10px; letter-spacing:.24em; text-transform:uppercase; color:var(--danger); border:2px solid var(--danger); padding:3px 7px; border-radius:4px; transform:rotate(-3deg); }
 .top h1{ font-size:clamp(16px,2.6vw,22px); margin:0; letter-spacing:.05em; color:var(--phosphor); text-transform:uppercase; }
 .top .who{ font-size:11px; color:var(--ink-dim); }
 .spacer{ flex:1; }
-.rung{ font-size:11px; letter-spacing:.1em; color:var(--focus); text-transform:uppercase; }
+.colevel{ display:flex; flex-direction:column; align-items:flex-end; gap:3px; }
+.codots{ display:flex; gap:4px; align-items:center; font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint); }
+.codots b{ color:var(--focus); }
 .wk{ display:flex; gap:4px; align-items:center; }
 .wk .dot{ width:12px; height:12px; border-radius:50%; border:2px solid var(--grid); }
 .wk .dot.on{ background:var(--phosphor); border-color:var(--phosphor); }
 .wk .dot.fri{ border-color:var(--danger); } .wk .dot.fri.on{ background:var(--danger); }
 
-/* ---- boss panel ---- */
 .boss{ display:flex; gap:12px; align-items:center; background:linear-gradient(180deg,#1a0e10,#120a0b); border:2px solid #3a1c22; border-radius:10px; padding:10px 12px; margin-bottom:12px; }
 .boss .face{ font-size:30px; line-height:1; filter:drop-shadow(0 0 8px rgba(255,77,94,.4)); }
 .boss .bmeta{ flex:1; min-width:0; }
@@ -69,7 +59,6 @@ body{
 .boss .intenttxt{ font-size:12px; color:var(--amber); line-height:1.3; }
 .boss .intenttxt.skipped{ color:var(--ink-faint); text-decoration:line-through; }
 
-/* ---- meters ---- */
 .meters{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:8px; }
 @media(max-width:720px){ .meters{ grid-template-columns:repeat(2,1fr); } }
 .meter{ background:var(--panel); border:2px solid var(--grid); border-radius:8px; padding:7px 9px; }
@@ -79,11 +68,11 @@ body{
 .bar{ height:9px; border-radius:3px; background:#06100e; overflow:hidden; border:1px solid #0a1a17; }
 .bar>i{ display:block; height:100%; width:0; transition:width .45s cubic-bezier(.2,.8,.2,1); }
 .meter .goal{ font-size:9px; color:var(--ink-faint); margin-top:4px; }
-.m-pip .val,.m-pip .lab{color:var(--phosphor)} .m-pip .bar>i{background:linear-gradient(90deg,#1f6e47,var(--phosphor));box-shadow:0 0 8px rgba(65,224,138,.5)}
-.m-js .val,.m-js .lab{color:var(--escape)} .m-js .bar>i{background:linear-gradient(90deg,#1c6470,var(--escape));box-shadow:0 0 8px rgba(73,214,230,.5)}
+.m-pip .val,.m-pip .lab{color:var(--phosphor)} .m-pip .bar>i{background:linear-gradient(90deg,#1f6e47,var(--phosphor));box-shadow:0 0 8px rgba(65,224,138,.5)} .m-pip .goal b{color:var(--phosphor)}
+.m-js .val,.m-js .lab{color:var(--escape)} .m-js .bar>i{background:linear-gradient(90deg,#1c6470,var(--escape));box-shadow:0 0 8px rgba(73,214,230,.5)} .m-js .goal b{color:var(--escape)}
 .m-mh .val,.m-mh .lab{color:var(--amber)} .m-mh .bar>i{background:linear-gradient(90deg,#7a561a,var(--amber));box-shadow:0 0 8px rgba(242,177,60,.5)}
 .m-heat .val,.m-heat .lab{color:var(--danger)} .m-heat .bar>i{background:linear-gradient(90deg,#7a2129,var(--danger));box-shadow:0 0 8px rgba(255,77,94,.5)}
-.m-js.gated{ opacity:.7; } .m-js.gated .goal{ color:var(--escape); }
+.m-js.gated{ opacity:.75; }
 
 .strip{ display:flex; flex-wrap:wrap; gap:8px 16px; align-items:center; margin:2px 0 12px; font-size:11px; color:var(--ink-dim); }
 .pips{ display:inline-flex; gap:3px; vertical-align:middle; }
@@ -99,7 +88,6 @@ body{
 .hd{ font-size:10px; letter-spacing:.22em; text-transform:uppercase; color:var(--ink-dim); margin:2px 0 8px; display:flex; align-items:center; gap:10px; }
 .hd::after{ content:""; flex:1; height:2px; background:repeating-linear-gradient(90deg,var(--grid) 0 6px,transparent 6px 10px); }
 
-/* ---- deliverables ---- */
 .deliverables{ display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:9px; margin-bottom:14px; }
 .dcard{ background:linear-gradient(180deg,var(--panel),var(--panel-2)); border:2px solid var(--grid); border-radius:9px; padding:9px 11px 10px; position:relative; transition:transform .12s,box-shadow .12s,border-color .12s; }
 .dcard .dtitle{ font-size:12px; line-height:1.3; margin-bottom:7px; min-height:31px; }
@@ -116,15 +104,11 @@ body{
 .selecting .dcard.nopick{ opacity:.3; }
 @keyframes pulse{ 0%,100%{box-shadow:0 0 7px rgba(255,212,94,.25)} 50%{box-shadow:0 0 20px rgba(255,212,94,.55)} }
 
-/* ---- hand ---- */
 .handzone{ margin-top:4px; }
 .handrow{ display:flex; justify-content:center; align-items:flex-end; gap:10px; flex-wrap:wrap; min-height:184px; padding:6px 0 2px; }
-.pcard{
-  --c:var(--common); width:132px; min-height:172px; background:linear-gradient(180deg,#16232a,#0e181c);
+.pcard{ --c:var(--common); width:132px; min-height:172px; background:linear-gradient(180deg,#16232a,#0e181c);
   border:2px solid var(--c); border-radius:11px; padding:9px 9px 10px; cursor:pointer; position:relative;
-  display:flex; flex-direction:column; gap:6px; transition:transform .13s cubic-bezier(.2,.8,.2,1),box-shadow .13s,filter .13s;
-  box-shadow:0 8px 0 rgba(0,0,0,.35);
-}
+  display:flex; flex-direction:column; gap:6px; transition:transform .13s cubic-bezier(.2,.8,.2,1),box-shadow .13s,filter .13s; box-shadow:0 8px 0 rgba(0,0,0,.35); }
 .pcard:hover,.pcard:focus-visible{ transform:translateY(-14px) rotate(-1deg); box-shadow:0 18px 0 rgba(0,0,0,.4),0 0 26px color-mix(in srgb,var(--c) 45%,transparent); outline:none; z-index:5; }
 .pcard .cost{ position:absolute; top:-10px; left:-10px; width:28px; height:28px; border-radius:50%; background:#1a1407; border:2px solid var(--focus); color:var(--focus); display:grid; place-items:center; font-weight:bold; font-size:14px; box-shadow:0 0 10px rgba(255,212,94,.4); }
 .pcard .cname{ font-size:12px; font-weight:bold; letter-spacing:.02em; color:var(--c); text-transform:uppercase; line-height:1.2; margin-top:4px; }
@@ -132,7 +116,7 @@ body{
 .pcard .ctype{ font-size:8.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint); border-top:1px dashed var(--ink-faint); padding-top:5px; }
 .pcard.unplayable{ filter:grayscale(.7) brightness(.6); cursor:not-allowed; }
 .pcard.unplayable:hover{ transform:none; box-shadow:0 8px 0 rgba(0,0,0,.35); }
-.pcard[data-r=common]{--c:var(--common)} .pcard[data-r=uncommon]{--c:var(--uncommon)} .pcard[data-r=rare]{--c:var(--rare)} .pcard[data-r=curse]{--c:var(--curse)}
+.pcard[data-r=common]{--c:var(--common)} .pcard[data-r=uncommon]{--c:var(--uncommon)} .pcard[data-r=rare]{--c:var(--rare)}
 .pcard.selarm{ border-color:var(--focus); box-shadow:0 0 22px rgba(255,212,94,.6); transform:translateY(-14px); }
 
 .controls{ display:flex; justify-content:center; align-items:center; gap:14px; margin-top:8px; flex-wrap:wrap; }
@@ -143,20 +127,19 @@ body{
 .linkbtn{ background:none; border:none; color:var(--ink-faint); font-family:var(--font); font-size:11px; letter-spacing:.08em; text-transform:uppercase; cursor:pointer; }
 .linkbtn:hover{ color:var(--focus); }
 
-/* ---- floating juice ---- */
 #juice{ position:fixed; inset:0; pointer-events:none; z-index:200; }
 .fx{ position:absolute; font-weight:bold; font-size:15px; text-shadow:0 0 8px currentColor; animation:rise 1s ease-out forwards; }
 @keyframes rise{ 0%{opacity:0;transform:translateY(6px) scale(.8)}15%{opacity:1}100%{opacity:0;transform:translateY(-32px) scale(1.05)} }
 
-/* ---- modals / veil ---- */
 .veil{ position:absolute; inset:0; z-index:80; display:none; align-items:center; justify-content:center; padding:16px; background:rgba(4,7,6,.82); backdrop-filter:blur(2px); overflow-y:auto; }
 .veil.show{ display:flex; }
 .reck{ width:min(560px,100%); background:linear-gradient(180deg,#1a0c0f,#120a0b); border:2px solid var(--danger); border-radius:12px; padding:18px; box-shadow:0 0 46px rgba(255,77,94,.3); animation:slam .3s cubic-bezier(.2,1.2,.3,1); }
 .reck.neutral{ border-color:var(--capital); background:linear-gradient(180deg,#140f1c,#0e0b14); box-shadow:0 0 40px rgba(199,155,255,.25); }
 .reck.good2{ border-color:var(--phosphor); background:linear-gradient(180deg,#0e1a15,#0b1310); box-shadow:0 0 40px rgba(65,224,138,.25); }
+.reck.escape2{ border-color:var(--escape); background:linear-gradient(180deg,#0c1a1e,#0a1416); box-shadow:0 0 40px rgba(73,214,230,.28); }
 @keyframes slam{ 0%{transform:scale(.86) rotate(-1deg);opacity:0}100%{transform:scale(1);opacity:1} }
 .reck .ehd{ font-size:10px; letter-spacing:.28em; text-transform:uppercase; color:var(--danger); margin-bottom:4px; }
-.reck.neutral .ehd{color:var(--capital)} .reck.good2 .ehd{color:var(--phosphor)}
+.reck.neutral .ehd{color:var(--capital)} .reck.good2 .ehd{color:var(--phosphor)} .reck.escape2 .ehd{color:var(--escape)}
 .reck .etitle{ font-size:18px; margin:0 0 8px; }
 .reck .ecat{ display:inline-block; font-size:9px; letter-spacing:.13em; text-transform:uppercase; color:var(--ink-dim); border:1px solid var(--ink-faint); padding:2px 7px; border-radius:20px; margin-bottom:10px; }
 .reck .edesc{ font-size:13px; line-height:1.5; margin-bottom:12px; }
@@ -167,32 +150,34 @@ body{
 .btn:hover,.btn:focus-visible{ background:#2a1216; transform:translateX(3px); outline:none; }
 .btn .bl{ font-weight:bold; display:block; } .btn .bd{ font-size:11px; color:var(--ink-dim); margin-top:3px; }
 .btn.primary{ background:#0e1a15; border-color:var(--phosphor); } .btn.primary:hover{ background:#12241c; }
+.btn.esc{ background:#0c1a1e; border-color:var(--escape); } .btn.esc:hover{ background:#102329; }
 .btn.cap{ border-color:var(--capital); background:#170f1f; }
+.btn.plain{ border-color:var(--ink-faint); }
 
-/* ---- draft grid ---- */
 .draftgrid{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin:6px 0 12px; }
 .draftgrid .pcard{ cursor:pointer; } .draftgrid .pcard:hover{ transform:translateY(-10px) rotate(-1deg); }
 .reliccard{ width:150px; min-height:150px; background:linear-gradient(180deg,#1a1407,#12100a); border:2px solid var(--rare); border-radius:11px; padding:11px; cursor:pointer; display:flex; flex-direction:column; gap:7px; align-items:center; text-align:center; transition:transform .13s,box-shadow .13s; box-shadow:0 8px 0 rgba(0,0,0,.35); }
 .reliccard:hover{ transform:translateY(-8px); box-shadow:0 14px 0 rgba(0,0,0,.4),0 0 24px rgba(255,176,58,.4); }
 .reliccard .ricon{ font-size:30px; } .reliccard .rname{ font-size:12px; color:var(--rare); text-transform:uppercase; letter-spacing:.03em; } .reliccard .rdesc{ font-size:10.5px; color:var(--ink-dim); line-height:1.35; }
 
-/* ---- overlays (title/end) ---- */
 .overlay{ position:absolute; inset:0; z-index:90; display:none; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:24px; overflow-y:auto; background:radial-gradient(120% 100% at 50% 30%,#0d1518,#06090a); }
 .overlay.show{ display:flex; }
 .overlay .big{ font-size:clamp(30px,7vw,64px); letter-spacing:.1em; margin:0; text-transform:uppercase; line-height:.95; }
-.overlay .lede{ max-width:540px; color:var(--ink-dim); font-size:13px; line-height:1.6; margin:14px 0 20px; }
+.overlay .lede{ max-width:560px; color:var(--ink-dim); font-size:13px; line-height:1.6; margin:14px 0 20px; }
 .overlay .cta{ font-family:var(--font); cursor:pointer; text-transform:uppercase; letter-spacing:.14em; font-size:14px; padding:13px 26px; border-radius:9px; border:2px solid var(--phosphor); background:#0e1a15; color:var(--phosphor); box-shadow:0 0 20px rgba(65,224,138,.25); transition:transform .1s,box-shadow .1s; }
 .overlay .cta:hover{ transform:translateY(-3px); box-shadow:0 0 32px rgba(65,224,138,.5); }
 .overlay .flav{ color:var(--ink-faint); font-size:11px; letter-spacing:.08em; margin-top:18px; max-width:480px; line-height:1.7; }
 .win .big{color:var(--phosphor);text-shadow:0 0 20px rgba(65,224,138,.5)} .escape .big{color:var(--escape);text-shadow:0 0 20px rgba(73,214,230,.5)} .lose .big{color:var(--danger);text-shadow:0 0 24px rgba(255,77,94,.55)}
-.brief{ text-align:left; max-width:520px; margin:12px auto 0; font-size:12px; color:var(--ink-dim); line-height:1.7; }
+.brief{ text-align:left; max-width:540px; margin:12px auto 0; font-size:12.5px; color:var(--ink-dim); line-height:1.75; }
 .brief b{color:var(--ink)} .brief .k{color:var(--phosphor)} .brief .e{color:var(--escape)} .brief .a{color:var(--amber)} .brief .d{color:var(--danger)} .brief .f{color:var(--focus)}
-.unlockbox{ margin-top:14px; border:1px dashed var(--focus); border-radius:8px; padding:10px 14px; max-width:420px; }
+.tiers{ display:flex; gap:8px; justify-content:center; margin:14px 0 0; flex-wrap:wrap; font-size:11px; }
+.tier{ border:1px solid var(--ink-faint); border-radius:8px; padding:7px 12px; }
+.tier b{ display:block; color:var(--ink); font-size:12px; letter-spacing:.05em; }
+.unlockbox{ margin-top:14px; border:1px dashed var(--focus); border-radius:8px; padding:10px 14px; max-width:440px; }
 .unlockbox .ul{ font-size:11px; color:var(--focus); letter-spacing:.1em; text-transform:uppercase; margin-bottom:4px; }
 .unlockbox .ui{ font-size:12px; color:var(--ink); }
 @keyframes shake{ 0%,100%{transform:translate(0,0)}20%{transform:translate(-4px,2px)}40%{transform:translate(4px,-2px)}60%{transform:translate(-3px,-2px)}80%{transform:translate(3px,2px)} }
 .shake{ animation:shake .38s; }
-kbd{ background:#0d1416; border:1px solid var(--ink-faint); border-bottom-width:2px; border-radius:4px; padding:0 5px; font-size:11px; color:var(--ink); }
 </style>
 </head>
 <body>
@@ -203,15 +188,21 @@ kbd{ background:#0d1416; border:1px solid var(--ink-faint); border-bottom-width:
     <div class="stamp" style="margin-bottom:16px">Confidential — HR</div>
     <h1 class="big glow" style="color:var(--phosphor)">PIP</h1>
     <div style="letter-spacing:.3em;font-size:11px;color:var(--ink-dim);text-transform:uppercase;margin-top:6px">A Corporate Roguelike Deckbuilder</div>
-    <p class="lede">You've been placed on a Performance Improvement Plan. So has everyone above you, eventually. Build a deck of workplace tactics, read your manager, and climb the ladder one PIP at a time — until the system finally gets you.</p>
+    <p class="lede">You've been placed on a Performance Improvement Plan. Build a deck of workplace tactics, read your manager, and climb three companies before the system gets you.</p>
     <div class="brief">
-      Each week you draw a <b>hand</b> and spend <span class="f">Focus</span> playing cards. Friday, your manager and the office push back — their next move is <b>telegraphed</b>, so plan ahead.<br><br>
-      <span class="k">▸ Survive</span> a job (hit PIP by Week 4) <b>or</b> <span class="e">Escape</span> it (hit Job Search — but only from Week 3).<br>
-      <span class="a">▸ Mental Health carries between jobs.</span> Your deck and Office Perks do too. Heat and deadlines reset.<br>
-      <span class="d">▸ Get fired, burn out, or get caught</span> and the run ends. Score = how far you climbed.
+      Draw a hand, spend <span class="f">Focus</span>. Friday, your manager acts — <b>telegraphed</b>, so plan ahead.<br>
+      <span class="k">▸ Survive</span> (hit PIP) → keep your seat, earn an <b>Office Perk</b>, climb a level here.<br>
+      <span class="e">▸ Escape</span> (hit Job Search, Week 3+) → jump to the next company with a <b>Rare card</b>.<br>
+      <span class="a">▸ Your deck, perks &amp; Mental Health carry over.</span> Heat &amp; deadlines reset.<br>
+      <span class="d">▸ Fired, burned out, or caught</span> ends the run.
+    </div>
+    <div class="tiers">
+      <div class="tier"><b>RedFlonic</b>the startup</div>
+      <div class="tier"><b>SailHorse</b>the megacorp</div>
+      <div class="tier"><b>McCrapsey</b>the consultancy</div>
     </div>
     <button class="cta" style="margin-top:22px" onclick="Game.start()">Clock In ▸</button>
-    <div class="flav" id="title-flav">"In theory, it's a support mechanism. In practice, it's a paper trail."</div>
+    <div class="flav">"In theory, it's a support mechanism. In practice, it's a paper trail."</div>
   </div>
 
   <!-- END -->
@@ -230,10 +221,12 @@ kbd{ background:#0d1416; border:1px solid var(--ink-faint); border-bottom-width:
   <div id="game" style="display:none">
     <div class="top">
       <span class="stamp">PIP</span>
-      <div><h1 class="glow" id="company">Initech</h1><div class="who" id="jobline">Role · Under Review</div></div>
+      <div><h1 class="glow" id="company">RedFlonic</h1><div class="who" id="jobline"></div></div>
       <span class="spacer"></span>
-      <span class="rung" id="rung">JOB #1</span>
-      <span class="wk" id="wk"></span>
+      <div class="colevel">
+        <div class="codots" id="codots"></div>
+        <span class="wk" id="wk"></span>
+      </div>
     </div>
     <div class="boss" id="boss"></div>
     <div class="meters" id="meters"></div>
@@ -260,301 +253,275 @@ kbd{ background:#0d1416; border:1px solid var(--ink-faint); border-bottom-width:
 "use strict";
 
 /* ============ CONSTANTS ============ */
-const MH_MAX=12, HEAT_MAX=10, CAP_MAX=5, HAND_SIZE=5, BASE_FOCUS=4;
-const UNLOCK_KEY="pip_unlocks_v1";
+const MH_BASE=12, HEAT_MAX=10, CAP_MAX=5, HAND_SIZE=5, BASE_FOCUS=4, MAX_WEEKS=4, LEVELS=5;
+const BEST_KEY="pip_best_v2";
 
-/* ============ CONTENT: CARDS ============ */
-// target: null | 'any' (incomplete deliverable) | 'ready'
-// play(g,d) -> log string. cost in Focus.
+/* ============ CARDS ============
+   target: null | 'any' (incomplete deliverable) | 'ready'
+   pool:true -> appears in weekly card drafts. rare:true -> escape-reward only.
+   Keep descriptions terse: the numbers do the talking. */
 const CARDS = {
-  work:      {name:"Work",        cost:1, r:"common",  type:"Action", target:"any",
-              desc:"+1 progress on a deliverable you pick.",
-              play:(g,d)=>{ const n=1+(g.has('two_monitors')?1:0); d.progress=Math.min(d.cost,d.progress+n); return "<b class='good'>+"+n+" progress</b> on “"+d.title+"” ("+d.progress+"/"+d.cost+")"; }},
-  shipit:    {name:"Ship It",     cost:1, r:"common",  type:"Action", target:"ready",
-              desc:"Complete a READY deliverable for its PIP reward.",
-              play:(g,d)=>{ d.done=true; g.completedThisWeek++; return g.hit("pip",d.reward)+" — “"+d.title+"” shipped."; }},
-  jobhunt:   {name:"Job Hunt",    cost:1, r:"common",  type:"Escape",
-              desc:"+2 Job Search, +2 Heat, −1 Mental Health.",
-              play:(g)=>g.hit("js",2)+" "+g.hit("heat",2)+" "+g.hit("mh",-1)},
-  network:   {name:"Network",     cost:1, r:"common",  type:"Social", choose:true,
-              desc:"Internal (+1 Capital, +1 PIP) or External (+1 Job, −2 Heat)."},
-  breathe:   {name:"Breathe",     cost:1, r:"common",  type:"Recover",
-              desc:"Recover Mental Health. Advances no goal.",
-              play:(g)=>{ const n=3+(g.has('headphones')?2:0); return g.hit("mh",n); }},
-  overtime:  {name:"Overtime",    cost:0, r:"common",  type:"Tempo",
-              desc:"Gain +1 Focus this week. Costs you −1 MH.",
-              play:(g)=>{ g.focus++; spawnJuice("focus","+1"); return "<b class='foc'>+1 Focus</b> "+g.hit("mh",-1); }},
-  // ----- draftable uncommons -----
-  deepwork:  {name:"Deep Work",   cost:2, r:"uncommon",type:"Action", target:"any", pool:true,
-              desc:"+3 progress on one deliverable. No interruptions.",
-              play:(g,d)=>{ const n=3+(g.has('two_monitors')?1:0); d.progress=Math.min(d.cost,d.progress+n); return "<b class='good'>+"+n+" progress</b> on “"+d.title+"” ("+d.progress+"/"+d.cost+")"; }},
-  resume:    {name:"Update Résumé",cost:1,r:"uncommon",type:"Escape", pool:true,
-              desc:"+2 Job Search. Quiet — no Heat.",
-              play:(g)=>g.hit("js",2)},
-  coffee:    {name:"Coffee Chat", cost:1, r:"uncommon",type:"Social", pool:true,
-              desc:"+1 Political Capital and +1 Job Search. Friends everywhere.",
-              play:(g)=>g.hit("cap",1)+" "+g.hit("js",1)},
-  kissup:    {name:"Kiss Up",     cost:1, r:"uncommon",type:"Social", pool:true,
-              desc:"−3 Heat and +1 Political Capital. Shameless, effective.",
-              play:(g)=>g.hit("heat",-3)+" "+g.hit("cap",1)},
-  skipmtg:   {name:"Skip the Meeting",cost:1,r:"uncommon",type:"Tempo", pool:true,
-              desc:"Cancel your manager's telegraphed move this Friday. +2 Heat.",
-              play:(g)=>{ g.skipIntent=true; return "<b class='foc'>Manager's move cancelled</b> for Friday. "+g.hit("heat",2); }},
-  ghosttask: {name:"Ghost a Task",cost:1, r:"uncommon",type:"Tempo", target:"any", pool:true,
-              desc:"Push one deliverable's deadline back a week.",
-              play:(g,d)=>{ d.deadline++; return "“"+d.title+"” deadline slips to <b class='foc'>Week "+d.deadline+"</b>."; }},
-  sandbag:   {name:"Sandbag",     cost:1, r:"uncommon",type:"Action", target:"any", pool:true,
-              desc:"+2 progress now. Look busy, stay hidden.",
-              play:(g,d)=>{ d.progress=Math.min(d.cost,d.progress+2); return "<b class='good'>+2 progress</b> on “"+d.title+"” ("+d.progress+"/"+d.cost+")"; }},
-  // ----- unlockable -----
-  delegate:  {name:"Delegate",    cost:1, r:"uncommon",type:"Action", target:"any", pool:true, unlock:"delegate",
-              desc:"+3 progress — but a coworker notices. +1 Heat.",
-              play:(g,d)=>{ d.progress=Math.min(d.cost,d.progress+3); return "<b class='good'>+3 progress</b> on “"+d.title+"”. "+g.hit("heat",1); }},
-  blitz:     {name:"LinkedIn Blitz",cost:2,r:"rare",   type:"Escape", pool:true, unlock:"blitz",
-              desc:"+4 Job Search. Loud — +3 Heat.",
-              play:(g)=>g.hit("js",4)+" "+g.hit("heat",3)},
-  therapy:   {name:"Therapy",     cost:2, r:"rare",    type:"Recover",pool:true, unlock:"therapy",
-              desc:"+5 Mental Health and draw a card. Actually helps.",
-              play:(g)=>{ const n=5+(g.has('headphones')?2:0); const l=g.hit("mh",n); g.draw(1); return l+" — and you <b class='foc'>draw a card</b>."; }},
-  twoweeks:  {name:"Two Weeks' Notice",cost:3,r:"rare",type:"Escape", pool:true,
-              desc:"+3 Job Search. Only playable from Week 3.",
-              playable:(g)=>g.week>=3,
-              play:(g)=>g.hit("js",3)+" — you can taste the door."},
+  work:     {name:"Work", cost:1, r:"common", type:"Action", target:"any", pool:false,
+    desc:"+1 progress. −1 MH.",
+    play:(g,d)=>{ const n=1+(fx('work_boost')?1:0); d.progress=Math.min(d.cost,d.progress+n); return prog(n,d)+" "+g.hit("mh",-1); }},
+  shipit:   {name:"Ship It", cost:1, r:"common", type:"Action", target:"ready",
+    desc:"Finish a ready deliverable → PIP.",
+    play:(g,d)=>{ d.done=true; R.completedThisWeek++; let l=g.hit("pip",d.reward); if(fx('billable')) l+=" "+g.hit("js",1); return l; }},
+  jobhunt:  {name:"Job Hunt", cost:1, r:"common", type:"Escape",
+    desc:"+2 Job · +2 Heat · −1 MH",
+    play:(g)=>g.hit("js",2+(fx('cheap_escape')?1:0))+" "+g.hit("heat",2)+" "+g.hit("mh",-1)},
+  network:  {name:"Network", cost:1, r:"common", type:"Social", choose:true,
+    desc:"Internal or external."},
+  breathe:  {name:"Breathe", cost:1, r:"common", type:"Recover",
+    desc:"+3 Mental Health.",
+    play:(g)=>g.hit("mh",3+(fx('recover_boost')?2:0))},
+  overtime: {name:"Overtime", cost:0, r:"common", type:"Tempo",
+    desc:"+1 Focus · −1 MH",
+    play:(g)=>{ R.focus++; spawnJuice("focus","+1"); return "<b class='foc'>+1 Focus</b> "+g.hit("mh",-1); }},
+  // ---- weekly-draft pool ----
+  deepwork: {name:"Deep Work", cost:2, r:"uncommon", type:"Action", target:"any", pool:true,
+    desc:"+3 progress. −2 MH.",
+    play:(g,d)=>{ const n=3+(fx('work_boost')?1:0)+(fx('deep_boost')?2:0); d.progress=Math.min(d.cost,d.progress+n); return prog(n,d)+" "+g.hit("mh",-2); }},
+  sandbag:  {name:"Sandbag", cost:1, r:"uncommon", type:"Action", target:"any", pool:true,
+    desc:"+2 progress. No drain.",
+    play:(g,d)=>{ d.progress=Math.min(d.cost,d.progress+2); return prog(2,d); }},
+  resume:   {name:"Update Résumé", cost:1, r:"uncommon", type:"Escape", pool:true,
+    desc:"+2 Job. No Heat.",
+    play:(g)=>g.hit("js",2+(fx('cheap_escape')?1:0))},
+  coffee:   {name:"Coffee Chat", cost:1, r:"uncommon", type:"Social", pool:true,
+    desc:"+1 Capital · +1 Job",
+    play:(g)=>g.hit("cap",1)+" "+g.hit("js",1)},
+  kissup:   {name:"Kiss Up", cost:1, r:"uncommon", type:"Social", pool:true,
+    desc:"−3 Heat · +1 Capital",
+    play:(g)=>g.hit("heat",-3)+" "+g.hit("cap",1)},
+  skipmtg:  {name:"Skip the Meeting", cost:1, r:"uncommon", type:"Tempo", pool:true,
+    desc:"Cancel Friday's manager move. +2 Heat",
+    play:(g)=>{ R.skipIntent=true; return "<b class='foc'>Move cancelled.</b> "+g.hit("heat",2); }},
+  ghosttask:{name:"Ghost a Task", cost:1, r:"uncommon", type:"Tempo", target:"any", pool:true,
+    desc:"Push a deadline back a week.",
+    play:(g,d)=>{ d.deadline++; return "“"+d.title+"” → <b class='foc'>Week "+d.deadline+"</b>."; }},
+  delegate: {name:"Delegate", cost:1, r:"uncommon", type:"Action", target:"any", pool:true,
+    desc:"+3 progress · +1 Heat",
+    play:(g,d)=>{ d.progress=Math.min(d.cost,d.progress+3); return prog(3,d)+" "+g.hit("heat",1); }},
+  blitz:    {name:"LinkedIn Blitz", cost:2, r:"rare", type:"Escape", pool:true,
+    desc:"+4 Job · +3 Heat",
+    play:(g)=>g.hit("js",4+(fx('cheap_escape')?1:0))+" "+g.hit("heat",3)},
+  therapy:  {name:"Therapy", cost:2, r:"rare", type:"Recover", pool:true,
+    desc:"+5 MH · draw a card",
+    play:(g)=>{ const l=g.hit("mh",5+(fx('recover_boost')?2:0)); gDraw(1); return l+" · <b class='foc'>drew 1</b>"; }},
+  twoweeks: {name:"Two Weeks' Notice", cost:3, r:"rare", type:"Escape", pool:true,
+    desc:"+3 Job. Week 3+.",
+    playable:()=>R.week>=3,
+    play:(g)=>g.hit("js",3+(fx('cheap_escape')?1:0))},
+  // ---- escape-reward rares (not in weekly pool) ----
+  referral: {name:"Insider Referral", cost:1, r:"rare", type:"Escape", rare:true,
+    desc:"+5 Job Search.",
+    play:(g)=>g.hit("js",5+(fx('cheap_escape')?1:0))},
+  portfolio:{name:"Portfolio Piece", cost:2, r:"rare", type:"Action", target:"any", rare:true,
+    desc:"Finish any deliverable now.",
+    play:(g,d)=>{ d.done=true; R.completedThisWeek++; return g.hit("pip",d.reward)+" — “"+d.title+"” done."; }},
+  signing:  {name:"Signing Bonus", cost:1, r:"rare", type:"Recover", rare:true,
+    desc:"+2 Capital · +3 MH",
+    play:(g)=>g.hit("cap",2)+" "+g.hit("mh",3)},
+  burnbridge:{name:"Burn Bridge", cost:1, r:"rare", type:"Escape", rare:true,
+    desc:"+6 Job · +3 Heat",
+    play:(g)=>g.hit("js",6+(fx('cheap_escape')?1:0))+" "+g.hit("heat",3)},
+  freshstart:{name:"Fresh Start", cost:0, r:"rare", type:"Recover", rare:true,
+    desc:"+4 MH · draw 2",
+    play:(g)=>{ const l=g.hit("mh",4); gDraw(2); return l+" · <b class='foc'>drew 2</b>"; }},
+};
+function prog(n,d){ return "<b class='good'>+"+n+" progress</b> ("+d.progress+"/"+d.cost+")"; }
+const RARES=["referral","portfolio","signing","burnbridge","freshstart"];
+
+/* ============ OFFICE PERKS (company-exclusive) ============
+   fx tags drive effects. Each perk belongs to one company's pool. */
+const PERKS = {
+  // RedFlonic — the startup: speed, hustle, "culture"
+  coldbrew:{icon:"☕", name:"Cold Brew on Tap", fx:"recover_boost", desc:"Breathe & Therapy heal +2."},
+  movefast:{icon:"⚡", name:"Move Fast", fx:"work_boost", desc:"Work & Deep Work give +1 progress."},
+  hoodie:  {icon:"🧥", name:"Company Hoodie", fx:"max_mh", desc:"+2 max Mental Health."},
+  pingpong:{icon:"🏓", name:"Ping-Pong Table", fx:"friday_calm", desc:"+1 MH after each Friday."},
+  equity:  {icon:"📈", name:"Equity Grant", fx:"draft_extra", desc:"See an extra option in card drafts."},
+  // SailHorse — the megacorp: process, protection, politics
+  corpcard:{icon:"💳", name:"Corporate Card", fx:"corp_card", desc:"Once per level, prevent a termination."},
+  unionrep:{icon:"✊", name:"Union Rep", fx:"ally", desc:"Ignore the first exposure check each level."},
+  parking: {icon:"🅿️", name:"Reserved Parking", fx:"big_hand", desc:"Draw +1 card each week."},
+  pension: {icon:"🏦", name:"Pension Vesting", fx:"start_capital", desc:"Start each level with +2 Capital."},
+  badge:   {icon:"🪪", name:"Badge Access", fx:"skip_boss", desc:"Once per level, auto-skip a manager move."},
+  // McCrapsey — the consultancy: leverage, billability, status
+  expense: {icon:"🧾", name:"Expense Account", fx:"cap_gen", desc:"+1 Capital after each Friday."},
+  rolodex: {icon:"📇", name:"The Rolodex", fx:"cheap_escape", desc:"Job Hunt & escape cards give +1 Job."},
+  corner:  {icon:"🚪", name:"Corner Office", fx:"deep_boost", desc:"Deep Work gives +2 more progress."},
+  billable:{icon:"⏱️", name:"Billable Hours", fx:"billable", desc:"Ship It also gives +1 Job Search."},
+  airline: {icon:"✈️", name:"Airline Status", fx:"draft_extra", desc:"See an extra option in card drafts."},
 };
 
-/* ============ RELICS (Office Perks) ============ */
-const RELICS = {
-  two_monitors:{icon:"🖥️", name:"Two Monitors",   desc:"Work & Deep Work give +1 progress."},
-  headphones:  {icon:"🎧", name:"Noise-Cancelling",desc:"Breathe & Therapy heal +2 more."},
-  one_ally:    {icon:"🤝", name:"The One Ally",    desc:"Ignore the first exposure check each job."},
-  ergo_chair:  {icon:"🪑", name:"Ergonomic Chair", desc:"Draw +1 card at the start of each week."},
-  corp_card:   {icon:"💳", name:"Corporate Card",  desc:"Once per job, prevent a termination."},
-  blackmail:   {icon:"📁", name:"Blackmail Folder",desc:"Once per job, auto-skip a manager's move."},
+/* ============ MANAGER BOSSES (per company) ============ */
+const BOSSES = {
+  // RedFlonic
+  founder:{icon:"🦄", name:"The Founder", desc:"A visionary. The vision changes weekly.",
+    intents:[
+      {tel:"Pivoting the whole roadmap — <b>a deadline creeps up</b>", run:g=>{ const d=g.soonest(); if(!d) return "Nothing to pull forward."; d.deadline=Math.max(R.week,d.deadline-1); return "“"+d.title+"” now due <b class='bad'>Week "+d.deadline+"</b>."; }},
+      {tel:"Dreaming up a 'quick win' — <b>new deliverable</b>", run:g=>{ addDeliverable(R.week+1); return "A new deliverable, due next week."; }},
+      {tel:"All-hands vision session — <b>−1 Focus next week</b>", run:g=>{ R.nextFocusPenalty++; return "The vibes were immaculate. <b class='foc'>−1 Focus next week</b>."; }},
+    ]},
+  culturefit:{icon:"🎉", name:"The Culture Fit", desc:"Cares more about vibes than output.",
+    intents:[
+      {tel:"Mandatory fun event — <b>−1 MH</b>", run:g=>g.hit("mh",-1)+" of forced whimsy."},
+      {tel:"Reviewing your 'energy' — <b>−1 PIP</b>", run:g=>g.hit("pip",-1)+" for insufficient enthusiasm."},
+      {tel:"Oversharing in #general — <b>+2 Heat</b>", run:g=>g.hit("heat",2)+" — your name came up."},
+    ]},
+  // SailHorse
+  middlemgr:{icon:"📎", name:"The Middle Manager", desc:"Wants a status update on your status updates.",
+    intents:[
+      {tel:"Status report due — <b>−1 Focus next week</b>", run:g=>{ R.nextFocusPenalty++; return "Paperwork about paperwork. <b class='foc'>−1 Focus next week</b>."; }},
+      {tel:"Nitpicking your work — <b>−1 PIP</b>", run:g=>g.hit("pip",-1)+" to 'quality concerns.'"},
+      {tel:"Watching your screen — <b>+2 Heat</b>", run:g=>g.hit("heat",2)+" from the over-shoulder."},
+    ]},
+  thereorg:{icon:"🌀", name:"The Reorg", desc:"Nobody knows who they report to anymore.",
+    intents:[
+      {tel:"Shuffling priorities — <b>a deadline creeps up</b>", run:g=>{ const d=g.soonest(); if(!d) return "Nothing to reshuffle."; d.deadline=Math.max(R.week,d.deadline-1); return "“"+d.title+"” now due <b class='bad'>Week "+d.deadline+"</b>."; }},
+      {tel:"Left you on read — <b>−1 MH</b>", run:g=>g.hit("mh",-1)+" — six days, no reply."},
+      {tel:"Reassigning your win — <b>−1 PIP</b>", run:g=>g.hit("pip",-1)+" — credit went sideways."},
+    ]},
+  // McCrapsey
+  partner:{icon:"🔥", name:"The Partner", desc:"Up or out. You are, so far, out.",
+    intents:[
+      {tel:"Brutal case review — <b>−2 PIP</b>", run:g=>g.hit("pip",-2)+" — 'not partner material.'"},
+      {tel:"Weekend deck request — <b>−1 MH · +1 Heat</b>", run:g=>g.hit("mh",-1)+" "+g.hit("heat",1)},
+      {tel:"Client 'ask' lands on you — <b>new deliverable</b>", run:g=>{ addDeliverable(R.week+1); return "A client fire drill, due next week."; }},
+    ]},
+  managingdir:{icon:"💼", name:"The Managing Director", desc:"Your work is their promotion packet.",
+    intents:[
+      {tel:"Piling on scope — <b>new deliverable</b>", run:g=>{ addDeliverable(R.week+2); return "Another workstream for the pile."; }},
+      {tel:"Taking credit upstairs — <b>−2 PIP</b>", run:g=>g.hit("pip",-2)+" — your win, their slide."},
+      {tel:"Booking your calendar solid — <b>−1 Focus next week</b>", run:g=>{ R.nextFocusPenalty++; return "Back-to-backs all week. <b class='foc'>−1 Focus next week</b>."; }},
+    ]},
 };
+
+/* ============ COMPANIES (ordered ladder) ============ */
+const COMPANIES = [
+  {id:"redflonic", name:"RedFlonic", icon:"🚩", archetype:"Series-C Startup",
+    blurb:'"We\'re not a company, we\'re a family." The family keeps a spreadsheet.',
+    bosses:["founder","culturefit"], perks:["coldbrew","movefast","hoodie","pingpong","equity"], pipBase:8, jsBase:10},
+  {id:"sailhorse", name:"SailHorse", icon:"🏢", archetype:"Legacy Megacorp",
+    blurb:"Forty thousand employees. Nobody's sure what it does. Wildly profitable.",
+    bosses:["middlemgr","thereorg"], perks:["corpcard","unionrep","parking","pension","badge"], pipBase:10, jsBase:12},
+  {id:"mccrapsey", name:"McCrapsey", icon:"💼", archetype:"Elite Consultancy",
+    blurb:"Up or out. The coffee is excellent. The hours are not.",
+    bosses:["partner","managingdir"], perks:["expense","rolodex","corner","billable","airline"], pipBase:12, jsBase:14},
+];
 
 /* ============ ROLES (deliverable decks) ============ */
 const ROLES = {
-  engineer:{name:"Software Engineer", pool:[
-    {title:"Fix the Production Bug (Again)",cost:2,reward:3},
-    {title:"Migrate the Legacy Database",cost:4,reward:6},
-    {title:"Refactor the Spaghetti Module",cost:3,reward:4},
-    {title:"Ship the Half-Specced Feature",cost:3,reward:4},
-    {title:"Write the On-Call Runbook",cost:2,reward:3},
-    {title:"Kill the Flaky Test Suite",cost:3,reward:4},
-  ]},
-  designer:{name:"Product Designer", pool:[
-    {title:"Redesign the Client Dashboard",cost:3,reward:4},
-    {title:"Build the Design System",cost:4,reward:6},
-    {title:"Run the User Research Nobody Reads",cost:2,reward:3},
-    {title:"Prototype the Pivot-of-the-Week",cost:3,reward:4},
-    {title:"Refresh the Brand (Again)",cost:2,reward:3},
-    {title:"Audit Accessibility Post-Launch",cost:3,reward:4},
-  ]},
-  sales:{name:"Account Executive", unlock:"sales", pool:[
-    {title:"Close the Q3 Whale Account",cost:4,reward:6},
-    {title:"Rescue the Churning Client",cost:3,reward:4},
-    {title:"Fill the Pipeline Report",cost:2,reward:3},
-    {title:"Survive the QBR Presentation",cost:3,reward:4},
-    {title:"Cold-Call the Dead Leads",cost:2,reward:3},
-    {title:"Renegotiate the Doomed Renewal",cost:3,reward:4},
-  ]},
+  engineer:{name:"Engineering", pool:[
+    {title:"Fix the Production Bug (Again)",cost:2,reward:3},{title:"Migrate the Legacy Database",cost:4,reward:6},
+    {title:"Refactor the Spaghetti Module",cost:3,reward:4},{title:"Ship the Half-Specced Feature",cost:3,reward:4},
+    {title:"Write the On-Call Runbook",cost:2,reward:3},{title:"Kill the Flaky Test Suite",cost:3,reward:4}]},
+  designer:{name:"Design", pool:[
+    {title:"Redesign the Client Dashboard",cost:3,reward:4},{title:"Build the Design System",cost:4,reward:6},
+    {title:"Run User Research Nobody Reads",cost:2,reward:3},{title:"Prototype the Pivot-of-the-Week",cost:3,reward:4},
+    {title:"Refresh the Brand (Again)",cost:2,reward:3},{title:"Audit Accessibility Post-Launch",cost:3,reward:4}]},
+  ops:{name:"Operations", pool:[
+    {title:"Reconcile the Q3 Numbers",cost:3,reward:4},{title:"Automate the Manual Report",cost:2,reward:3},
+    {title:"Untangle the Vendor Contract",cost:4,reward:6},{title:"Survive the Compliance Audit",cost:3,reward:4},
+    {title:"Rebuild the Broken Dashboard",cost:2,reward:3},{title:"Document the Undocumented Process",cost:3,reward:4}]},
 };
 
-/* ============ BOSSES (Manager archetypes) ============ */
-// intents: each {tel:telegraph text, run:(g)=>logString}. chosen per week.
-const BOSSES = {
-  micromanager:{icon:"🔍", name:"The Micromanager", desc:"Wants a status update on your status updates.",
-    intents:[
-      {tel:"Demanding a status report — <b>−1 Focus next week</b>", run:g=>{ g.nextFocusPenalty+=1; return "A status report eats your Monday. "+"<b class='foc'>−1 Focus next week</b>."; }},
-      {tel:"Nitpicking your work — <b>−1 PIP</b>", run:g=>g.hit("pip",-1)+" to 'quality concerns.'"},
-      {tel:"Watching your screen — <b>+2 Heat</b>", run:g=>g.hit("heat",2)+" from the constant over-shoulder."},
-    ]},
-  ghost:{icon:"👻", name:"The Ghost", desc:"Unreachable, until suddenly they aren't.",
-    intents:[
-      {tel:"Left you on read — <b>−1 Mental Health</b>", run:g=>g.hit("mh",-1)+" — no reply for six days."},
-      {tel:"A deadline is creeping closer", run:g=>{ const d=g.soonestOpen(); if(!d) return "Nothing to pull forward. Lucky."; d.deadline=Math.max(g.week,d.deadline-1); return "“"+d.title+"” now due <b class='bad'>Week "+d.deadline+"</b>."; }},
-      {tel:"About to dump a rush task on you", run:g=>{ g.addDeliverable(g.week+1); return "A surprise deliverable lands, <b class='bad'>due next week</b>."; }},
-    ]},
-  empire:{icon:"🏛️", name:"The Empire Builder", unlock:"empire", desc:"Your workload is their promotion packet.",
-    intents:[
-      {tel:"Assigning MORE work", run:g=>{ g.addDeliverable(g.week+2); return "Another deliverable for the pile."; }},
-      {tel:"Reprioritizing everything — <b>−1 Focus, +1 Heat</b>", run:g=>{ g.nextFocusPenalty+=1; return "Priorities 'shifted.' "+g.hit("heat",1)+" and <b class='foc'>−1 Focus next week</b>."; }},
-      {tel:"Taking credit for your work — <b>−2 PIP</b>", run:g=>g.hit("pip",-2)+" — your win became their win."},
-    ]},
-  niceone:{icon:"🙂", name:"The Nice One", unlock:"niceone", desc:"So supportive. Right up until they aren't.",
-    intents:[
-      {tel:"Genuinely encouraging you — <b>+2 MH</b>", run:g=>g.hit("mh",2)+". It feels almost real."},
-      {tel:"'Advocating' for you upstairs — <b>+1 Capital</b>", run:g=>g.hit("cap",1)+". They say they've got your back."},
-      {tel:"The mask slips — <b>−3 PIP, −2 MH</b>", run:g=>g.hit("pip",-3)+" "+g.hit("mh",-2)+". It was documentation all along."},
-    ]},
-};
-
-/* ============ ENCOUNTER DECK (office events) ============ */
+/* ============ ENCOUNTER DECK ============ */
 const ENCOUNTERS = [
-  {id:"hr", cat:"Mental Health", title:"HR 'Check-In'", desc:"A 30-minute meeting that could have been nothing at all.",
-    resolve:g=>({log:g.hit("mh",-1)})},
-  {id:"linkedin", cat:"Exposure", title:"Someone Saw Your LinkedIn", desc:"“Love the new headline!” — said with a raised eyebrow.",
-    resolve:g=> g.heat>=4 ? ({log:"Your search has a smell. "+g.hit("mh",-1)+" "+g.hit("heat",1)}) : ({log:"You've kept a low profile. No harm done."})},
-  {id:"reply", cat:"Mental Health", title:"The Reply-All", desc:"Forty people watch your manager ask why it isn't done.",
-    resolve:g=>({log:g.hit("mh",-1)})},
-  {id:"scope", cat:"PIP Pressure", title:"Scope Creep", desc:"'Done' now means something else on your best deliverable.",
-    resolve:g=>{ const d=g.mostProgressed(); if(!d) return {log:"Nothing in progress to sabotage. Lucky."}; d.progress=Math.max(0,d.progress-1); return {log:"“"+d.title+"” loses <b class='bad'>1 progress</b> to churn."}; }},
-  {id:"happyhour", cat:"Coworker", title:"Team Happy Hour", desc:"Optional in the way these things are optional.",
-    resolve:g=>({prompt:"You can only be in one place.", choices:[
-      {label:"Show your face", cls:"primary", desc:"Goodwill now, groggy later.", apply:g=>{ g.nextFocusPenalty+=1; return {log:g.hit("cap",1)+" — but <b class='foc'>−1 Focus next week</b>."}; }},
-      {label:"Slip out to job hunt", desc:"Applications over small talk.", apply:g=>({log:g.hit("js",1)+" "+g.hit("heat",2)})}]})},
-  {id:"ambush", cat:"Forced Dilemma", title:"The 4 PM Ambush", desc:"A 'quick 15' lands exactly on your phone interview.",
-    resolve:g=>({prompt:"Two calendars, one you.", choices:[
-      {label:"Cancel the interview", cls:"primary", desc:"Safe. The recruiter won't wait forever.", apply:g=>({log:g.hit("js",-2)})},
-      {label:"Risk being late", desc:"Take the call. Coin flip.", apply:g=> Math.random()<0.5 ? ({log:"The manager rescheduled anyway. Clean getaway."}) : ({log:"You slink in late. It's noted. "+g.hit("pip",-2)+" "+g.hit("mh",-1)})}]})},
-  {id:"praise", cat:"PIP Pressure", title:"An Unexpected Kind Word", desc:"A peer review comes back glowing, and it lands upstairs.",
-    resolve:g=>({log:g.hit("pip",2)+". Bank it before the feeling passes.", good:true})},
-  {id:"ally", cat:"Coworker", title:"Coffee With an Ally", desc:"A work friend quietly covers a dropped ball for you.",
-    resolve:g=>({log:g.hit("cap",1)+" "+g.hit("mh",1)+". Someone in your corner.", good:true})},
+  {id:"hr", cat:"Mental Health", title:"HR 'Check-In'", desc:"Thirty minutes that could have been an email.", resolve:g=>({log:g.hit("mh",-1)})},
+  {id:"linkedin", cat:"Exposure", title:"Someone Saw Your LinkedIn", desc:'"Love the new headline!" — eyebrow raised.',
+    resolve:g=> g.heat>=4 ? ({log:"Your search has a smell. "+g.hit("mh",-1)+" "+g.hit("heat",1)}) : ({log:"Low profile. No harm done."})},
+  {id:"reply", cat:"Mental Health", title:"The Reply-All", desc:"Forty people watch you get asked why it isn't done.", resolve:g=>({log:g.hit("mh",-1)})},
+  {id:"scope", cat:"PIP Pressure", title:"Scope Creep", desc:"'Done' now means something else.",
+    resolve:g=>{ const d=g.mostProgressed(); if(!d) return {log:"Nothing to sabotage. Lucky."}; d.progress=Math.max(0,d.progress-1); return {log:"“"+d.title+"” <b class='bad'>−1 progress</b>."}; }},
+  {id:"happyhour", cat:"Coworker", title:"Team Happy Hour", desc:"Optional the way these things are optional.",
+    resolve:g=>({choices:[
+      {label:"Show your face", cls:"primary", apply:g=>{ R.nextFocusPenalty++; return {log:g.hit("cap",1)+" · <b class='foc'>−1 Focus next week</b>"}; }},
+      {label:"Slip out to job hunt", apply:g=>({log:g.hit("js",1)+" "+g.hit("heat",2)})}]})},
+  {id:"ambush", cat:"Forced Dilemma", title:"The 4 PM Ambush", desc:"A 'quick 15' lands on your phone interview.",
+    resolve:g=>({choices:[
+      {label:"Cancel the interview", cls:"primary", apply:g=>({log:g.hit("js",-2)})},
+      {label:"Risk being late", apply:g=> Math.random()<0.5 ? ({log:"Rescheduled anyway. Clean."}) : ({log:"Late, and noted. "+g.hit("pip",-2)+" "+g.hit("mh",-1)})}]})},
+  {id:"praise", cat:"PIP Pressure", title:"An Unexpected Kind Word", desc:"A peer review comes back glowing.", resolve:g=>({log:g.hit("pip",2), good:true})},
+  {id:"ally", cat:"Coworker", title:"Coffee With an Ally", desc:"A friend quietly covers for you.", resolve:g=>({log:g.hit("cap",1)+" "+g.hit("mh",1), good:true})},
   {id:"snitch", cat:"Exposure", title:"The Snitch", min:2, desc:"Someone forwarded your job-board activity to HR.",
-    resolve:g=>{ if(g.heat>=6){ if(g.spendCap(2)) return {log:"HR opens a file — but you spend <b class='cap'>2 Capital</b> and an ally buries it. Close."}; return {log:"It sticks to your record. "+g.hit("pip",-4)+" "+g.hit("mh",-2)}; } return {log:"Not enough to pin on you — yet. "+g.hit("heat",2)+" "+g.hit("mh",-1)}; }},
-  {id:"firedrill", cat:"Time Thief", title:"Weekend Fire Drill", desc:"Prod is down. You 'volunteer.'",
-    resolve:g=>({log:"Heroics under fire. "+g.hit("mh",-2)+" "+g.hit("pip",1)})},
-  {id:"reorg", cat:"Mental Health", title:"Reorg Rumors", desc:"The org chart is 'being refreshed.'",
-    resolve:g=>({prompt:"How do you spend the dread?", choices:[
-      {label:"Update your resume tonight", cls:"primary", desc:"Turn anxiety into an exit.", apply:g=>({log:g.hit("js",1)+" "+g.hit("mh",-1)})},
-      {label:"Doomscroll and spiral", desc:"It does not help.", apply:g=>({log:g.hit("mh",-2)})}]})},
-  {id:"counter", cat:"Forced Dilemma", title:"The Retention Trap", min:3, when:g=>g.js>=6, desc:"Word of your interviews leaked up. Suddenly they want to keep you.",
-    resolve:g=>({prompt:"Trust a company that PIP'd you?", choices:[
-      {label:"Take the 'pause', drop the search", desc:"PIP relief; throw away your runway.", apply:g=>{ g.js=Math.max(0,g.js-4); return {log:g.hit("pip",3)+", but "+g.hit("js",-4)}; }},
-      {label:"Smile, keep both doors open", cls:"primary", desc:"Change nothing. Risky if watched.", apply:g=>({log:g.hit("heat",2)})}]})},
-  {id:"blame", cat:"PIP Pressure", title:"Blamed for the Team Miss", min:2, desc:"The team missed. Your PIP makes you the tidy scapegoat.",
-    resolve:g=>({log:g.hit("pip",-1)+" "+g.hit("mh",-1)})},
+    resolve:g=>{ if(g.heat>=6){ if(g.spendCap(2)) return {log:"An ally buries it — <b class='cap'>−2 Capital</b>."}; return {log:"It sticks. "+g.hit("pip",-4)+" "+g.hit("mh",-2)}; } return {log:"Nothing to pin — yet. "+g.hit("heat",2)}; }},
+  {id:"firedrill", cat:"Time Thief", title:"Weekend Fire Drill", desc:"Prod is down. You 'volunteer.'", resolve:g=>({log:g.hit("mh",-2)+" "+g.hit("pip",1)})},
+  {id:"reorg", cat:"Mental Health", title:"Layoff Rumors", desc:"The org chart is 'being refreshed.'",
+    resolve:g=>({choices:[
+      {label:"Update your résumé tonight", cls:"primary", apply:g=>({log:g.hit("js",1)+" "+g.hit("mh",-1)})},
+      {label:"Doomscroll and spiral", apply:g=>({log:g.hit("mh",-2)})}]})},
+  {id:"blame", cat:"PIP Pressure", title:"Blamed for the Team Miss", min:2, desc:"You're the tidy scapegoat.", resolve:g=>({log:g.hit("pip",-1)+" "+g.hit("mh",-1)})},
 ];
 
 /* ============ STATE ============ */
-const R = {}; // run state (persists across jobs)
-let unlocks = loadUnlocks();
+const R = {};
+let best = loadBest();
+function loadBest(){ try{ const v=localStorage.getItem(BEST_KEY); if(v) return JSON.parse(v); }catch(e){} return {depth:0, label:"—"}; }
+function saveBest(depth,label){ if(depth>best.depth){ best={depth,label}; try{ localStorage.setItem(BEST_KEY, JSON.stringify(best)); }catch(e){} } }
 
-function loadUnlocks(){
-  try{ const raw=localStorage.getItem(UNLOCK_KEY); if(raw){ const u=JSON.parse(raw); u.set=new Set(u.list||[]); u.maxRung=u.maxRung||0; return u; } }catch(e){}
-  return {list:[], set:new Set(), maxRung:0};
-}
-function saveUnlocks(){ try{ localStorage.setItem(UNLOCK_KEY, JSON.stringify({list:[...unlocks.set], maxRung:unlocks.maxRung})); }catch(e){} }
-function isUnlocked(id){ return unlocks.set.has(id); }
-function grantUnlock(id){ if(!unlocks.set.has(id)){ unlocks.set.add(id); unlocks.list=[...unlocks.set]; return true; } return false; }
-
-/* ============ RUN / JOB SETUP ============ */
-const COMPANIES=["Initech","Globex","Hooli","Vandelay","Umbrella Corp","Wernham Hogg","Prestige Worldwide","Cyberdyne","Soylent Inc","Pied Piper","Vault-Tec","Massive Dynamic"];
-
+/* ============ RUN / LEVEL SETUP ============ */
 function newRun(){
-  Object.assign(R,{
-    rung:0, mh:MH_MAX,
-    deck:[], relics:[],
-    unlockedThisRun:[],
-  });
-  // starter deck
-  R.deck = ["work","work","work","work","shipit","shipit","jobhunt","jobhunt","network","breathe","breathe","overtime"];
-  startJob();
+  Object.assign(R,{ companyIdx:0, level:1, mh:MH_BASE,
+    deck:["work","work","work","work","shipit","shipit","jobhunt","jobhunt","network","breathe","breathe","overtime"],
+    perks:[], unlockedThisRun:[], lastBoss:null });
+  startLevel();
 }
-
-function pickBoss(){
-  const avail=Object.keys(BOSSES).filter(b=>!BOSSES[b].unlock || isUnlocked(BOSSES[b].unlock));
-  // avoid repeating the immediately-previous boss when possible
-  const pool = avail.filter(b=>b!==R.lastBoss); const chosen=(pool.length?pool:avail)[Math.floor(Math.random()*(pool.length?pool.length:avail.length))];
-  R.lastBoss=chosen; return chosen;
-}
-function pickRole(){
-  const avail=Object.keys(ROLES).filter(r=>!ROLES[r].unlock || isUnlocked(ROLES[r].unlock));
-  return avail[Math.floor(Math.random()*avail.length)];
-}
-
-function startJob(){
-  const r=R.rung;
-  R.bossId=pickBoss(); R.roleId=pickRole();
-  R.company = COMPANIES[(r)%COMPANIES.length];
-  R.week=1; R.maxWeeks=4;
-  R.pipGoal = 9 + r*3;   // job 1: 9, then +3 each rung — steep ladder
-  R.jsGoal  = 11 + r*2;  // job 1: 11, escape stays a touch harder than survive
-  R.pip=0; R.js=0; R.heat=0; R.cap=0;
+function startLevel(){
+  const co=COMPANIES[R.companyIdx]; R.company=co;
+  const bpool=co.bosses.filter(b=>b!==R.lastBoss); R.bossId=(bpool.length?bpool:co.bosses)[Math.floor(Math.random()*(bpool.length?bpool.length:co.bosses.length))]; R.lastBoss=R.bossId;
+  R.roleId=Object.keys(ROLES)[Math.floor(Math.random()*Object.keys(ROLES).length)];
+  R.pipGoal=co.pipBase+(R.level-1);
+  R.jsGoal =co.jsBase +(R.level-1);
+  R.pip=0; R.js=0; R.heat=0; R.cap=fx('start_capital')?2:0;
   R.focus=BASE_FOCUS; R.nextFocusPenalty=0;
-  R.hand=[]; R.discard=[]; R.selecting=null;
-  R.completedThisWeek=0; R.skipIntent=false;
-  R.allyUsed=false; R.corpUsed=false; R.blackmailUsed=false;
-  R.pendingTerminate=null; R.over=false; R.phase="play";
-  R.seenEnc=new Set();
-  // deliverables: 2 to start (roles' pool), deadlines wk2 & wk3
-  R.rolePool = shuffle(ROLES[R.roleId].pool.slice());
-  R.deliverables=[];
-  addDeliverable(3); addDeliverable(4);
-  // draw pile = shuffled deck
-  R.draw = shuffle(R.deck.slice());
-  chooseIntent();
-  drawHand(true);
-  R.phase="play";
+  R.week=1; R.completedThisWeek=0; R.skipIntent=false;
+  R.allyUsed=false; R.corpUsed=false; R.skipBossUsed=false;
+  R.pendingTerminate=null; R.over=false; R.phase="play"; R.selecting=null; R.seenEnc=new Set();
+  R.rolePool=shuffle(ROLES[R.roleId].pool.slice());
+  R.deliverables=[]; addDeliverable(3); addDeliverable(4);
+  R.draw=shuffle(R.deck.slice()); R.hand=[]; R.discard=[];
+  chooseIntent(); drawHand();
 }
-
 function addDeliverable(deadlineWeek){
-  // cap the pile-on: never more than 3 open deliverables at once
-  const openCount = R.deliverables.filter(d=>!d.done&&!d.missed).length;
-  if(openCount>=3) return false;
-  const spec = R.rolePool.length? R.rolePool.pop() : {title:"Miscellaneous Busywork",cost:2,reward:3};
-  R.deliverables.push({id:uid(), title:spec.title, cost:spec.cost, reward:spec.reward, progress:0, deadline:Math.min(deadlineWeek,R.maxWeeks), done:false, missed:false});
+  if(R.deliverables.filter(d=>!d.done&&!d.missed).length>=3) return false;
+  const spec=R.rolePool.length?R.rolePool.pop():{title:"Miscellaneous Busywork",cost:2,reward:3};
+  R.deliverables.push({id:uid(),title:spec.title,cost:spec.cost,reward:spec.reward,progress:0,deadline:Math.min(deadlineWeek,MAX_WEEKS),done:false,missed:false});
   return true;
 }
-R.addDeliverable = deadlineWeek=>addDeliverable(deadlineWeek);
-
-function chooseIntent(){
-  const b=BOSSES[R.bossId];
-  let list=b.intents;
-  // The Nice One: betray on week 3+, buff before
-  if(R.bossId==="niceone"){ list = R.week>=3 ? [b.intents[2]] : b.intents.slice(0,2); }
-  R.intent = list[Math.floor(Math.random()*list.length)];
-}
+function chooseIntent(){ const b=BOSSES[R.bossId]; R.intent=b.intents[Math.floor(Math.random()*b.intents.length)]; }
 
 /* ============ DECK OPS ============ */
-R.draw = null;
-function drawHand(fresh){
-  const size = HAND_SIZE + (hasRelic('ergo_chair')?1:0);
-  R.hand=[]; drawCards(size);
-}
-function drawCards(n){
-  for(let i=0;i<n;i++){
-    if(R.draw.length===0){ if(R.discard.length===0) break; R.draw=shuffle(R.discard); R.discard=[]; }
-    const card=R.draw.pop();
-    if(card!=null) R.hand.push(card);
-  }
-}
-function _dpush(cid){ if(cid!=null) R.discard.push(cid); } // defensive: never let a null poison the pile
-R.draw2 = null;
+function drawHand(){ R.hand=[]; drawCards(HAND_SIZE+(fx('big_hand')?1:0)); }
+function drawCards(n){ for(let i=0;i<n;i++){ if(R.draw.length===0){ if(R.discard.length===0) break; R.draw=shuffle(R.discard); R.discard=[]; } const c=R.draw.pop(); if(c!=null) R.hand.push(c); } }
 function gDraw(n){ drawCards(n); renderHand(); renderPiles(); }
+function dpush(cid){ if(cid!=null) R.discard.push(cid); }
 
-/* ============ CONTEXT HELPERS (g) ============ */
+/* ============ CONTEXT (g) ============ */
 const g = {
   get week(){return R.week}, get heat(){return R.heat}, get js(){return R.js}, get pip(){return R.pip}, get cap(){return R.cap}, get mh(){return R.mh},
-  set js(v){R.js=Math.max(0,v)}, set pip(v){R.pip=Math.max(0,v)},
-  get focus(){return R.focus}, set focus(v){R.focus=v},
-  get completedThisWeek(){return R.completedThisWeek}, set completedThisWeek(v){R.completedThisWeek=v},
-  get nextFocusPenalty(){return R.nextFocusPenalty}, set nextFocusPenalty(v){R.nextFocusPenalty=v},
-  get skipIntent(){return R.skipIntent}, set skipIntent(v){R.skipIntent=v},
   add(stat,n){
-    if(stat==="mh") R.mh=clamp(R.mh+n,0,MH_MAX);
+    if(stat==="mh") R.mh=clamp(R.mh+n,0,mhMax());
     else if(stat==="heat") R.heat=clamp(R.heat+n,0,HEAT_MAX);
     else if(stat==="cap") R.cap=clamp(R.cap+n,0,CAP_MAX);
     else if(stat==="pip") R.pip=Math.max(0,R.pip+n);
     else if(stat==="js") R.js=Math.max(0,R.js+n);
   },
-  hit(stat,n){
-    g.add(stat,n);
-    const names={pip:"PIP",js:"Job Search",mh:"Mental Health",heat:"Heat",cap:"Capital"};
+  hit(stat,n){ g.add(stat,n);
+    const names={pip:"PIP",js:"Job",mh:"MH",heat:"Heat",cap:"Capital"};
     const cls={pip:"good",js:"job",mh:n>0?"good":"bad",heat:n>0?"bad":"good",cap:"cap"}[stat];
     spawnJuice(stat,(n>0?"+":"")+n);
     return "<b class='"+cls+"'>"+(n>0?"+":"")+n+" "+names[stat]+"</b>";
   },
-  mostProgressed(){ const a=R.deliverables.filter(d=>!d.done&&!d.missed&&d.progress>0).sort((x,y)=>y.progress-x.progress); return a[0]||null; },
-  soonestOpen(){ const a=R.deliverables.filter(d=>!d.done&&!d.missed).sort((x,y)=>x.deadline-y.deadline); return a[0]||null; },
-  addDeliverable(w){ addDeliverable(w); },
-  terminate(hd,lede){ R.pendingTerminate={hd,lede}; },
+  mostProgressed(){ return R.deliverables.filter(d=>!d.done&&!d.missed&&d.progress>0).sort((a,b)=>b.progress-a.progress)[0]||null; },
+  soonest(){ return R.deliverables.filter(d=>!d.done&&!d.missed).sort((a,b)=>a.deadline-b.deadline)[0]||null; },
   spendCap(n){ if(R.cap>=n){ R.cap-=n; spawnJuice("cap","-"+n); return true; } return false; },
-  has(relic){ return hasRelic(relic); },
-  draw(n){ gDraw(n); },
 };
-function hasRelic(id){ return R.relics && R.relics.includes(id); }
+function fx(tag){ return R.perks && R.perks.some(id=>PERKS[id].fx===tag); }
+function mhMax(){ return MH_BASE + (fx('max_mh')?2:0); }
+function hasPerk(id){ return R.perks && R.perks.includes(id); }
 
 /* ============ UTILS ============ */
 function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
@@ -565,356 +532,256 @@ const $=s=>document.querySelector(s);
 /* ============ JUICE ============ */
 const statColors={pip:"var(--phosphor)",js:"var(--escape)",mh:"var(--amber)",heat:"var(--danger)",cap:"var(--capital)",focus:"var(--focus)"};
 function spawnJuice(stat,text){
-  const anchor = stat==="focus" ? document.querySelector("#strip .focusdots") : document.querySelector("[data-meter='"+stat+"']") || document.querySelector("#strip .pips");
+  const anchor = stat==="focus" ? $("#strip .focusdots") : document.querySelector("[data-meter='"+stat+"']") || $("#strip .pips");
   const n=document.createElement("div"); n.className="fx"; n.textContent=text; n.style.color=statColors[stat]||"#fff";
-  let x=window.innerWidth/2,y=150;
-  if(anchor){ const r=anchor.getBoundingClientRect(); x=r.left+r.width*0.5+(Math.random()*24-12); y=r.top+2; }
+  let x=window.innerWidth/2,y=150; if(anchor){ const r=anchor.getBoundingClientRect(); x=r.left+r.width*0.5+(Math.random()*24-12); y=r.top+2; }
   n.style.left=x+"px"; n.style.top=y+"px"; $("#juice").appendChild(n); setTimeout(()=>n.remove(),1000);
 }
 function shake(){ const s=$("#screen"); s.classList.remove("shake"); void s.offsetWidth; s.classList.add("shake"); }
 
 /* ============ RENDER ============ */
 function render(){ renderTop(); renderBoss(); renderMeters(); renderStrip(); renderDeliverables(); renderHand(); renderPiles(); renderHint(); }
-
 function renderTop(){
-  $("#company").textContent=R.company;
-  $("#jobline").textContent=ROLES[R.roleId].name+" · Under Review";
-  $("#rung").textContent="JOB #"+(R.rung+1);
+  const co=R.company;
+  $("#company").textContent=co.name;
+  $("#jobline").textContent=co.archetype+" · "+ROLES[R.roleId].name+" · Under Review";
+  $("#codots").innerHTML="Company <b>"+(R.companyIdx+1)+"/3</b> · Level <b>"+R.level+"/"+LEVELS+"</b>";
   const wk=$("#wk"); wk.innerHTML="";
-  for(let i=1;i<=R.maxWeeks;i++){ const d=document.createElement("span"); d.className="dot"+(i<R.week?" on":"")+(i===R.week&&R.phase==="play"?" on":""); wk.appendChild(d); }
+  for(let i=1;i<=MAX_WEEKS;i++){ const d=document.createElement("span"); d.className="dot"+((i<R.week||(i===R.week&&R.phase==="play"))?" on":""); wk.appendChild(d); }
   const fri=document.createElement("span"); fri.className="dot fri"+(R.phase!=="play"?" on":""); wk.appendChild(fri);
 }
 function renderBoss(){
   const b=BOSSES[R.bossId];
-  $("#boss").innerHTML=
-    "<div class='face'>"+b.icon+"</div>"
-    +"<div class='bmeta'><div class='bname'>"+b.name+"</div><div class='bdesc'>"+b.desc+"</div></div>"
+  $("#boss").innerHTML="<div class='face'>"+b.icon+"</div><div class='bmeta'><div class='bname'>"+b.name+"</div><div class='bdesc'>"+b.desc+"</div></div>"
     +"<div class='intent'><div class='intentlab'>Friday · Week "+R.week+"</div><div class='intenttxt"+(R.skipIntent?" skipped":"")+"'>"+(R.intent?R.intent.tel:"—")+"</div></div>";
 }
 function renderMeters(){
   const host=$("#meters"); host.innerHTML="";
-  host.appendChild(meter("pip","PIP","m-pip",R.pip,R.pipGoal,"Survive at "+R.pipGoal));
-  const jg = R.week>=3 ? "Escape at "+R.jsGoal : "Locked until Week 3";
-  const jm=meter("js","Job Search","m-js",R.js,R.jsGoal,jg); if(R.week<3) jm.classList.add("gated"); host.appendChild(jm);
-  host.appendChild(meter("mh","Mental Health","m-mh",R.mh,MH_MAX,"Burnout at 0 · carries over"));
-  host.appendChild(meter("heat","Heat","m-heat",R.heat,HEAT_MAX,"≥8 risks exposure"));
+  host.appendChild(meter("pip","PIP","m-pip",R.pip,R.pipGoal,"Survive → <b>Office Perk</b>"));
+  const jm=meter("js","Job Search","m-js",R.js,R.jsGoal, R.week>=3?"Escape → <b>Rare card</b>":"Escape unlocks Week 3"); if(R.week<3) jm.classList.add("gated"); host.appendChild(jm);
+  host.appendChild(meter("mh","Mental Health","m-mh",R.mh,mhMax(),"Burnout at 0 · carries over"));
+  host.appendChild(meter("heat","Heat","m-heat",R.heat,HEAT_MAX,"10 = caught"));
 }
 function meter(key,label,cls,val,max,goal){
   const pct=clamp(val/max*100,0,100); const w=document.createElement("div"); w.className="meter "+cls; w.setAttribute("data-meter",key);
-  w.innerHTML="<div class='top2'><span class='lab'>"+label+"</span><span class='val'>"+val+(key==="mh"||key==="heat"?" / "+max:" / "+max)+"</span></div><div class='bar'><i style='width:"+pct+"%'></i></div><div class='goal'>"+goal+"</div>";
+  w.innerHTML="<div class='top2'><span class='lab'>"+label+"</span><span class='val'>"+val+" / "+max+"</span></div><div class='bar'><i style='width:"+pct+"%'></i></div><div class='goal'>"+goal+"</div>";
   return w;
 }
 function renderStrip(){
   const capPips=Array.from({length:CAP_MAX},(_,i)=>"<i class='"+(i<R.cap?"on":"")+"'></i>").join("");
   const focDots=Array.from({length:Math.max(R.focus,BASE_FOCUS)},(_,i)=>"<i class='"+(i<R.focus?"on":"")+"'></i>").join("");
-  let relicHtml="";
-  if(R.relics.length){ relicHtml="<span class='relicbar'>"+R.relics.map(id=>{ const rl=RELICS[id]; const spent=(id==="one_ally"&&R.allyUsed)||(id==="corp_card"&&R.corpUsed)||(id==="blackmail"&&R.blackmailUsed); return "<span class='relic"+(spent?" spent":"")+"' title='"+rl.name+" — "+rl.desc+"'>"+rl.icon+"</span>"; }).join("")+"</span>"; }
-  $("#strip").innerHTML=
-    "<span class='focuschip'>Focus</span> <span class='focusdots'>"+focDots+"</span>"
-    +"<span class='tag' style='color:var(--capital)'>Capital</span> <span class='pips'>"+capPips+"</span>"
-    +(relicHtml?("<span>Perks "+relicHtml+"</span>"):"<span style='color:var(--ink-faint)'>No Office Perks yet</span>");
+  let perkHtml = R.perks.length ? ("<span class='relicbar'>"+R.perks.map(id=>{ const p=PERKS[id]; const spent=(p.fx==="ally"&&R.allyUsed)||(p.fx==="corp_card"&&R.corpUsed)||(p.fx==="skip_boss"&&R.skipBossUsed); return "<span class='relic"+(spent?" spent":"")+"' title='"+p.name+" — "+p.desc+"'>"+p.icon+"</span>"; }).join("")+"</span>") : "<span style='color:var(--ink-faint)'>No perks yet</span>";
+  $("#strip").innerHTML="<span class='focuschip'>Focus</span> <span class='focusdots'>"+focDots+"</span>"
+    +"<span style='color:var(--capital)'>Capital</span> <span class='pips'>"+capPips+"</span>"
+    +"<span>Perks "+perkHtml+"</span>";
 }
 function renderDeliverables(){
-  const host=$("#deliverables"); host.innerHTML="";
-  $("#game").classList.toggle("selecting",!!R.selecting);
+  const host=$("#deliverables"); host.innerHTML=""; $("#game").classList.toggle("selecting",!!R.selecting);
   const active=R.deliverables.filter(d=>!d.missed);
   if(!active.length){ host.innerHTML="<div style='color:var(--ink-faint);font-size:11px'>No active deliverables.</div>"; }
   active.forEach(d=>{
     const ready=!d.done&&d.progress>=d.cost, urgent=!d.done&&d.deadline<=R.week;
-    const card=document.createElement("div");
-    card.className="dcard"+(ready?" ready":"")+(urgent&&!ready?" urgent":"")+(d.done?" done":"");
-    if(R.selecting){ const need=R.selecting.target; const pickable = need==="ready"?ready:(!d.done); card.classList.add(pickable?"pick":"nopick"); if(pickable){ card.onclick=()=>chooseTarget(d); card.tabIndex=0; card.onkeydown=e=>{ if(e.key==="Enter"||e.key===" "){e.preventDefault();chooseTarget(d);} }; } }
+    const card=document.createElement("div"); card.className="dcard"+(ready?" ready":"")+(urgent&&!ready?" urgent":"")+(d.done?" done":"");
+    if(R.selecting){ const pickable = R.selecting.target==="ready"?ready:(!d.done); card.classList.add(pickable?"pick":"nopick"); if(pickable){ card.onclick=()=>chooseTarget(d); card.tabIndex=0; card.onkeydown=e=>{ if(e.key==="Enter"||e.key===" "){e.preventDefault();chooseTarget(d);} }; } }
     const pct=clamp(d.progress/d.cost*100,0,100);
-    let badge=d.done?"<span class='dbadge done'>Done</span>":(ready?"<span class='dbadge ready'>Ready</span>":"");
-    card.innerHTML=badge+"<div class='dtitle'>"+d.title+"</div>"
-      +"<div class='dmeta'><span>"+d.progress+"/"+d.cost+"</span><span class='reward'>+"+d.reward+" PIP</span></div>"
-      +"<div class='dprog'><i style='width:"+pct+"%'></i></div>"
-      +"<div class='dmeta'><span class='ddl'>"+(d.done?"Filed":("Due Wk "+d.deadline))+"</span></div>";
+    const badge=d.done?"<span class='dbadge done'>Done</span>":(ready?"<span class='dbadge ready'>Ready</span>":"");
+    card.innerHTML=badge+"<div class='dtitle'>"+d.title+"</div><div class='dmeta'><span>"+d.progress+"/"+d.cost+"</span><span class='reward'>+"+d.reward+" PIP</span></div>"
+      +"<div class='dprog'><i style='width:"+pct+"%'></i></div><div class='dmeta'><span class='ddl'>"+(d.done?"Filed":("Due Wk "+d.deadline))+"</span></div>";
     host.appendChild(card);
   });
 }
 function renderHand(){
   const host=$("#hand"); host.innerHTML="";
   R.hand.forEach((cid,idx)=>{
-    const c=CARDS[cid]; if(!c) return; const b=document.createElement("button");
-    b.className="pcard"; b.setAttribute("data-r",c.r); b.setAttribute("data-idx",idx);
-    const affordable = c.cost<=R.focus;
-    const playableExtra = c.playable? c.playable(g): true;
-    const targetable = !c.target || R.deliverables.some(d=> c.target==="ready" ? (!d.done&&d.progress>=d.cost) : (!d.done&&!d.missed));
-    const ok = affordable && playableExtra && targetable && R.phase==="play";
+    const c=CARDS[cid]; if(!c) return; const b=document.createElement("button"); b.className="pcard"; b.setAttribute("data-r",c.r); b.setAttribute("data-idx",idx);
+    const affordable=c.cost<=R.focus, extra=c.playable?c.playable():true;
+    const targetable=!c.target||R.deliverables.some(d=> c.target==="ready"?(!d.done&&d.progress>=d.cost):(!d.done&&!d.missed));
+    const ok=affordable&&extra&&targetable&&R.phase==="play";
     if(!ok) b.classList.add("unplayable");
     if(R.selecting && R.selecting.idx===idx) b.classList.add("selarm");
-    b.innerHTML="<span class='cost'>"+c.cost+"</span><span class='cname'>"+c.name+"</span><span class='cdesc'>"+c.desc+"</span><span class='ctype'>"+c.type+(c.playable&&!playableExtra?" · Wk3+":"")+"</span>";
-    if(ok) b.onclick=()=>onPlay(idx); else b.onclick=()=>{ if(!affordable){ flash("Not enough Focus."); } else if(!targetable){ flash("No valid target."); } else if(!playableExtra){ flash("Only playable from Week 3."); } };
+    b.innerHTML="<span class='cost'>"+c.cost+"</span><span class='cname'>"+c.name+"</span><span class='cdesc'>"+c.desc+"</span><span class='ctype'>"+c.type+(c.playable&&!extra?" · Wk3+":"")+"</span>";
+    b.onclick= ok ? ()=>onPlay(idx) : ()=>{ flash(!affordable?"Not enough Focus.":!targetable?"No valid target.":!extra?"Only from Week 3.":""); };
     host.appendChild(b);
   });
 }
 function renderPiles(){ $("#drawc").textContent="Draw "+R.draw.length; $("#discardc").textContent="Discard "+R.discard.length; }
 function renderHint(){
   if(R.selecting){ $("#hint").innerHTML="Pick a "+(R.selecting.target==="ready"?"<b>ready</b> ":"")+"deliverable, or <button class='linkbtn' onclick='Game.cancelSelect()'>cancel</button>"; return; }
-  const b=BOSSES[R.bossId];
-  $("#hint").innerHTML="Spend Focus on cards. Friday, <b style='color:var(--danger)'>"+b.name+"</b> acts — then End Week when you're ready.";
+  $("#hint").innerHTML="Spend Focus. Friday, <b style='color:var(--danger)'>"+BOSSES[R.bossId].name+"</b> acts — then End Week.";
 }
-function flash(msg){ $("#hint").innerHTML="<span style='color:var(--danger)'>"+msg+"</span>"; }
+function flash(m){ if(m) $("#hint").innerHTML="<span style='color:var(--danger)'>"+m+"</span>"; }
 
 /* ============ PLAY ============ */
-function onPlay(idx){
-  if(R.phase!=="play"||R.over) return;
-  const cid=R.hand[idx], c=CARDS[cid];
-  if(c.cost>R.focus) return;
-  if(c.choose){ openNetwork(idx); return; }
-  if(c.target){ R.selecting={idx, target:c.target}; render(); return; }
-  resolvePlay(idx,null);
-}
+function onPlay(idx){ if(R.phase!=="play"||R.over) return; const c=CARDS[R.hand[idx]]; if(c.cost>R.focus) return;
+  if(c.choose){ openNetwork(idx); return; } if(c.target){ R.selecting={idx,target:c.target}; render(); return; } resolvePlay(idx,null); }
 function chooseTarget(d){ if(!R.selecting) return; const idx=R.selecting.idx; R.selecting=null; resolvePlay(idx,d); }
-
-function resolvePlay(idx,target){
-  const cid=R.hand[idx], c=CARDS[cid];
-  R.focus-=c.cost;
-  const log=c.play(g,target);
-  // move to discard
-  R.hand.splice(idx,1); _dpush(cid,'resolvePlay');
-  R.selecting=null;
-  render();
-  $("#hint").innerHTML=log;
-  if(checkLossContinuous()) return;
-}
-
+function resolvePlay(idx,target){ const cid=R.hand[idx], c=CARDS[cid]; R.focus-=c.cost; const log=c.play(g,target);
+  R.hand.splice(idx,1); dpush(cid); R.selecting=null; render(); $("#hint").innerHTML=log; checkLossContinuous(); }
 function openNetwork(idx){
-  const host=$("#modalhost");
-  host.innerHTML="<div class='reck neutral'><div class='ehd'>Network</div><h3 class='etitle'>Which network?</h3><div class='ecat'>One card · two bets</div>"
-    +"<div class='edesc'>Play the room inside for standing, or work outside contacts toward the door.</div><div class='choices'>"
-    +"<button class='btn primary' id='n-int'><span class='bl'>Internal</span><span class='bd'>+1 Political Capital, +1 PIP Progress.</span></button>"
-    +"<button class='btn cap' id='n-ext'><span class='bl'>External</span><span class='bd'>+1 Job Search, −2 Heat. Discreet.</span></button>"
-    +"<button class='btn' id='n-cancel' style='border-color:var(--ink-faint)'><span class='bl'>Cancel</span></button></div></div>";
-  $("#veil").classList.add("show");
-  let resolved=false;
-  const fin=makeLog=>{ if(resolved) return; resolved=true; $("#veil").classList.remove("show"); const cid=R.hand[idx]; R.focus-=CARDS.network.cost; R.hand.splice(idx,1); _dpush(cid); const log=makeLog(); render(); $("#hint").innerHTML=log; checkLossContinuous(); };
+  $("#modalhost").innerHTML="<div class='reck neutral'><div class='ehd'>Network</div><h3 class='etitle'>Which network?</h3><div class='choices'>"
+    +"<button class='btn primary' id='n-int'><span class='bl'>Internal</span><span class='bd'>+1 Capital · +1 PIP</span></button>"
+    +"<button class='btn cap' id='n-ext'><span class='bl'>External</span><span class='bd'>+1 Job · −2 Heat</span></button>"
+    +"<button class='btn plain' id='n-cancel'><span class='bl'>Cancel</span></button></div></div>";
+  $("#veil").classList.add("show"); let done=false;
+  const fin=make=>{ if(done) return; done=true; $("#veil").classList.remove("show"); const cid=R.hand[idx]; R.focus-=CARDS.network.cost; R.hand.splice(idx,1); dpush(cid); const log=make(); render(); $("#hint").innerHTML=log; checkLossContinuous(); };
   $("#n-int").onclick=()=>fin(()=>g.hit("cap",1)+" "+g.hit("pip",1));
   $("#n-ext").onclick=()=>fin(()=>g.hit("js",1)+" "+g.hit("heat",-2));
-  $("#n-cancel").onclick=()=>{ if(resolved) return; resolved=true; $("#veil").classList.remove("show"); };
+  $("#n-cancel").onclick=()=>{ if(done) return; done=true; $("#veil").classList.remove("show"); };
 }
 
 /* ============ FRIDAY ============ */
-function endWeek(){
-  if(R.phase!=="play"||R.over) return;
-  R.selecting=null;
-  // discard remaining hand
-  R.hand.forEach(c=>_dpush(c,'endWeek')); R.hand=[];
-  R.phase="friday"; render();
-  const steps=[];
-  // 1) boss intent
-  steps.push(done=>bossStep(done));
-  // 2) encounters (1, +1 if week>=3 or rung>=2)
-  const encN = 1 + ((R.week>=3||R.rung>=2)?1:0);
-  const cards=drawEncounters(encN);
-  cards.forEach(card=>steps.push(done=>encounterStep(card,done)));
-  runSteps(steps, ()=>afterFridayEvents());
+function endWeek(){ if(R.phase!=="play"||R.over) return; R.selecting=null; R.hand.forEach(dpush); R.hand=[]; R.phase="friday"; render();
+  const steps=[done=>bossStep(done)];
+  const encN=1+(R.week>=3?1:0);
+  drawEncounters(encN).forEach(card=>steps.push(done=>encounterStep(card,done)));
+  runSteps(steps,()=>afterFridayEvents());
 }
-
-function drawEncounters(n){
-  const out=[];
-  for(let i=0;i<n;i++){
-    let pool=ENCOUNTERS.filter(c=>(!c.min||R.week>=c.min)&&(!c.when||c.when(g))&&!R.seenEnc.has(c.id)&&!out.includes(c));
-    if(!pool.length){ R.seenEnc.clear(); pool=ENCOUNTERS.filter(c=>(!c.min||R.week>=c.min)&&(!c.when||c.when(g))&&!out.includes(c)); }
-    if(!pool.length) break;
-    const card=pool[Math.floor(Math.random()*pool.length)]; out.push(card); R.seenEnc.add(card.id);
-  }
-  return out;
-}
-
+function drawEncounters(n){ const out=[]; for(let i=0;i<n;i++){ let pool=ENCOUNTERS.filter(c=>(!c.min||R.week>=c.min)&&!R.seenEnc.has(c.id)&&!out.includes(c)); if(!pool.length){ R.seenEnc.clear(); pool=ENCOUNTERS.filter(c=>(!c.min||R.week>=c.min)&&!out.includes(c)); } if(!pool.length) break; const card=pool[Math.floor(Math.random()*pool.length)]; out.push(card); R.seenEnc.add(card.id); } return out; }
 function bossStep(done){
   const b=BOSSES[R.bossId];
-  // blackmail relic auto-skips
-  let autoSkip=false;
-  if(!R.skipIntent && hasRelic('blackmail') && !R.blackmailUsed && R.intent && /−|lose|Heat|Focus|PIP|Mental/i.test(R.intent.tel)){ /* only auto-use vs harmful */ }
-  const host=$("#modalhost");
-  if(R.skipIntent){
-    host.innerHTML=modalShell("danger","Friday · Manager","Move Cancelled",b.name,"You dodged <b class='foc'>"+stripTags(R.intent.tel)+"</b> this week. It won't be forgotten.","");
-    $("#veil").classList.add("show"); R.skipIntent=false;
-    return contButton(done);
-  }
-  const log=R.intent? R.intent.run(g) : "Your manager is mercifully absent this week.";
-  renderMetersLive();
-  if(isBad(log)) shake();
-  host.innerHTML=modalShell("danger","Friday · Manager","The Manager Acts",b.name+" "+b.icon, R.intent?("<span style='color:var(--ink-dim)'>"+stripTags(R.intent.tel).replace(/—.*/,'').trim()+"</span>"):"", log);
-  $("#veil").classList.add("show");
-  contButton(()=>{ if(checkLossContinuous()) return; done(); });
+  if(!R.skipIntent && fx('skip_boss') && !R.skipBossUsed && R.intent && /−|new deliverable|creeps/i.test(R.intent.tel)){ R.skipBossUsed=true; R.skipIntent=true; }
+  if(R.skipIntent){ $("#modalhost").innerHTML=modal("danger","Friday · Manager","Move Skipped",b.name+" "+b.icon,"","You dodged: "+stripTags(R.intent.tel)+"."); $("#veil").classList.add("show"); R.skipIntent=false; return cont(done); }
+  const log=R.intent?R.intent.run(g):"Your manager is mercifully absent."; renderLive(); if(bad(log)) shake();
+  $("#modalhost").innerHTML=modal("danger","Friday · Manager","The Manager Acts",b.name+" "+b.icon,"",log); $("#veil").classList.add("show");
+  cont(()=>{ if(checkLossContinuous()) return; done(); });
 }
-
 function encounterStep(card,done){
-  const host=$("#modalhost");
-  const res=card.resolve(g);
-  const cls = res.good?"good2":"danger";
-  host.innerHTML=modalShell(cls,"Friday · Office","", card.title, card.desc, "", card.cat);
-  $("#veil").classList.add("show");
-  const logHost=()=>host.querySelector(".elog"), choHost=()=>host.querySelector(".choices");
-  if(res.choices){
-    if(res.prompt) logHost().innerHTML="<span style='color:var(--ink-dim)'>"+res.prompt+"</span>";
-    let chosen=false;
-    res.choices.forEach(ch=>{ const btn=document.createElement("button"); btn.className="btn"+(ch.cls?(" "+ch.cls):""); btn.innerHTML="<span class='bl'>"+ch.label+"</span>"+(ch.desc?"<span class='bd'>"+ch.desc+"</span>":""); btn.onclick=()=>{ if(chosen) return; chosen=true; const out=ch.apply(g); logHost().innerHTML=out.log||""; renderMetersLive(); if(isBad(out.log)) shake(); contButton(()=>{ if(checkLossContinuous()) return; done(); }); }; choHost().appendChild(btn); });
-  } else {
-    logHost().innerHTML=res.log||""; renderMetersLive(); if(isBad(res.log)&&!res.good) shake();
-    contButton(()=>{ if(checkLossContinuous()) return; done(); });
-  }
+  const res=card.resolve(g); const cls=res.good?"good2":"danger";
+  $("#modalhost").innerHTML=modal(cls,"Friday · Office",card.title,card.cat,card.desc,""); $("#veil").classList.add("show");
+  const logEl=()=>$("#modalhost .elog"), choEl=()=>$("#modalhost .choices");
+  if(res.choices){ let chosen=false;
+    res.choices.forEach(ch=>{ const btn=document.createElement("button"); btn.className="btn"+(ch.cls?(" "+ch.cls):""); btn.innerHTML="<span class='bl'>"+ch.label+"</span>"; btn.onclick=()=>{ if(chosen) return; chosen=true; const out=ch.apply(g); logEl().innerHTML=out.log||""; renderLive(); if(bad(out.log)) shake(); cont(()=>{ if(checkLossContinuous()) return; done(); }); }; choEl().appendChild(btn); });
+  } else { logEl().innerHTML=res.log||""; renderLive(); if(bad(res.log)&&!res.good) shake(); cont(()=>{ if(checkLossContinuous()) return; done(); }); }
 }
-
 function afterFridayEvents(){
   if(R.over) return;
-  if(R.pendingTerminate){ const t=R.pendingTerminate; R.pendingTerminate=null; if(hasRelic('corp_card')&&!R.corpUsed){ R.corpUsed=true; showInfo("good2","Corporate Card","Saved by the Corporate Card","You expense your way out of a termination. It works exactly once — and you just used it.", ()=>continueFriday()); return; } return gameOver("terminated",t.hd,t.lede); }
+  if(R.pendingTerminate){ const t=R.pendingTerminate; R.pendingTerminate=null; if(fx('corp_card')&&!R.corpUsed){ R.corpUsed=true; return info("good2","Corporate Card","Expensed Away","You expense your way out of a termination — once.",()=>continueFriday()); } return gameOver("terminated",t.hd,t.lede); }
   continueFriday();
 }
-function continueFriday(){
-  // deadlines due this week
-  const due=R.deliverables.filter(d=>!d.done&&!d.missed&&d.deadline===R.week);
-  runSteps(due.map(d=>done=>deadlineStep(d,done)), ()=>afterDeadlines());
-}
+function continueFriday(){ const due=R.deliverables.filter(d=>!d.done&&!d.missed&&d.deadline===R.week); runSteps(due.map(d=>done=>deadlineStep(d,done)),()=>afterDeadlines()); }
 function deadlineStep(d,done){
-  d.missed=true;
-  let log, title;
-  if(d.progress===0){ title="Deliverable Abandoned"; log="You never even started <b class='bad'>“"+d.title+"”</b>. It goes in the file, in red ink. "+g.hit("pip",-3)+" "+g.hit("mh",-2)+" "+g.hit("heat",2); }
-  else { title="Missed Deadline"; log="You blew the deadline on <b class='bad'>“"+d.title+"”</b> ("+d.progress+"/"+d.cost+"). "+g.hit("pip",-2)+" "+g.hit("mh",-1); }
-  $("#modalhost").innerHTML=modalShell("danger","Deadline Passed",title,"","",log,"PIP Pressure");
-  $("#veil").classList.add("show"); renderMetersLive(); shake();
-  contButton(()=>{ if(checkLossContinuous()) return; done(); });
+  d.missed=true; let log,title;
+  if(d.progress===0){ title="Deliverable Abandoned"; log="Never even started <b class='bad'>“"+d.title+"”</b>. "+g.hit("pip",-3)+" "+g.hit("mh",-2)+" "+g.hit("heat",2); }
+  else { title="Missed Deadline"; log="Blew the deadline on <b class='bad'>“"+d.title+"”</b>. "+g.hit("pip",-2)+" "+g.hit("mh",-1); }
+  $("#modalhost").innerHTML=modal("danger","Deadline Passed",title,"PIP Pressure","",log); $("#veil").classList.add("show"); renderLive(); shake();
+  cont(()=>{ if(checkLossContinuous()) return; done(); });
 }
-function afterDeadlines(){
-  if(R.over) return;
-  // Heat exposure check
-  heatCheck(()=>afterHeat());
-}
+function afterDeadlines(){ if(R.over) return; heatCheck(()=>afterHeat()); }
 function heatCheck(done){
-  // Heat is fully visible and player-controlled. Only a MAXED meter (10) means caught —
-  // and even then an ally or Political Capital can save you. 8-9 is a loud warning.
   if(R.heat>=10){
-    if(hasRelic('one_ally') && !R.allyUsed){ R.allyUsed=true; showInfo("good2","The One Ally","An Ally Runs Interference","Your Heat maxed out and someone talked — but your one true work friend vouches for you. This once.", ()=>{ g.add("heat",-3); renderMetersLive(); done(); }); return; }
-    if(g.spendCap(2)){ showInfo("neutral","Exposure","You Bought Your Way Out","Heat boiled over — but you spend <b class='cap'>2 Political Capital</b> to make it a misunderstanding. "+g.hit("heat",-3), ()=>{ renderMetersLive(); done(); }); return; }
-    return gameOver("terminated","Terminated for cause","Your Heat hit the ceiling. Someone connected the dots on your job search, and during a PIP that's cause. Security has your badge.");
+    if(fx('ally')&&!R.allyUsed){ R.allyUsed=true; return info("good2","Union Rep","They Vouch For You","Heat maxed, but the rep steps in — this once.",()=>{ g.add("heat",-3); renderLive(); done(); }); }
+    if(g.spendCap(2)){ return info("neutral","Exposure","Bought Off","<b class='cap'>−2 Capital</b> makes it a misunderstanding. "+g.hit("heat",-3),()=>{ renderLive(); done(); }); }
+    return gameOver("terminated","Terminated for Cause","Your Heat hit the ceiling. Someone connected the dots on your job search. Security has your badge.");
   }
-  if(R.heat>=8){
-    showInfo("danger","Exposure","A Close Call","Whispers about your job search are reaching the wrong ears. Cool it down. "+g.hit("mh",-1), ()=>{ renderMetersLive(); done(); }); return;
-  }
+  if(R.heat>=8){ return info("danger","Exposure","A Close Call","Whispers are reaching the wrong ears. "+g.hit("mh",-1),()=>{ renderLive(); done(); }); }
   done();
 }
 function afterHeat(){
   if(R.over) return;
-  // WIN checks
-  if(R.week>=3 && R.js>=R.jsGoal) return clearJob("escape");
-  if(R.week>=R.maxWeeks){ if(R.pip>=R.pipGoal) return clearJob("survive"); return gameOver("fired","Fired","Four weeks up. You didn't hit your metrics and you didn't make it out. The PIP did exactly what it was built to do."); }
-  // continue: offer a card draft, then advance week
+  if(fx('friday_calm')) g.add("mh",1);
+  if(fx('cap_gen')) g.add("cap",1);
+  renderLive();
+  const canEscape = R.week>=3 && R.js>=R.jsGoal;
+  const survived = R.pip>=R.pipGoal;
+  if(canEscape) return offerPathChoice(survived);
+  if(R.week>=MAX_WEEKS){ if(survived) return doSurvive(); return gameOver("fired","Fired","Four weeks up. You didn't hit your PIP and you didn't make it out. The plan worked as designed."); }
   offerCardDraft(()=>advanceWeek());
 }
 
+/* ============ PATH CHOICE ============ */
+function offerPathChoice(survived){
+  R.phase="choice"; const isLast=R.companyIdx>=COMPANIES.length-1; const next=COMPANIES[R.companyIdx+1];
+  const choices=[];
+  choices.push({cls:"esc", label:isLast?"Walk out the front door":"Take the offer at "+next.name, desc:isLast?"Escape for good. You're free.":"Leave "+R.company.name+" with a Rare card.", act:()=>doEscape()});
+  if(R.week<MAX_WEEKS){ choices.push({cls:"primary", label:"Stay — keep grinding", desc:"Play on. Survive here for an Office Perk.", act:()=>offerCardDraft(()=>advanceWeek())}); }
+  else if(survived){ choices.push({cls:"primary", label:"Turn it down & stay", desc:"You hit your PIP. Survive → Office Perk + promotion.", act:()=>doSurvive()}); }
+  else { choices.push({cls:"plain", label:"Turn it down", desc:"Refuse the offer — and take the firing.", act:()=>gameOver("fired","Fired","You turned down the exit and missed your PIP. Bold. Fatal.")}); }
+  choiceModal("escape2","A Firm Offer","An offer just landed. You can leave "+R.company.name+" now — or stay and prove them wrong.",choices);
+}
+function doEscape(){ R.phase="cleared"; offerRareDraft(()=>jumpCompany()); }
+function doSurvive(){ R.phase="cleared"; info("good2","Survived","You Survived — "+R.company.name+" · Level "+R.level,"They couldn't fire you. Pick your reward.",()=>offerPerkDraft(()=>levelUp())); }
+
+function jumpCompany(){ g.add("mh",2); R.companyIdx++; if(R.companyIdx>=COMPANIES.length) return winRun("freedom"); R.level=1; startLevel(); render(); $("#veil").classList.remove("show"); }
+function levelUp(){ g.add("mh",2); if(R.level>=LEVELS){ promote(); } else { R.level++; startLevel(); render(); $("#veil").classList.remove("show"); } }
+function promote(){ R.companyIdx++; if(R.companyIdx>=COMPANIES.length) return winRun("partner"); R.level=1; startLevel(); render(); const co=R.company; info("good2","Promoted","Onward and Upward","You topped out — welcome to <b>"+co.name+"</b>, "+co.archetype+". "+co.blurb,()=>{ render(); $("#veil").classList.remove("show"); }); }
+
 /* ============ DRAFTS ============ */
-function draftPool(){
-  return Object.keys(CARDS).filter(id=>CARDS[id].pool && (!CARDS[id].unlock || isUnlocked(CARDS[id].unlock)));
-}
 function offerCardDraft(done){
-  const pool=shuffle(draftPool().slice()).slice(0,3);
-  if(!pool.length){ return done(); }
-  const host=$("#modalhost");
-  host.innerHTML="<div class='reck neutral'><div class='ehd'>Week Survived · Level Up</div><h3 class='etitle'>Add a card to your deck</h3><div class='ecat'>Your build grows</div><div class='draftgrid' id='dg'></div><div class='choices'><button class='btn' id='skip' style='border-color:var(--ink-faint)'><span class='bl'>Skip — keep your deck lean</span></button></div></div>";
-  $("#veil").classList.add("show");
-  const dg=$("#dg"); let picked=false;
-  pool.forEach(id=>{ const c=CARDS[id]; const el=document.createElement("button"); el.className="pcard"; el.setAttribute("data-r",c.r); el.innerHTML="<span class='cost'>"+c.cost+"</span><span class='cname'>"+c.name+"</span><span class='cdesc'>"+c.desc+"</span><span class='ctype'>"+c.type+"</span>"; el.onclick=()=>{ if(picked) return; picked=true; R.deck.push(id); R.discard.push(id); $("#veil").classList.remove("show"); done(); }; dg.appendChild(el); });
-  $("#skip").onclick=()=>{ if(picked) return; picked=true; $("#veil").classList.remove("show"); done(); };
+  const pool=shuffle(Object.keys(CARDS).filter(id=>CARDS[id].pool)).slice(0, fx('draft_extra')?4:3);
+  if(!pool.length) return done();
+  $("#modalhost").innerHTML="<div class='reck neutral'><div class='ehd'>Level Up</div><h3 class='etitle'>Add a card</h3><div class='draftgrid' id='dg'></div><div class='choices'><button class='btn plain' id='skip'><span class='bl'>Skip</span></button></div></div>";
+  $("#veil").classList.add("show"); const dg=$("#dg"); let picked=false;
+  pool.forEach(id=>{ const c=CARDS[id]; const el=document.createElement("button"); el.className="pcard"; el.setAttribute("data-r",c.r); el.innerHTML="<span class='cost'>"+c.cost+"</span><span class='cname'>"+c.name+"</span><span class='cdesc'>"+c.desc+"</span><span class='ctype'>"+c.type+"</span>"; el.onclick=()=>{ if(picked)return; picked=true; R.deck.push(id); R.discard.push(id); $("#veil").classList.remove("show"); done(); }; dg.appendChild(el); });
+  $("#skip").onclick=()=>{ if(picked)return; picked=true; $("#veil").classList.remove("show"); done(); };
 }
-function offerRelicDraft(done){
-  const owned=new Set(R.relics);
-  const pool=shuffle(Object.keys(RELICS).filter(id=>!owned.has(id))).slice(0,3);
-  if(!pool.length){ return done(); }
-  const host=$("#modalhost");
-  host.innerHTML="<div class='reck good2'><div class='ehd'>Job Cleared · Reward</div><h3 class='etitle'>Choose an Office Perk</h3><div class='ecat'>Passive · lasts the whole career</div><div class='draftgrid' id='rg'></div></div>";
-  $("#veil").classList.add("show");
-  const rg=$("#rg"); let picked=false;
-  pool.forEach(id=>{ const rl=RELICS[id]; const el=document.createElement("button"); el.className="reliccard"; el.innerHTML="<div class='ricon'>"+rl.icon+"</div><div class='rname'>"+rl.name+"</div><div class='rdesc'>"+rl.desc+"</div>"; el.onclick=()=>{ if(picked) return; picked=true; R.relics.push(id); $("#veil").classList.remove("show"); done(); }; rg.appendChild(el); });
+function offerRareDraft(done){
+  const owned=new Set(R.deck); const pool=shuffle(RARES.filter(id=>!owned.has(id))); const show=(pool.length?pool:RARES.slice()).slice(0,3);
+  $("#modalhost").innerHTML="<div class='reck escape2'><div class='ehd'>Escape · New Job</div><h3 class='etitle'>A parting gift</h3><div class='draftgrid' id='dg'></div></div>";
+  $("#veil").classList.add("show"); const dg=$("#dg"); let picked=false;
+  show.forEach(id=>{ const c=CARDS[id]; const el=document.createElement("button"); el.className="pcard"; el.setAttribute("data-r",c.r); el.innerHTML="<span class='cost'>"+c.cost+"</span><span class='cname'>"+c.name+"</span><span class='cdesc'>"+c.desc+"</span><span class='ctype'>Rare</span>"; el.onclick=()=>{ if(picked)return; picked=true; R.deck.push(id); R.discard.push(id); $("#veil").classList.remove("show"); done(); }; dg.appendChild(el); });
+}
+function offerPerkDraft(done){
+  const co=R.company; const owned=new Set(R.perks); const pool=co.perks.filter(id=>!owned.has(id));
+  if(!pool.length) return done();
+  const show=shuffle(pool.slice()).slice(0,3);
+  $("#modalhost").innerHTML="<div class='reck good2'><div class='ehd'>Survived · "+co.name+" Perk</div><h3 class='etitle'>Choose an Office Perk</h3><div class='ecat'>Only earned by staying · lasts the run</div><div class='draftgrid' id='rg'></div></div>";
+  $("#veil").classList.add("show"); const rg=$("#rg"); let picked=false;
+  show.forEach(id=>{ const p=PERKS[id]; const el=document.createElement("button"); el.className="reliccard"; el.innerHTML="<div class='ricon'>"+p.icon+"</div><div class='rname'>"+p.name+"</div><div class='rdesc'>"+p.desc+"</div>"; el.onclick=()=>{ if(picked)return; picked=true; R.perks.push(id); $("#veil").classList.remove("show"); done(); }; rg.appendChild(el); });
 }
 
-/* ============ WEEK / RUNG ADVANCE ============ */
+/* ============ WEEK ADVANCE ============ */
 function advanceWeek(){
-  R.week++;
-  R.focus=Math.max(1,BASE_FOCUS-R.nextFocusPenalty); R.nextFocusPenalty=0;
-  R.completedThisWeek=0; R.skipIntent=false;
-  R.phase="play";
-  chooseIntent();
-  drawHand(true);
-  render();
-  const host=$("#modalhost");
-  const lines=["Focus this week: <b class='foc'>"+R.focus+"</b>. Manager's move: <b style='color:var(--amber)'>"+stripTags(R.intent?R.intent.tel:"—")+"</b>.",
-    "PIP <b style='color:var(--phosphor)'>"+R.pip+"/"+R.pipGoal+"</b> · Job <b style='color:var(--escape)'>"+R.js+"/"+R.jsGoal+"</b>"+(R.week>=3?" (escape unlocked)":" (escape locked)")+" · MH <b style='color:var(--amber)'>"+R.mh+"</b> · Heat <b style='color:var(--danger)'>"+R.heat+"</b>."];
-  host.innerHTML=modalShell("neutral","New Week","Week "+R.week+" of "+R.maxWeeks,"", R.week===R.maxWeeks?"Final week. Survive with PIP, or escape if you can.":"", lines.join("\n"));
-  $("#veil").classList.add("show");
-  contButton(()=>{ $("#veil").classList.remove("show"); render(); });
+  R.week++; R.focus=Math.max(1,BASE_FOCUS-R.nextFocusPenalty); R.nextFocusPenalty=0; R.completedThisWeek=0; R.skipIntent=false; R.phase="play";
+  chooseIntent(); drawHand(); render();
+  const lines=["Focus: <b class='foc'>"+R.focus+"</b> · Manager: <b style='color:var(--amber)'>"+stripTags(R.intent?R.intent.tel:"—")+"</b>",
+    "PIP <b style='color:var(--phosphor)'>"+R.pip+"/"+R.pipGoal+"</b> · Job <b style='color:var(--escape)'>"+R.js+"/"+R.jsGoal+"</b>"+(R.week>=3?" (escape open)":"")+" · MH <b style='color:var(--amber)'>"+R.mh+"</b> · Heat <b style='color:var(--danger)'>"+R.heat+"</b>"];
+  $("#modalhost").innerHTML=modal("neutral","New Week","Week "+R.week+" of "+MAX_WEEKS,"",R.week===MAX_WEEKS?"Final week.":"",lines.join("\n"));
+  $("#veil").classList.add("show"); cont(()=>{ $("#veil").classList.remove("show"); render(); });
 }
 
-function clearJob(kind){
-  R.phase="cleared";
-  const host=$("#modalhost");
-  const title = kind==="escape" ? "You Escaped "+R.company : "You Survived the PIP";
-  const body = kind==="escape"
-    ? "You hit <b class='job'>"+R.js+" Job Search</b> and walked before the axe fell. On to the next one — which will be worse."
-    : "You hit <b class='good'>"+R.pip+" PIP</b>. They couldn't fire you. So they'll just PIP you again next quarter.";
-  host.innerHTML=modalShell("good2", kind==="escape"?"Escaped":"Survived", title, "", body, "");
-  $("#veil").classList.add("show");
-  contButton(()=>{ offerRelicDraft(()=>advanceRung()); });
-}
-function advanceRung(){
-  R.rung++;
-  unlocks.maxRung=Math.max(unlocks.maxRung,R.rung);
-  // weekend recovery
-  R.mh=clamp(R.mh+3,0,MH_MAX);
-  // process unlocks for reaching this rung
-  const newly=processUnlocks(R.rung);
-  if(newly.length){ R.unlockedThisRun.push(...newly); saveUnlocks();
-    showInfo("neutral","New Content Unlocked", "You've Earned a Reputation", "Climbing the ladder unlocks new challenges and tools for future runs:\n"+newly.map(u=>"• "+u).join("\n"), ()=>{ startJob(); render(); $("#veil").classList.remove("show"); });
-  } else { saveUnlocks(); startJob(); render(); $("#veil").classList.remove("show"); }
-}
-function processUnlocks(rung){
-  const map={
-    1:[["delegate","Card: Delegate"],["sales","Role: Account Executive"]],
-    2:[["empire","Boss: The Empire Builder"],["blitz","Card: LinkedIn Blitz"]],
-    3:[["niceone","Boss: The Nice One"],["therapy","Card: Therapy"]],
-  };
-  const out=[]; (map[rung]||[]).forEach(([id,label])=>{ if(grantUnlock(id)) out.push(label); });
-  return out;
-}
-
-/* ============ LOSS ============ */
-function checkLossContinuous(){
-  if(R.over) return true;
-  if(R.mh<=0){ if(hasRelic('corp_card')&&!R.corpUsed){ /* corp card doesn't stop burnout */ } gameOver("breakdown","Burned Out","Your Mental Health hit zero. You stop showing up — first in spirit, then in fact. The PIP outlasted you."); return true; }
-  return false;
-}
-
+/* ============ LOSS / WIN ============ */
+function checkLossContinuous(){ if(R.over) return true; if(R.mh<=0){ gameOver("breakdown","Burned Out","Your Mental Health hit zero. You stop showing up — first in spirit, then in fact. The plan outlasted you."); return true; } return false; }
+function depthNum(){ return R.companyIdx*LEVELS + R.level; }
+function depthLabel(){ return R.company.name+" · Level "+R.level; }
 function gameOver(kind,hd,lede){
   if(R.over) return; R.over=true; R.phase="over"; $("#veil").classList.remove("show");
+  saveBest(depthNum(), depthLabel());
   const s=$("#endscreen"); s.className="overlay show lose";
   $("#end-hd").textContent="Career Over";
   $("#end-title").textContent = kind==="breakdown"?"BURNED OUT":(kind==="terminated"?"TERMINATED":"FIRED");
-  const rungsCleared=R.rung;
-  $("#end-lede").innerHTML=lede+"<br><br>You climbed <b style='color:var(--focus)'>"+rungsCleared+"</b> "+(rungsCleared===1?"rung":"rungs")+" of the corporate ladder.";
-  // unlocks summary
-  const ub=$("#end-unlocks");
-  if(R.unlockedThisRun && R.unlockedThisRun.length){ ub.innerHTML="<div class='unlockbox'><div class='ul'>Unlocked this run</div><div class='ui'>"+R.unlockedThisRun.join(" · ")+"</div></div>"; } else { ub.innerHTML=unlocks.maxRung>0?("<div class='unlockbox'><div class='ul'>Best career</div><div class='ui'>"+unlocks.maxRung+" rungs climbed</div></div>"):""; }
-  $("#end-flav").innerHTML="Job #"+(R.rung+1)+" at "+R.company+" · PIP "+R.pip+" · Job "+R.js+" · MH "+R.mh+" · Heat "+R.heat+"<br>Please return your badge and laptop.";
+  $("#end-lede").innerHTML=lede+"<br><br>You reached <b style='color:var(--focus)'>"+depthLabel()+"</b>.";
+  $("#end-unlocks").innerHTML=best.depth>0?("<div class='unlockbox'><div class='ul'>Best career</div><div class='ui'>"+best.label+"</div></div>"):"";
+  $("#end-flav").innerHTML="PIP "+R.pip+" · Job "+R.js+" · MH "+R.mh+" · Heat "+R.heat+" · "+R.perks.length+" perks<br>Please return your badge and laptop.";
+}
+function winRun(kind){
+  if(R.over) return; R.over=true; R.phase="over"; $("#veil").classList.remove("show");
+  saveBest(99, kind==="freedom"?"Escaped the ladder":"Made Partner");
+  const s=$("#endscreen"); s.className="overlay show "+(kind==="freedom"?"escape":"win");
+  $("#end-hd").textContent="Career Complete";
+  if(kind==="freedom"){ $("#end-title").textContent="FREE"; $("#end-lede").innerHTML="You escaped McCrapsey — and the whole ladder. Three PIPs, three exits, and a deck full of leverage. Nobody's putting you on a plan ever again."; }
+  else { $("#end-title").textContent="PARTNER"; $("#end-lede").innerHTML="You clawed through all three companies and survived to the top of McCrapsey. They made you partner. Now <i>you</i> get to write the plans."; }
+  $("#end-unlocks").innerHTML="<div class='unlockbox'><div class='ul'>You beat the system</div><div class='ui'>"+R.perks.length+" Office Perks · "+R.deck.length+"-card deck</div></div>";
+  $("#end-flav").innerHTML="A rare win. The house usually takes it.";
 }
 
 /* ============ MODAL HELPERS ============ */
-function modalShell(cls,ehd,title,sub,desc,log,cat){
-  return "<div class='reck "+(cls==="danger"?"":cls)+"'>"
-    +"<div class='ehd'>"+ehd+"</div>"
+function modal(cls,ehd,title,cat,desc,body){
+  return "<div class='reck "+(cls==="danger"?"":cls)+"'><div class='ehd'>"+ehd+"</div>"
     +(title?"<h3 class='etitle'>"+title+"</h3>":"")
     +(cat?"<div class='ecat'>"+cat+"</div>":"")
-    +(sub?"<div class='ecat'>"+sub+"</div>":"")
     +(desc?"<div class='edesc'>"+desc+"</div>":"")
-    +"<div class='elog'>"+(log||"")+"</div>"
-    +"<div class='choices'></div></div>";
+    +"<div class='elog'>"+(body||"")+"</div><div class='choices'></div></div>";
 }
-function contButton(cb){ const host=$("#modalhost .choices"); if(!host) return cb(); host.innerHTML=""; const b=document.createElement("button"); b.className="btn primary"; b.innerHTML="<span class='bl'>Continue ▸</span>"; let done=false; b.onclick=()=>{ if(done) return; done=true; cb(); }; host.appendChild(b); b.focus(); }
-function showInfo(cls,ehd,title,body,cb){ $("#modalhost").innerHTML=modalShell(cls,ehd,title,"","",body); $("#veil").classList.add("show"); renderMetersLive(); contButton(cb); }
-function renderMetersLive(){ renderMeters(); renderStrip(); renderBoss(); }
-function runSteps(steps,onDone){ let i=0; const next=()=>{ if(R.over) return; if(i>=steps.length) return onDone(); const s=steps[i++]; s(next); }; next(); }
-function isBad(s){ return typeof s==="string" && s.indexOf("class='bad'")>=0; }
+function choiceModal(cls,title,desc,choices){
+  $("#modalhost").innerHTML="<div class='reck "+cls+"'><div class='ehd'>Decision</div><h3 class='etitle'>"+title+"</h3><div class='edesc'>"+desc+"</div><div class='choices' id='ch'></div></div>";
+  $("#veil").classList.add("show"); const host=$("#ch"); let done=false;
+  choices.forEach(c=>{ const b=document.createElement("button"); b.className="btn "+(c.cls||""); b.innerHTML="<span class='bl'>"+c.label+"</span>"+(c.desc?"<span class='bd'>"+c.desc+"</span>":""); b.onclick=()=>{ if(done)return; done=true; c.act(); }; host.appendChild(b); });
+}
+function cont(cb){ const host=$("#modalhost .choices"); if(!host) return cb(); host.innerHTML=""; const b=document.createElement("button"); b.className="btn primary"; b.innerHTML="<span class='bl'>Continue ▸</span>"; let done=false; b.onclick=()=>{ if(done)return; done=true; cb(); }; host.appendChild(b); b.focus(); }
+function info(cls,ehd,title,body,cb){ $("#modalhost").innerHTML=modal(cls,ehd,title,"","",body); $("#veil").classList.add("show"); renderLive(); cont(cb); }
+function renderLive(){ renderMeters(); renderStrip(); renderBoss(); }
+function runSteps(steps,onDone){ let i=0; const next=()=>{ if(R.over) return; if(i>=steps.length) return onDone(); steps[i++](next); }; next(); }
+function bad(s){ return typeof s==="string" && s.indexOf("class='bad'")>=0; }
 function stripTags(s){ return (s||"").replace(/<[^>]+>/g,""); }
 
 /* ============ BOOT ============ */
@@ -923,8 +790,7 @@ window.Game={
   endWeek(){ endWeek(); },
   cancelSelect(){ R.selecting=null; render(); },
 };
-// expose a tiny read-only probe for automated playtesting
-window.__PIP={ state:()=>({rung:R.rung,week:R.week,phase:R.phase,focus:R.focus,pip:R.pip,js:R.js,mh:R.mh,heat:R.heat,cap:R.cap,pipGoal:R.pipGoal,jsGoal:R.jsGoal,over:R.over,hand:R.hand.slice(),handCosts:R.hand.map(c=>CARDS[c].cost),dels:R.deliverables.filter(d=>!d.missed).map(d=>({t:d.title,p:d.progress,c:d.cost,done:d.done,ready:!d.done&&d.progress>=d.cost}))}) };
+window.__PIP={ state:()=>({companyIdx:R.companyIdx,level:R.level,depth:depthNum(),week:R.week,phase:R.phase,focus:R.focus,pip:R.pip,js:R.js,mh:R.mh,heat:R.heat,cap:R.cap,pipGoal:R.pipGoal,jsGoal:R.jsGoal,over:R.over,perks:R.perks.slice(),hand:R.hand.slice(),handCosts:R.hand.map(c=>CARDS[c].cost),dels:R.deliverables.filter(d=>!d.missed).map(d=>({t:d.title,p:d.progress,c:d.cost,done:d.done,ready:!d.done&&d.progress>=d.cost}))}) };
 })();
 </script>
 </body>
