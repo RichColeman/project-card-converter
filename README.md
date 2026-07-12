@@ -23,10 +23,21 @@ between runs (unlocked bosses/roles/cards) is saved to your browser's local stor
 
 ## The look
 
-A CRT terminal in a monitor bezel: phosphor-green corporate dread, scanlines, screen
-flicker, vignette bloom, and Balatro-style card juice — hand cards lift and tilt on
-hover, the screen shakes on damage, and `+3 / −2` numbers float on every stat change.
-Deliberate monospace type makes the whole thing read like a PIP memo you're trapped inside.
+A CRT terminal in a monitor bezel: scanlines, screen flicker, vignette bloom, and
+Balatro-style card juice — hand cards lift and tilt on hover, the screen shakes on damage,
+and `+3 / −2` numbers float on every stat change. Deliberate monospace type reads like a
+PIP memo you're trapped inside.
+
+**Theme: the company is Hell.** Not a metaphor — HR just hasn't put it in the handbook.
+You're (probably) human; your managers are named demons (*Belphaz, Archfiend of the Pivot*),
+HR is infernal, and each company tints the whole screen a different shade of damnation —
+RedFlonic burns startup-red, SailHorse is grey corporate limbo, McCrapsey is black-and-gold.
+
+**Card art is procedural.** Every card renders a unique **occult sigil** — a demonic seal
+(star-polygon, rune ticks, a type-specific center motif: keyhole for Escape, flame for
+Recover, hourglass for Tempo) generated deterministically from the card, tinted by rarity,
+stamped like infernal paperwork. Bosses get parametric SVG **demon-manager portraits**
+(horns, too many eyes, a lanyard). It's all hand-generated in-engine — no image assets.
 
 ## How it plays
 

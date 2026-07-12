@@ -178,6 +178,44 @@ body{ margin:0; background:radial-gradient(120% 90% at 50% 0%,#0e1518 0%,var(--g
 .unlockbox .ui{ font-size:12px; color:var(--ink); }
 @keyframes shake{ 0%,100%{transform:translate(0,0)}20%{transform:translate(-4px,2px)}40%{transform:translate(4px,-2px)}60%{transform:translate(-3px,-2px)}80%{transform:translate(3px,2px)} }
 .shake{ animation:shake .38s; }
+
+/* ===== infernal skin: per-company world tint ===== */
+:root{ --co:#41e08a; }
+#screen[data-co="0"]{ --co:#ff6a3a; }   /* RedFlonic — startup hellfire */
+#screen[data-co="1"]{ --co:#8fb0c4; }   /* SailHorse — grey corporate limbo */
+#screen[data-co="2"]{ --co:#e8b74a; }   /* McCrapsey — black-gold damnation */
+.screen::after{ background:radial-gradient(120% 130% at 50% 30%,rgba(0,0,0,0) 55%,rgba(0,0,0,.55) 100%),radial-gradient(90% 55% at 50% 0%, color-mix(in srgb, var(--co) 13%, transparent), rgba(0,0,0,0) 70%); }
+.top h1{ color:var(--co); text-shadow:0 0 8px color-mix(in srgb,var(--co) 45%,transparent); }
+.codots b{ color:var(--co); }
+.boss{ border-color:color-mix(in srgb, var(--co) 30%, #2a1216); }
+
+/* ===== demon boss portrait ===== */
+.boss .face{ width:54px; height:60px; line-height:0; color:var(--co); filter:drop-shadow(0 0 7px color-mix(in srgb,var(--co) 55%,transparent)); }
+.boss .face svg{ width:54px; height:60px; }
+.boss .face .eye{ fill:var(--co); }
+.demtag{ display:block; font-size:9px; font-style:italic; letter-spacing:.04em; color:var(--ink-faint); margin-top:1px; }
+
+/* ===== card frame (soul contract) ===== */
+.pcard{ min-height:208px; padding:12px 9px 9px; }
+.pcard .cost{ background:radial-gradient(circle at 50% 32%, #ffe6a0, #ff8a3c 52%, #7a1f10 100%); border-color:#ffc061; color:#2a0a05; text-shadow:none; box-shadow:0 0 12px rgba(255,120,50,.6); }
+.pcard .art{ height:60px; margin:0 -1px 3px; border-radius:7px; border:1px solid #0a1a1c; position:relative; overflow:hidden;
+  background:radial-gradient(circle at 50% 42%, #101d21, #05090b 78%); display:grid; place-items:center; }
+.pcard .art svg{ width:80px; height:80px; color:var(--c); opacity:.92; filter:drop-shadow(0 0 5px color-mix(in srgb,var(--c) 55%,transparent)); }
+.pcard .art::after{ content:""; position:absolute; inset:0; pointer-events:none; opacity:.3;
+  background:repeating-linear-gradient(0deg,transparent 0 2px,rgba(0,0,0,.4) 2px 3px); }
+.pcard[data-r=rare] .art{ box-shadow:inset 0 0 16px color-mix(in srgb,var(--rare) 32%,transparent); }
+.pcard .cname{ margin-top:1px; }
+.pcard .cdesc{ min-height:30px; }
+
+/* ===== end-of-run summary ===== */
+.summary{ max-width:540px; margin:2px auto 0; display:flex; flex-direction:column; gap:10px; }
+.journey{ display:flex; flex-wrap:wrap; gap:5px; justify-content:center; }
+.jstep{ font-size:10px; padding:3px 8px; border-radius:5px; border:1px solid var(--ink-faint); letter-spacing:.03em; color:var(--ink-dim); }
+.jstep.surv{ border-color:var(--phosphor); color:var(--phosphor); }
+.jstep.esc{ border-color:var(--escape); color:var(--escape); }
+.sumrow{ font-size:11.5px; color:var(--ink-dim); }
+.sumrow b{ color:var(--ink); }
+.perkline{ font-size:19px; letter-spacing:3px; }
 </style>
 </head>
 <body>
@@ -188,7 +226,7 @@ body{ margin:0; background:radial-gradient(120% 90% at 50% 0%,#0e1518 0%,var(--g
     <div class="stamp" style="margin-bottom:16px">Confidential — HR</div>
     <h1 class="big glow" style="color:var(--phosphor)">PIP</h1>
     <div style="letter-spacing:.3em;font-size:11px;color:var(--ink-dim);text-transform:uppercase;margin-top:6px">A Corporate Roguelike Deckbuilder</div>
-    <p class="lede">You've been placed on a Performance Improvement Plan. Build a deck of workplace tactics, read your manager, and climb three companies before the system gets you.</p>
+    <p class="lede">You've been placed on a Performance Improvement Plan. Nobody mentioned the company is Hell — HR just hasn't put it in the handbook yet. Build a deck of workplace tactics, read your (demonic) manager, and climb three companies before the system gets you.</p>
     <div class="brief">
       Draw a hand, spend <span class="f">Focus</span>. Friday, your manager acts — <b>telegraphed</b>, so plan ahead.<br>
       <span class="k">▸ Survive</span> (hit PIP) → keep your seat, earn an <b>Office Perk</b>, climb a level here.<br>
@@ -197,9 +235,9 @@ body{ margin:0; background:radial-gradient(120% 90% at 50% 0%,#0e1518 0%,var(--g
       <span class="d">▸ Fired, burned out, or caught</span> ends the run.
     </div>
     <div class="tiers">
-      <div class="tier"><b>RedFlonic</b>the startup</div>
-      <div class="tier"><b>SailHorse</b>the megacorp</div>
-      <div class="tier"><b>McCrapsey</b>the consultancy</div>
+      <div class="tier"><b>RedFlonic</b>the hungry startup</div>
+      <div class="tier"><b>SailHorse</b>the eternal megacorp</div>
+      <div class="tier"><b>McCrapsey</b>the up-or-out pit</div>
     </div>
     <button class="cta" style="margin-top:22px" onclick="Game.start()">Clock In ▸</button>
     <div class="flav">"In theory, it's a support mechanism. In practice, it's a paper trail."</div>
@@ -359,39 +397,39 @@ const PERKS = {
 /* ============ MANAGER BOSSES (per company) ============ */
 const BOSSES = {
   // RedFlonic
-  founder:{icon:"🦄", name:"The Founder", desc:"A visionary. The vision changes weekly.",
+  founder:{icon:"🦄", name:"The Founder", demon:"Belphaz, Archfiend of the Pivot", desc:"A visionary. The vision changes weekly.",
     intents:[
       {tel:"Pivoting the whole roadmap — <b>a deadline creeps up</b>", run:g=>{ const d=g.soonest(); if(!d) return "Nothing to pull forward."; d.deadline=Math.max(R.week,d.deadline-1); return "“"+d.title+"” now due <b class='bad'>Week "+d.deadline+"</b>."; }},
       {tel:"Dreaming up a 'quick win' — <b>new deliverable</b>", run:g=>{ addDeliverable(R.week+1); return "A new deliverable, due next week."; }},
       {tel:"All-hands vision session — <b>−1 Focus next week</b>", run:g=>{ R.nextFocusPenalty++; return "The vibes were immaculate. <b class='foc'>−1 Focus next week</b>."; }},
     ]},
-  culturefit:{icon:"🎉", name:"The Culture Fit", desc:"Cares more about vibes than output.",
+  culturefit:{icon:"🎉", name:"The Culture Fit", demon:"Moloch, Devourer of Boundaries", desc:"Cares more about vibes than output.",
     intents:[
       {tel:"Mandatory fun event — <b>−1 MH</b>", run:g=>g.hit("mh",-1)+" of forced whimsy."},
       {tel:"Reviewing your 'energy' — <b>−1 PIP</b>", run:g=>g.hit("pip",-1)+" for insufficient enthusiasm."},
       {tel:"Oversharing in #general — <b>+2 Heat</b>", run:g=>g.hit("heat",2)+" — your name came up."},
     ]},
   // SailHorse
-  middlemgr:{icon:"📎", name:"The Middle Manager", desc:"Wants a status update on your status updates.",
+  middlemgr:{icon:"📎", name:"The Middle Manager", demon:"Bureaucrax, Clerk of the Ninth Circle", desc:"Wants a status update on your status updates.",
     intents:[
       {tel:"Status report due — <b>−1 Focus next week</b>", run:g=>{ R.nextFocusPenalty++; return "Paperwork about paperwork. <b class='foc'>−1 Focus next week</b>."; }},
       {tel:"Nitpicking your work — <b>−1 PIP</b>", run:g=>g.hit("pip",-1)+" to 'quality concerns.'"},
       {tel:"Watching your screen — <b>+2 Heat</b>", run:g=>g.hit("heat",2)+" from the over-shoulder."},
     ]},
-  thereorg:{icon:"🌀", name:"The Reorg", desc:"Nobody knows who they report to anymore.",
+  thereorg:{icon:"🌀", name:"The Reorg", demon:"Chaosiel, the Ever-Shifting Org Chart", desc:"Nobody knows who they report to anymore.",
     intents:[
       {tel:"Shuffling priorities — <b>a deadline creeps up</b>", run:g=>{ const d=g.soonest(); if(!d) return "Nothing to reshuffle."; d.deadline=Math.max(R.week,d.deadline-1); return "“"+d.title+"” now due <b class='bad'>Week "+d.deadline+"</b>."; }},
       {tel:"Left you on read — <b>−1 MH</b>", run:g=>g.hit("mh",-1)+" — six days, no reply."},
       {tel:"Reassigning your win — <b>−1 PIP</b>", run:g=>g.hit("pip",-1)+" — credit went sideways."},
     ]},
   // McCrapsey
-  partner:{icon:"🔥", name:"The Partner", desc:"Up or out. You are, so far, out.",
+  partner:{icon:"🔥", name:"The Partner", demon:"Mammon, Who Bills by the Soul", desc:"Up or out. You are, so far, out.",
     intents:[
       {tel:"Brutal case review — <b>−2 PIP</b>", run:g=>g.hit("pip",-2)+" — 'not partner material.'"},
       {tel:"Weekend deck request — <b>−1 MH · +1 Heat</b>", run:g=>g.hit("mh",-1)+" "+g.hit("heat",1)},
       {tel:"Client 'ask' lands on you — <b>new deliverable</b>", run:g=>{ addDeliverable(R.week+1); return "A client fire drill, due next week."; }},
     ]},
-  managingdir:{icon:"💼", name:"The Managing Director", desc:"Your work is their promotion packet.",
+  managingdir:{icon:"💼", name:"The Managing Director", demon:"Asmodeus, Harvester of Credit", desc:"Your work is their promotion packet.",
     intents:[
       {tel:"Piling on scope — <b>new deliverable</b>", run:g=>{ addDeliverable(R.week+2); return "Another workstream for the pile."; }},
       {tel:"Taking credit upstairs — <b>−2 PIP</b>", run:g=>g.hit("pip",-2)+" — your win, their slide."},
@@ -402,13 +440,13 @@ const BOSSES = {
 /* ============ COMPANIES (ordered ladder) ============ */
 const COMPANIES = [
   {id:"redflonic", name:"RedFlonic", icon:"🚩", archetype:"Series-C Startup",
-    blurb:'"We\'re not a company, we\'re a family." The family keeps a spreadsheet.',
+    blurb:'"We\'re not a company, we\'re a family." A family that feeds. Equity vests posthumously.',
     bosses:["founder","culturefit"], perks:["coldbrew","movefast","hoodie","pingpong","equity"], pipBase:8, jsBase:10},
   {id:"sailhorse", name:"SailHorse", icon:"🏢", archetype:"Legacy Megacorp",
-    blurb:"Forty thousand employees. Nobody's sure what it does. Wildly profitable.",
+    blurb:"Forty thousand souls. Nobody's sure what it does. The paperwork is eternal, literally.",
     bosses:["middlemgr","thereorg"], perks:["corpcard","unionrep","parking","pension","badge"], pipBase:10, jsBase:12},
   {id:"mccrapsey", name:"McCrapsey", icon:"💼", archetype:"Elite Consultancy",
-    blurb:"Up or out. The coffee is excellent. The hours are not.",
+    blurb:"Up or out — and here, 'out' has a specific, sulfurous meaning.",
     bosses:["partner","managingdir"], perks:["expense","rolodex","corner","billable","airline"], pipBase:12, jsBase:14},
 ];
 
@@ -430,7 +468,7 @@ const ROLES = {
 
 /* ============ ENCOUNTER DECK ============ */
 const ENCOUNTERS = [
-  {id:"hr", cat:"Mental Health", title:"HR 'Check-In'", desc:"Thirty minutes that could have been an email.", resolve:g=>({log:g.hit("mh",-1)})},
+  {id:"hr", cat:"Mental Health", title:"HR 'Check-In'", desc:"A demon from HR blocks 30 minutes that could have been an email.", resolve:g=>({log:g.hit("mh",-1)})},
   {id:"linkedin", cat:"Exposure", title:"Someone Saw Your LinkedIn", desc:'"Love the new headline!" — eyebrow raised.',
     resolve:g=> g.heat>=4 ? ({log:"Your search has a smell. "+g.hit("mh",-1)+" "+g.hit("heat",1)}) : ({log:"Low profile. No harm done."})},
   {id:"reply", cat:"Mental Health", title:"The Reply-All", desc:"Forty people watch you get asked why it isn't done.", resolve:g=>({log:g.hit("mh",-1)})},
@@ -466,11 +504,12 @@ function saveBest(depth,label){ if(depth>best.depth){ best={depth,label}; try{ l
 function newRun(){
   Object.assign(R,{ companyIdx:0, level:1, mh:MH_BASE,
     deck:["work","work","work","work","shipit","shipit","jobhunt","jobhunt","network","breathe","breathe","overtime"],
-    perks:[], unlockedThisRun:[], lastBoss:null });
+    perks:[], unlockedThisRun:[], lastBoss:null, journey:[] });
   startLevel();
 }
 function startLevel(){
   const co=COMPANIES[R.companyIdx]; R.company=co;
+  const scr=$("#screen"); if(scr) scr.dataset.co=R.companyIdx;
   const bpool=co.bosses.filter(b=>b!==R.lastBoss); R.bossId=(bpool.length?bpool:co.bosses)[Math.floor(Math.random()*(bpool.length?bpool.length:co.bosses.length))]; R.lastBoss=R.bossId;
   R.roleId=Object.keys(ROLES)[Math.floor(Math.random()*Object.keys(ROLES).length)];
   R.pipGoal=co.pipBase+(R.level-1);
@@ -539,6 +578,87 @@ function spawnJuice(stat,text){
 }
 function shake(){ const s=$("#screen"); s.classList.remove("shake"); void s.offsetWidth; s.classList.add("shake"); }
 
+/* ============ PROCEDURAL ART (occult sigils + demon portraits) ============ */
+function hashStr(s){ let h=2166136261; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return h>>>0; }
+function rngOf(seed){ let a=seed>>>0; return ()=>{ a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+function starPath(cx,cy,r,P,step,rot){
+  const seen=new Array(P).fill(false); let path="";
+  for(let s=0;s<P;s++){ if(seen[s]) continue; let i=s, first=true; do{ seen[i]=true; const a=rot+i*2*Math.PI/P; path+=(first?"M":"L")+(cx+r*Math.cos(a)).toFixed(1)+" "+(cy+r*Math.sin(a)).toFixed(1); first=false; i=(i+step)%P; }while(i!==s); path+="Z"; }
+  return path;
+}
+function sigilMotif(type){
+  switch(type){
+    case "Escape": return '<circle cx="50" cy="46" r="4"/><path d="M47 49 L45.5 57 L54.5 57 L53 49 Z"/>';
+    case "Action": return '<path d="M50 41 L57 54 L50 59 L43 54 Z"/><path d="M50 47 L50 58"/>';
+    case "Social": return '<circle cx="45.5" cy="50" r="5"/><circle cx="54.5" cy="50" r="5"/>';
+    case "Recover": return '<path d="M50 40 C55 47 55 53 50 59 C45 53 45 47 50 40 Z"/>';
+    case "Tempo": return '<path d="M43 43 L57 43 L46 50 L57 57 L43 57 L54 50 Z"/>';
+    default: return '<path d="M41 50 Q50 43 59 50 Q50 57 41 50 Z"/><circle cx="50" cy="50" r="2.2" fill="currentColor" stroke="none"/>';
+  }
+}
+function sigil(id,type){
+  const R=rngOf(hashStr(id));
+  const P=5+Math.floor(R()*4);                       // 5..8 points
+  let step=2+Math.floor(R()*Math.max(1,(P-3)/1));    // 2..P-2 ish
+  step=Math.min(step,P-2)||2; if(step<2) step=2;
+  const rot=R()*Math.PI*2;
+  const T=13+Math.floor(R()*10);
+  let ticks=""; for(let i=0;i<T;i++){ const a=i*2*Math.PI/T, r0=42, r1=(i%3===0?47:44.5); ticks+="M"+(50+r0*Math.cos(a)).toFixed(1)+" "+(50+r0*Math.sin(a)).toFixed(1)+"L"+(50+r1*Math.cos(a)).toFixed(1)+" "+(50+r1*Math.sin(a)).toFixed(1); }
+  const star=starPath(50,50,31,P,step,rot);
+  let nodes=""; for(let i=0;i<P;i++){ const a=rot+i*2*Math.PI/P; nodes+='<circle cx="'+(50+31*Math.cos(a)).toFixed(1)+'" cy="'+(50+31*Math.sin(a)).toFixed(1)+'" r="1.6"/>'; }
+  const dbl = R()<0.5 ? '<circle cx="50" cy="50" r="38" opacity=".35"/>' : "";
+  return '<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round">'
+    +'<circle cx="50" cy="50" r="46" stroke-width="1.7"/><circle cx="50" cy="50" r="42" opacity=".5"/>'+dbl
+    +'<path d="'+ticks+'" opacity=".8"/><path d="'+star+'" opacity=".9"/>'
+    +'<circle cx="50" cy="50" r="18" opacity=".5"/>'
+    +'<g fill="currentColor" stroke="none">'+nodes+'</g>'+sigilMotif(type)+'</svg>';
+}
+const DEMONS={
+  founder:    {horn:"curl",   eyes:3, acc:"neck"},
+  culturefit: {horn:"nub",    eyes:2, acc:"lanyard"},
+  middlemgr:  {horn:"straight",eyes:2, acc:"glasses"},
+  thereorg:   {horn:"asym",   eyes:2, acc:"none"},
+  partner:    {horn:"long",   eyes:2, acc:"tie"},
+  managingdir:{horn:"crown",  eyes:2, acc:"tielanyard"},
+};
+function demonPortrait(bossId){
+  const d=DEMONS[bossId]||DEMONS.founder;
+  const horns={
+    curl:'<path d="M22 20 C14 16 12 8 16 4 C15 11 20 14 26 16 Z"/><path d="M42 20 C50 16 52 8 48 4 C49 11 44 14 38 16 Z"/>',
+    nub:'<path d="M24 16 L21 8 L28 14 Z"/><path d="M40 16 L43 8 L36 14 Z"/>',
+    straight:'<path d="M25 16 L22 5 L29 14 Z"/><path d="M39 16 L42 5 L35 14 Z"/>',
+    asym:'<path d="M24 17 C18 12 18 6 22 4 C21 10 25 13 28 15 Z"/><path d="M40 16 L44 7 L37 14 Z"/>',
+    long:'<path d="M24 16 C18 8 18 2 22 -1 C22 8 27 12 29 14 Z"/><path d="M40 16 C46 8 46 2 42 -1 C42 8 37 12 35 14 Z"/>',
+    crown:'<path d="M22 15 L19 5 L26 13 Z"/><path d="M32 13 L32 3 L36 12 Z"/><path d="M42 15 L45 5 L38 13 Z"/>',
+  }[d.horn]||"";
+  let eyes;
+  if(d.eyes===3) eyes='<ellipse class="eye" cx="26" cy="33" rx="3" ry="2.4"/><ellipse class="eye" cx="38" cy="33" rx="3" ry="2.4"/><ellipse class="eye" cx="32" cy="27" rx="2.6" ry="2.2"/>';
+  else eyes='<ellipse class="eye" cx="26" cy="33" rx="3.2" ry="2.5"/><ellipse class="eye" cx="38" cy="33" rx="3.2" ry="2.5"/>';
+  const acc={
+    neck:'<path d="M24 52 Q32 56 40 52"/>',
+    lanyard:'<path d="M26 51 L30 60 M38 51 L34 60"/><rect x="29" y="58" width="6" height="5" rx="1"/>',
+    glasses:'<circle cx="26" cy="33" r="5"/><circle cx="38" cy="33" r="5"/><path d="M31 33 L33 33"/>',
+    tie:'<path d="M32 50 L29 55 L32 63 L35 55 Z"/>',
+    tielanyard:'<path d="M32 50 L29 55 L32 62 L35 55 Z"/><path d="M26 50 L31 55 M38 50 L33 55"/>',
+    none:"",
+  }[d.acc]||"";
+  return '<svg viewBox="0 0 64 68" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linejoin="round" stroke-linecap="round">'
+    +'<g fill="#160408">'+horns+'</g>'
+    +'<path d="M17 30 Q17 15 32 15 Q47 15 47 30 Q47 45 32 53 Q17 45 17 30 Z" fill="#160408"/>'
+    +eyes
+    +'<path d="M27 43 Q32 47 37 43"/>'
+    +acc+'</svg>';
+}
+function cardInner(cid){
+  const c=CARDS[cid];
+  const wk=(c.playable&&!c.playable())?" · Wk3+":"";
+  return "<span class='cost'>"+c.cost+"</span>"
+    +"<div class='art'>"+sigil(cid,c.type)+"</div>"
+    +"<div class='cname'>"+c.name+"</div>"
+    +"<div class='cdesc'>"+c.desc+"</div>"
+    +"<div class='ctype'>"+c.type+(c.r==="rare"?" · Rare":"")+wk+"</div>";
+}
+
 /* ============ RENDER ============ */
 function render(){ renderTop(); renderBoss(); renderMeters(); renderStrip(); renderDeliverables(); renderHand(); renderPiles(); renderHint(); }
 function renderTop(){
@@ -552,7 +672,8 @@ function renderTop(){
 }
 function renderBoss(){
   const b=BOSSES[R.bossId];
-  $("#boss").innerHTML="<div class='face'>"+b.icon+"</div><div class='bmeta'><div class='bname'>"+b.name+"</div><div class='bdesc'>"+b.desc+"</div></div>"
+  $("#boss").innerHTML="<div class='face'>"+demonPortrait(R.bossId)+"</div><div class='bmeta'><div class='bname'>"+b.name+"</div>"
+    +(b.demon?"<span class='demtag'>"+b.demon+"</span>":"")+"<div class='bdesc'>"+b.desc+"</div></div>"
     +"<div class='intent'><div class='intentlab'>Friday · Week "+R.week+"</div><div class='intenttxt"+(R.skipIntent?" skipped":"")+"'>"+(R.intent?R.intent.tel:"—")+"</div></div>";
 }
 function renderMeters(){
@@ -599,7 +720,7 @@ function renderHand(){
     const ok=affordable&&extra&&targetable&&R.phase==="play";
     if(!ok) b.classList.add("unplayable");
     if(R.selecting && R.selecting.idx===idx) b.classList.add("selarm");
-    b.innerHTML="<span class='cost'>"+c.cost+"</span><span class='cname'>"+c.name+"</span><span class='cdesc'>"+c.desc+"</span><span class='ctype'>"+c.type+(c.playable&&!extra?" · Wk3+":"")+"</span>";
+    b.innerHTML=cardInner(cid);
     b.onclick= ok ? ()=>onPlay(idx) : ()=>{ flash(!affordable?"Not enough Focus.":!targetable?"No valid target.":!extra?"Only from Week 3.":""); };
     host.appendChild(b);
   });
@@ -698,8 +819,8 @@ function offerPathChoice(survived){
   else { choices.push({cls:"plain", label:"Turn it down", desc:"Refuse the offer — and take the firing.", act:()=>gameOver("fired","Fired","You turned down the exit and missed your PIP. Bold. Fatal.")}); }
   choiceModal("escape2","A Firm Offer","An offer just landed. You can leave "+R.company.name+" now — or stay and prove them wrong.",choices);
 }
-function doEscape(){ R.phase="cleared"; offerRareDraft(()=>jumpCompany()); }
-function doSurvive(){ R.phase="cleared"; info("good2","Survived","You Survived — "+R.company.name+" · Level "+R.level,"They couldn't fire you. Pick your reward.",()=>offerPerkDraft(()=>levelUp())); }
+function doEscape(){ R.phase="cleared"; R.journey.push({co:R.company.name,lvl:R.level,out:"esc"}); offerRareDraft(()=>jumpCompany()); }
+function doSurvive(){ R.phase="cleared"; R.journey.push({co:R.company.name,lvl:R.level,out:"surv"}); info("good2","Survived","You Survived — "+R.company.name+" · Level "+R.level,"They couldn't fire you. Pick your reward.",()=>offerPerkDraft(()=>levelUp())); }
 
 function jumpCompany(){ g.add("mh",2); R.companyIdx++; if(R.companyIdx>=COMPANIES.length) return winRun("freedom"); R.level=1; startLevel(); render(); $("#veil").classList.remove("show"); }
 function levelUp(){ g.add("mh",2); if(R.level>=LEVELS){ promote(); } else { R.level++; startLevel(); render(); $("#veil").classList.remove("show"); } }
@@ -711,14 +832,14 @@ function offerCardDraft(done){
   if(!pool.length) return done();
   $("#modalhost").innerHTML="<div class='reck neutral'><div class='ehd'>Level Up</div><h3 class='etitle'>Add a card</h3><div class='draftgrid' id='dg'></div><div class='choices'><button class='btn plain' id='skip'><span class='bl'>Skip</span></button></div></div>";
   $("#veil").classList.add("show"); const dg=$("#dg"); let picked=false;
-  pool.forEach(id=>{ const c=CARDS[id]; const el=document.createElement("button"); el.className="pcard"; el.setAttribute("data-r",c.r); el.innerHTML="<span class='cost'>"+c.cost+"</span><span class='cname'>"+c.name+"</span><span class='cdesc'>"+c.desc+"</span><span class='ctype'>"+c.type+"</span>"; el.onclick=()=>{ if(picked)return; picked=true; R.deck.push(id); R.discard.push(id); $("#veil").classList.remove("show"); done(); }; dg.appendChild(el); });
+  pool.forEach(id=>{ const c=CARDS[id]; const el=document.createElement("button"); el.className="pcard"; el.setAttribute("data-r",c.r); el.innerHTML=cardInner(id); el.onclick=()=>{ if(picked)return; picked=true; R.deck.push(id); R.discard.push(id); $("#veil").classList.remove("show"); done(); }; dg.appendChild(el); });
   $("#skip").onclick=()=>{ if(picked)return; picked=true; $("#veil").classList.remove("show"); done(); };
 }
 function offerRareDraft(done){
   const owned=new Set(R.deck); const pool=shuffle(RARES.filter(id=>!owned.has(id))); const show=(pool.length?pool:RARES.slice()).slice(0,3);
   $("#modalhost").innerHTML="<div class='reck escape2'><div class='ehd'>Escape · New Job</div><h3 class='etitle'>A parting gift</h3><div class='draftgrid' id='dg'></div></div>";
   $("#veil").classList.add("show"); const dg=$("#dg"); let picked=false;
-  show.forEach(id=>{ const c=CARDS[id]; const el=document.createElement("button"); el.className="pcard"; el.setAttribute("data-r",c.r); el.innerHTML="<span class='cost'>"+c.cost+"</span><span class='cname'>"+c.name+"</span><span class='cdesc'>"+c.desc+"</span><span class='ctype'>Rare</span>"; el.onclick=()=>{ if(picked)return; picked=true; R.deck.push(id); R.discard.push(id); $("#veil").classList.remove("show"); done(); }; dg.appendChild(el); });
+  show.forEach(id=>{ const el=document.createElement("button"); el.className="pcard"; el.setAttribute("data-r",CARDS[id].r); el.innerHTML=cardInner(id); el.onclick=()=>{ if(picked)return; picked=true; R.deck.push(id); R.discard.push(id); $("#veil").classList.remove("show"); done(); }; dg.appendChild(el); });
 }
 function offerPerkDraft(done){
   const co=R.company; const owned=new Set(R.perks); const pool=co.perks.filter(id=>!owned.has(id));
@@ -743,6 +864,15 @@ function advanceWeek(){
 function checkLossContinuous(){ if(R.over) return true; if(R.mh<=0){ gameOver("breakdown","Burned Out","Your Mental Health hit zero. You stop showing up — first in spirit, then in fact. The plan outlasted you."); return true; } return false; }
 function depthNum(){ return R.companyIdx*LEVELS + R.level; }
 function depthLabel(){ return R.company.name+" · Level "+R.level; }
+function runSummary(won){
+  let j = R.journey.length
+    ? "<div class='journey'>"+R.journey.map(s=>"<span class='jstep "+(s.out==="surv"?"surv":"esc")+"'>"+(s.out==="surv"?"Survived ":"Escaped ")+s.co+" L"+s.lvl+"</span>").join("")+"</div>"
+    : "<div class='sumrow' style='text-align:center'>You didn't clear a single Plan. The house barely noticed.</div>";
+  const perkIcons = R.perks.length ? "<span class='perkline'>"+R.perks.map(id=>PERKS[id].icon).join(" ")+"</span>" : "<span style='color:var(--ink-faint)'>none</span>";
+  return "<div class='summary'>"+j
+    +"<div class='sumrow' style='text-align:center'>Deck: <b>"+R.deck.length+" cards</b> · Perks: "+perkIcons+"</div>"
+    +(!won?"<div class='sumrow' style='text-align:center'>Best career: <b>"+best.label+"</b></div>":"")+"</div>";
+}
 function gameOver(kind,hd,lede){
   if(R.over) return; R.over=true; R.phase="over"; $("#veil").classList.remove("show");
   saveBest(depthNum(), depthLabel());
@@ -750,8 +880,8 @@ function gameOver(kind,hd,lede){
   $("#end-hd").textContent="Career Over";
   $("#end-title").textContent = kind==="breakdown"?"BURNED OUT":(kind==="terminated"?"TERMINATED":"FIRED");
   $("#end-lede").innerHTML=lede+"<br><br>You reached <b style='color:var(--focus)'>"+depthLabel()+"</b>.";
-  $("#end-unlocks").innerHTML=best.depth>0?("<div class='unlockbox'><div class='ul'>Best career</div><div class='ui'>"+best.label+"</div></div>"):"";
-  $("#end-flav").innerHTML="PIP "+R.pip+" · Job "+R.js+" · MH "+R.mh+" · Heat "+R.heat+" · "+R.perks.length+" perks<br>Please return your badge and laptop.";
+  $("#end-unlocks").innerHTML=runSummary(false);
+  $("#end-flav").innerHTML="Please return your badge, your laptop, and your soul.";
 }
 function winRun(kind){
   if(R.over) return; R.over=true; R.phase="over"; $("#veil").classList.remove("show");
@@ -760,7 +890,7 @@ function winRun(kind){
   $("#end-hd").textContent="Career Complete";
   if(kind==="freedom"){ $("#end-title").textContent="FREE"; $("#end-lede").innerHTML="You escaped McCrapsey — and the whole ladder. Three PIPs, three exits, and a deck full of leverage. Nobody's putting you on a plan ever again."; }
   else { $("#end-title").textContent="PARTNER"; $("#end-lede").innerHTML="You clawed through all three companies and survived to the top of McCrapsey. They made you partner. Now <i>you</i> get to write the plans."; }
-  $("#end-unlocks").innerHTML="<div class='unlockbox'><div class='ul'>You beat the system</div><div class='ui'>"+R.perks.length+" Office Perks · "+R.deck.length+"-card deck</div></div>";
+  $("#end-unlocks").innerHTML=runSummary(true);
   $("#end-flav").innerHTML="A rare win. The house usually takes it.";
 }
 
