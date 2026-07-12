@@ -65,6 +65,11 @@ So every level is a real fork: *grind this place for its unique perk set, or bai
 rare card and skip ahead.* **Win the run** by clearing all three companies — escape
 McCrapsey (freedom) or survive to the top of it (partner).
 
+**Your very first run is Survive-only.** The Escape path — Job Hunt and the escape cards —
+is locked to start, and the Job-Search track just reads *Locked*, so your first PIP teaches
+one goal at a time. When that run ends (win or lose) you learn the exit exists, and Escape
+unlocks for good.
+
 **It's permadeath** — get fired, burn out, or let your **Heat** hit the ceiling and the run
 is over. Your deck, perks, and Mental Health carry the whole way; Heat and deadlines reset
 each level. Your score is how far you climbed.

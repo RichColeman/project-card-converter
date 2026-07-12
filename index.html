@@ -268,13 +268,7 @@ body{ margin:0; background:radial-gradient(120% 90% at 50% 0%,#0e1518 0%,var(--g
     <h1 class="big glow" style="color:var(--phosphor)">PIP</h1>
     <div style="letter-spacing:.3em;font-size:11px;color:var(--ink-dim);text-transform:uppercase;margin-top:6px">A Corporate Roguelike Deckbuilder</div>
     <p class="lede">You've been placed on a Performance Improvement Plan. Nobody mentioned the company is Hell — HR just hasn't put it in the handbook yet. Build a deck of workplace tactics, read your (demonic) manager, and climb three companies before the system gets you.</p>
-    <div class="brief">
-      Draw a hand, spend <span class="f">Focus</span>. Friday, your manager acts — <b>telegraphed</b>, so plan ahead.<br>
-      <span class="k">▸ Survive</span> (hit PIP) → keep your seat, earn an <b>Office Perk</b>, climb a level here.<br>
-      <span class="e">▸ Escape</span> (hit Job Search, Week 3+) → jump to the next company with a <b>Rare card</b>.<br>
-      <span class="a">▸ Your deck, perks &amp; Mental Health carry over.</span> Heat &amp; deadlines reset.<br>
-      <span class="d">▸ Fired, burned out, or caught</span> ends the run.
-    </div>
+    <div class="brief" id="brief"></div>
     <div class="tiers">
       <div class="tier"><b>RedFlonic</b>the hungry startup</div>
       <div class="tier"><b>SailHorse</b>the eternal megacorp</div>
@@ -601,11 +595,17 @@ const R = {};
 let best = loadBest();
 function loadBest(){ try{ const v=localStorage.getItem(BEST_KEY); if(v) return JSON.parse(v); }catch(e){} return {depth:0, label:"—"}; }
 function saveBest(depth,label){ if(depth>best.depth){ best={depth,label}; try{ localStorage.setItem(BEST_KEY, JSON.stringify(best)); }catch(e){} } }
+// The Escape path (Job Hunt + escape cards) is locked on the very first run, then unlocks for good.
+const ESCAPE_KEY="pip_escape_unlocked_v1";
+let escapeUnlocked = (()=>{ try{ return localStorage.getItem(ESCAPE_KEY)==="1"; }catch(e){ return false; } })();
+function unlockEscape(){ if(!escapeUnlocked){ escapeUnlocked=true; try{ localStorage.setItem(ESCAPE_KEY,"1"); }catch(e){} return true; } return false; }
 
 /* ============ RUN / LEVEL SETUP ============ */
 function newRun(){
   Object.assign(R,{ companyIdx:0, level:1, mh:MH_BASE, cap:0,
-    deck:["work","work","work","work","shipit","shipit","jobhunt","jobhunt","network","breathe","breathe","overtime"],
+    deck: escapeUnlocked
+      ? ["work","work","work","work","shipit","shipit","jobhunt","jobhunt","network","breathe","breathe","overtime"]
+      : ["work","work","work","work","work","work","shipit","shipit","network","breathe","breathe","overtime"],
     perks:[], unlockedThisRun:[], lastBoss:null, journey:[] });
   startLevel();
 }
@@ -799,7 +799,8 @@ function renderBoss(){
 function renderMeters(){
   const host=$("#meters"); host.innerHTML="";
   host.appendChild(meter("pip","PIP","m-pip",R.pip,R.pipGoal,"Survive → <b>Office Perk</b>"));
-  const jm=meter("js","Job Search","m-js",R.js,R.jsGoal, R.week>=3?"Escape → <b>Rare card</b>":"Escape unlocks Week 3"); if(R.week<3) jm.classList.add("gated"); host.appendChild(jm);
+  const jgoal = !escapeUnlocked ? "Locked" : (R.week>=3?"Escape → <b>Rare card</b>":"Escape unlocks Week 3");
+  const jm=meter("js","Job Search","m-js",R.js,R.jsGoal, jgoal); if(!escapeUnlocked||R.week<3) jm.classList.add("gated"); host.appendChild(jm);
   host.appendChild(meter("mh","Mental Health","m-mh",R.mh,mhMax(),"Burnout at 0 · carries over"));
   host.appendChild(meter("heat","Heat","m-heat",R.heat,HEAT_MAX,"10 = caught"));
 }
@@ -926,7 +927,7 @@ function afterHeat(){
   if(fx('friday_calm')) g.add("mh",1);
   if(fx('cap_gen')) g.add("cap",1);
   renderLive();
-  const canEscape = R.week>=3 && R.js>=R.jsGoal;
+  const canEscape = escapeUnlocked && R.week>=3 && R.js>=R.jsGoal;
   const survived = R.pip>=R.pipGoal;
   if(canEscape) return offerPathChoice(survived);
   if(R.week>=MAX_WEEKS){ if(survived) return doSurvive(); return gameOver("fired","Fired","Four weeks up. You didn't hit your PIP and you didn't make it out. The plan worked as designed."); }
@@ -983,7 +984,7 @@ function shopUpgrade(done){
 
 /* ============ DRAFTS ============ */
 function offerCardDraft(done){
-  const pool=shuffle(Object.keys(CARDS).filter(id=>CARDS[id].pool)).slice(0, fx('draft_extra')?4:3);
+  const pool=shuffle(Object.keys(CARDS).filter(id=>CARDS[id].pool && (escapeUnlocked||CARDS[id].type!=="Escape"))).slice(0, fx('draft_extra')?4:3);
   if(!pool.length) return done();
   $("#modalhost").innerHTML="<div class='reck neutral'><div class='ehd'>Level Up</div><h3 class='etitle'>Add a card</h3><div class='draftgrid' id='dg'></div><div class='choices'><button class='btn plain' id='skip'><span class='bl'>Skip</span></button></div></div>";
   $("#veil").classList.add("show"); const dg=$("#dg"); let picked=false;
@@ -1019,6 +1020,7 @@ function advanceWeek(){
 function checkLossContinuous(){ if(R.over) return true; if(R.mh<=0){ gameOver("breakdown","Burned Out","Your Mental Health hit zero. You stop showing up — first in spirit, then in fact. The plan outlasted you."); return true; } return false; }
 function depthNum(){ return R.companyIdx*LEVELS + R.level; }
 function depthLabel(){ return R.company.name+" · Level "+R.level; }
+function revealBanner(){ return "<div class='unlockbox' style='border-color:var(--escape)'><div class='ul' style='color:var(--escape)'>🔓 Unlocked — the way out</div><div class='ui'>Turns out you could have <b style='color:var(--escape)'>Job Hunt</b>ed your way out this whole time. The <b style='color:var(--escape)'>Escape</b> path opens on your next run.</div></div>"; }
 function runSummary(won){
   let j = R.journey.length
     ? "<div class='journey'>"+R.journey.map(s=>"<span class='jstep "+(s.out==="surv"?"surv":"esc")+"'>"+(s.out==="surv"?"Survived ":"Escaped ")+s.co+" L"+s.lvl+"</span>").join("")+"</div>"
@@ -1035,7 +1037,8 @@ function gameOver(kind,hd,lede){
   $("#end-hd").textContent="Career Over";
   $("#end-title").textContent = kind==="breakdown"?"BURNED OUT":(kind==="terminated"?"TERMINATED":"FIRED");
   $("#end-lede").innerHTML=lede+"<br><br>You reached <b style='color:var(--focus)'>"+depthLabel()+"</b>.";
-  $("#end-unlocks").innerHTML=runSummary(false);
+  const rev=unlockEscape();
+  $("#end-unlocks").innerHTML=(rev?revealBanner():"")+runSummary(false);
   $("#end-flav").innerHTML="Please return your badge, your laptop, and your soul.";
 }
 function winRun(kind){
@@ -1045,7 +1048,8 @@ function winRun(kind){
   $("#end-hd").textContent="Career Complete";
   if(kind==="freedom"){ $("#end-title").textContent="FREE"; $("#end-lede").innerHTML="You escaped McCrapsey — and the whole ladder. Three PIPs, three exits, and a deck full of leverage. Nobody's putting you on a plan ever again."; }
   else { $("#end-title").textContent="PARTNER"; $("#end-lede").innerHTML="You clawed through all three companies and survived to the top of McCrapsey. They made you partner. Now <i>you</i> get to write the plans."; }
-  $("#end-unlocks").innerHTML=runSummary(true);
+  const rev=unlockEscape();
+  $("#end-unlocks").innerHTML=(rev?revealBanner():"")+runSummary(true);
   $("#end-flav").innerHTML="A rare win. The house usually takes it.";
 }
 
@@ -1075,7 +1079,22 @@ window.Game={
   endWeek(){ endWeek(); },
   cancelSelect(){ R.selecting=null; render(); },
 };
-window.__PIP={ state:()=>({companyIdx:R.companyIdx,level:R.level,depth:depthNum(),week:R.week,phase:R.phase,focus:R.focus,pip:R.pip,js:R.js,mh:R.mh,heat:R.heat,cap:R.cap,pipGoal:R.pipGoal,jsGoal:R.jsGoal,over:R.over,perks:R.perks.slice(),hand:R.hand.slice(),handCosts:R.hand.map(c=>CARDS[c].cost),dels:R.deliverables.filter(d=>!d.missed).map(d=>({t:d.title,p:d.progress,c:d.cost,done:d.done,ready:!d.done&&d.progress>=d.cost}))}) };
+// Title brief — hide the Escape line until it's unlocked (the first-run reveal)
+(function initBrief(){
+  const b=$("#brief"); if(!b) return;
+  const common="Draw a hand, spend <span class='f'>Focus</span>. Friday, your manager acts — <b>telegraphed</b>, so plan ahead.<br>";
+  b.innerHTML = escapeUnlocked
+    ? common
+      +"<span class='k'>▸ Survive</span> (hit PIP) → keep your seat, earn an <b>Office Perk</b>, climb a level here.<br>"
+      +"<span class='e'>▸ Escape</span> (hit Job Search, Week 3+) → jump to the next company with a <b>Rare card</b>.<br>"
+      +"<span class='a'>▸ Your deck, perks &amp; Mental Health carry over.</span> Heat &amp; deadlines reset.<br>"
+      +"<span class='d'>▸ Fired, burned out, or caught</span> ends the run."
+    : common
+      +"<span class='k'>▸ Survive</span> (hit PIP by Week 4) → keep your seat and earn an <b>Office Perk</b>.<br>"
+      +"<span class='a'>▸ Climb all three companies.</span> Your deck, perks &amp; Mental Health carry over.<br>"
+      +"<span class='d'>▸ Burn out or get fired</span> and the run ends.";
+})();
+window.__PIP={ state:()=>({companyIdx:R.companyIdx,level:R.level,escapeUnlocked,depth:depthNum(),week:R.week,phase:R.phase,focus:R.focus,pip:R.pip,js:R.js,mh:R.mh,heat:R.heat,cap:R.cap,pipGoal:R.pipGoal,jsGoal:R.jsGoal,over:R.over,perks:R.perks.slice(),hand:R.hand.slice(),handCosts:R.hand.map(c=>CARDS[c].cost),dels:R.deliverables.filter(d=>!d.missed).map(d=>({t:d.title,p:d.progress,c:d.cost,done:d.done,ready:!d.done&&d.progress>=d.cost}))}) };
 })();
 </script>
 </body>
