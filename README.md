@@ -1,367 +1,83 @@
-# Project Card → JIRA Converter
+# PIP — Performance Improvement Plan
 
-**Executive Summary:** Transform project recommendation cards into actionable JIRA tickets for seamless team handoff.
+A solo strategy card game about surviving an unwinnable system, adapted for the web.
 
-## Overview
+You've been placed on a Performance Improvement Plan. You have **four weeks**. The
+system is designed for you to fail. Prove it wrong — either by beating the PIP on its
+own terms, or by getting out before it buries you.
 
-This application converts executive-level project cards (typically from PowerPoint or PDF recommendations) into structured JIRA tickets that team leaders and project managers can immediately use for implementation tracking.
+> _Office Space meets Pandemic._ Dark corporate humor over genuine, sweaty tension.
 
-### Key Features
+## Play it
 
-- **Guided Form Entry**: Multi-section form with validation for all project card components
-- **Visual JIRA Preview**: See exactly how your ticket will appear in JIRA
-- **Multiple Export Formats**: JSON (for bulk import) and Markdown (for manual entry)
-- **Financial Documentation**: Built-in enforcement of assumption tracking per consulting best practices
-- **Type-Safe Architecture**: Full TypeScript coverage for data integrity
-
-### MVP Scope (v1.0)
-
-✅ Manual form entry for project cards  
-✅ Single card conversion  
-✅ Visual JIRA ticket preview  
-✅ JSON and Markdown export  
-✅ Copy-to-clipboard functionality  
-
-### Roadmap (v2.0+)
-
-🔲 PDF/PowerPoint file upload with parsing  
-🔲 Batch conversion (multiple cards → multiple tickets)  
-🔲 Direct JIRA API integration  
-🔲 Template library for common project types  
-🔲 Team collaboration features  
-
----
-
-## Architecture
-
-### Technology Stack
-
-| Layer | Technology | Justification |
-|-------|-----------|---------------|
-| **Frontend** | React 18 + TypeScript | Type safety, component reusability |
-| **Styling** | Tailwind CSS | Rapid UI development, consistent design system |
-| **Forms** | React Hook Form + Zod | Performance optimization, schema validation |
-| **State** | React Hooks (useState, useCallback) | Lightweight for single-card workflow |
-| **Build** | Vite | Fast development, optimized production builds |
-
-### Project Structure
+The entire game is a single self-contained file — **no build step, no dependencies**.
 
 ```
-src/
-├── types/
-│   ├── projectCard.ts      # Source data model with financial guidelines
-│   └── jiraTicket.ts        # Target JIRA format
-├── lib/
-│   └── cardToJiraMapper.ts  # Core transformation logic
-├── components/
-│   ├── ProjectCardForm.tsx  # Multi-section input form
-│   ├── JiraTicketPreview.tsx# Visual ticket representation
-│   └── ExportControls.tsx   # Copy/download functionality
-├── hooks/
-│   └── useCardConverter.ts  # Conversion state management
-└── App.tsx                  # Main orchestration
+open index.html      # macOS
+xdg-open index.html  # Linux
+# ...or just drag index.html into any browser
 ```
 
-### Data Flow
+Everything (art, logic, sound of dread) is inlined. It runs offline.
 
-```
-User Input (Form)
-    ↓
-ProjectCard (validated)
-    ↓
-CardToJiraMapper.transform()
-    ↓
-JiraTicket (structured)
-    ↓
-Preview + Export
-```
+## The look
 
----
+A CRT terminal in a monitor bezel: phosphor-green corporate dread, scanlines, screen
+flicker, vignette bloom, and Balatro-style card juice — hover-lift, screen shake on
+damage, and floating `+3 / −2` numbers on every stat change. The type is deliberate
+monospace, so the whole thing reads like a PIP memo you're trapped inside.
 
-## Setup & Installation
+## How it plays
 
-### Prerequisites
+Each round is one work week. The game lasts four.
 
-- Node.js 18+ 
-- npm or yarn
+- **Mon–Thu — Action Phase.** You take **4 actions**, one per day, from five action cards.
+- **Friday — Reckoning.** Control transfers to the system. You draw encounter card(s)
+  and the game pushes back. Escalates across the four weeks.
 
-### Installation Steps
+### Two ways to win, in direct conflict
 
-```bash
-# 1. Install dependencies
-cd project-card-converter
-npm install
+| Path | Win condition |
+|------|---------------|
+| **Survive the PIP** | Reach **12 PIP Progress** by Friday of Week 4. You kept the job. |
+| **Escape** | Reach **12 Job Search** before the clock runs out. You outran it. |
 
-# 2. Start development server
-npm run dev
+Actions that advance one path cost you on the other. Spreading thin is dangerous.
 
-# 3. Open browser
-# Navigate to http://localhost:5173
-```
+### Three ways to lose
 
-### Build for Production
+- The four-week clock expires with neither threshold met — **Fired**.
+- **Mental Health** hits zero — **Breakdown**.
+- A **tripwire** fires — abandoning a deliverable past its deadline, or getting caught
+  job-hunting while your **Heat** is too high — **Terminated for cause**.
 
-```bash
-npm run build
-npm run preview  # Test production build locally
-```
+### Actions
 
----
+- **Work on a Deliverable** — add one unit of progress to a task you pick.
+- **Complete a Deliverable** — ship a finished task, converting work into PIP credit.
+- **Job Hunt** — fast escape progress, but it raises Heat and drains you.
+- **Network** — *Internal* (political capital + standing) or *External* (quiet job-search
+  progress that cools Heat). One action, two strategies.
+- **Meditate / Cry** — recover Mental Health. Advances neither goal; the clock still ticks.
 
-## Usage Guide
+### The antagonist deck
 
-### Step 1: Configure JIRA Project
+Encounter cards each attack a **different** part of your decision space — direct PIP
+pressure, mental-health attacks, exposure threats, time thieves, coworker dynamics, and
+forced dilemmas. The best cards present a **decision**, not just a tax: cancel the phone
+interview or risk being late to the manager's ambush; take the retention "pause" and
+throw away your runway, or smile and keep both doors open.
 
-Enter your JIRA project key (e.g., "PROJ", "TECH") at the top of the form.
+## Design notes
 
-### Step 2: Fill Project Card Details
-
-Complete all required sections:
-
-1. **Basic Information**
-   - Title, description, priority, impact level
-
-2. **Key Activities**
-   - Implementation steps (minimum 1 required)
-
-3. **Business Benefits**
-   - Qualitative benefits (preferred format: "Enable X", "Improve Y")
-   - Quantitative impacts (optional, requires source attribution)
-
-4. **Effort Estimate**
-   - Duration, complexity, resources
-
-5. **Cost Estimate** (Optional)
-   - Only if based on client data or documented assumptions
-   - All cost fields require assumption documentation
-
-6. **Additional Context**
-   - Dependencies, risks, stakeholders
-
-7. **Metadata**
-   - Engagement name, author
-
-### Step 3: Generate Preview
-
-Click "Generate JIRA Ticket Preview" to see the formatted ticket.
-
-### Step 4: Export
-
-Choose your export format:
-
-- **JSON**: For JIRA bulk import or API integration
-- **Markdown**: For copy-paste into JIRA description field
+This implements the PIP design brief and resolves its open tuning questions with sensible
+starting values (thresholds of 12, escalating 1→2 encounter cards per week, deliverables
+assigned over time, Heat as the visible exposure/tripwire meter, Political Capital as a
+spendable shield). All of it lives at the top of the `<script>` block in `index.html` —
+thresholds, the deliverable pool, and the full encounter deck are plain data, easy to tune.
 
 ---
 
-## Financial Documentation Guidelines
-
-This application enforces consulting best practices for financial claims:
-
-### ✅ DO:
-
-- Use qualitative benefits by default: "Enable revenue optimization", "Improve efficiency"
-- Document source for any quantitative claim: "15% reduction (Source: Client benchmark data)"
-- Include assumptions for all cost estimates
-- Flag estimates pending client validation
-
-### ❌ DON'T:
-
-- Create financial figures without supporting data
-- Omit source attribution for quantitative impacts
-- Provide cost estimates without documenting assumptions
-
-### Example: Quantitative Impact (Correct)
-
-```typescript
-{
-  metric: "Customer acquisition cost",
-  impact: "15-20% reduction",
-  source: "Client-provided benchmark data from Q4 2024",
-  assumptions: ["Based on current conversion rates", "Assumes no change in ad spend"]
-}
-```
-
----
-
-## Type Definitions
-
-### ProjectCard
-
-```typescript
-interface ProjectCard {
-  title: string;
-  description: string;
-  keyActivities: string[];
-  businessBenefits: {
-    qualitative: string[];        // Preferred
-    quantitative?: Array<{
-      metric: string;
-      impact: string;
-      source: string;             // REQUIRED
-      assumptions?: string[];
-    }>;
-  };
-  effortEstimate: {
-    duration: string;
-    complexity: 'Low' | 'Medium' | 'High';
-    resources?: string;
-  };
-  impact: {
-    level: 'Low' | 'Medium' | 'High';
-    description: string;
-  };
-  cost?: {
-    estimate: string;
-    assumptions: string[];        // REQUIRED
-    isEstimated: boolean;
-    dataSource?: string;
-  };
-  // ... additional fields
-}
-```
-
-### JiraTicket
-
-```typescript
-interface JiraTicket {
-  project: string;
-  issueType: 'Epic' | 'Story' | 'Task';
-  summary: string;
-  description: string;            // Markdown-formatted
-  priority: 'Highest' | 'High' | 'Medium' | 'Low' | 'Lowest';
-  labels: string[];
-  customFields?: {
-    businessValue?: string;
-    effortEstimate?: string;
-    acceptanceCriteria?: string;
-    // ... additional custom fields
-  };
-}
-```
-
----
-
-## Transformation Logic
-
-### Priority Mapping
-
-| Project Card | JIRA Priority |
-|--------------|---------------|
-| Critical + High Impact | Highest |
-| High | High |
-| Medium | Medium |
-| Low | Low |
-
-### Issue Type Determination
-
-| Complexity | JIRA Issue Type | Rationale |
-|-----------|----------------|-----------|
-| High | Epic | Requires breakdown into smaller stories |
-| Medium | Story | Sprint-sized work item |
-| Low | Task | Simple implementation |
-
-### Label Generation
-
-Automatic labels include:
-- `impact-{level}` (e.g., `impact-high`)
-- `complexity-{level}` (e.g., `complexity-medium`)
-- `priority-{level}` (if specified)
-- Engagement identifier (sanitized from metadata)
-
----
-
-## Testing
-
-### Manual Testing Checklist
-
-- [ ] Form validation prevents submission with incomplete data
-- [ ] Quantitative benefits require source attribution
-- [ ] Cost estimates require assumptions
-- [ ] Preview displays all entered data correctly
-- [ ] JSON export is valid and importable
-- [ ] Markdown export is properly formatted
-- [ ] Copy-to-clipboard works in all browsers
-- [ ] "Create Another Ticket" resets form state
-
-### Unit Tests (Future)
-
-```bash
-npm run test
-```
-
-Example test structure:
-
-```typescript
-describe('CardToJiraMapper', () => {
-  it('should transform basic project card to JIRA ticket', () => {
-    const card: ProjectCard = { /* test data */ };
-    const config: MappingConfig = { jiraProjectKey: 'TEST' };
-    const ticket = CardToJiraMapper.transform(card, config);
-    
-    expect(ticket.project).toBe('TEST');
-    expect(ticket.issueType).toBe('Story');
-    // ... additional assertions
-  });
-});
-```
-
----
-
-## Troubleshooting
-
-### Issue: Form won't submit
-
-**Solution:** Check browser console for validation errors. All required fields must be completed.
-
-### Issue: Copy to clipboard fails
-
-**Solution:** Ensure browser has clipboard permissions. Try the download option instead.
-
-### Issue: JIRA import fails with JSON
-
-**Solution:** Verify your JIRA instance supports JSON import and that custom field names match your JIRA configuration.
-
----
-
-## Contributing
-
-### Code Style
-
-- Use TypeScript strict mode
-- Follow ESLint configuration
-- Document complex functions with JSDoc comments
-- Prefer functional components and hooks
-
-### Pull Request Process
-
-1. Create feature branch from `main`
-2. Add unit tests for new functionality
-3. Update README if adding user-facing features
-4. Ensure `npm run build` succeeds without errors
-
----
-
-## License
-
-MIT License - See LICENSE file for details
-
----
-
-## Support
-
-For questions or issues:
-1. Check the troubleshooting section above
-2. Review existing GitHub issues
-3. Create a new issue with reproduction steps
-
----
-
-## Changelog
-
-### v1.0.0 (MVP)
-- Initial release
-- Manual form entry
-- Single card conversion
-- JSON and Markdown export
-- Visual JIRA preview
+_Note: `App.tsx` and `package.json` are leftover stubs from an unrelated, never-completed
+"card converter" project that previously occupied this repo. The game itself does not use
+them and needs no toolchain._

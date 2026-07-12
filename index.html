@@ -1,0 +1,1051 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>PIP — Performance Improvement Plan</title>
+<style>
+/* ============================================================
+   PIP — a solo strategy card game about surviving an
+   unwinnable system. Self-contained: no build, no deps.
+   Visual world: a CRT terminal in a monitor bezel.
+   ============================================================ */
+
+:root{
+  --ground:#080b0e;
+  --bezel:#12100c;
+  --panel:#111a1c;
+  --panel-2:#0d1416;
+  --ink:#d6e2cf;          /* slightly green-biased paper */
+  --ink-dim:#7f938a;
+  --ink-faint:#465651;
+  --grid:#1b2a2b;
+
+  --phosphor:#41e08a;     /* PIP progress — you belong here */
+  --escape:#49d6e6;       /* job search — the exit */
+  --amber:#f2b13c;        /* mental health */
+  --danger:#ff4d5e;       /* heat / termination */
+  --capital:#c79bff;      /* political capital */
+
+  --shadow:0 6px 0 rgba(0,0,0,.55);
+  --font: ui-monospace, "SF Mono", "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background:
+    radial-gradient(120% 90% at 50% 0%, #0e1518 0%, var(--ground) 60%, #04060700 100%),
+    var(--ground);
+  color:var(--ink);
+  font-family:var(--font);
+  font-size:15px;
+  line-height:1.45;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+
+/* ---------- CRT monitor bezel ---------- */
+.monitor{
+  min-height:100%;
+  padding:clamp(8px,2.4vw,34px);
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+}
+.screen{
+  position:relative;
+  width:min(1080px,100%);
+  min-height:clamp(560px,92vh,948px);
+  background:linear-gradient(180deg,#0c1315,#0a1012);
+  border-radius:16px;
+  padding:clamp(14px,2.2vw,26px);
+  box-shadow:
+    0 0 0 6px #1c1a14,
+    0 0 0 10px #0b0a07,
+    0 0 0 12px #241f16,
+    0 26px 60px rgba(0,0,0,.7),
+    inset 0 0 120px rgba(0,40,20,.14);
+  overflow:hidden;
+}
+/* scanlines */
+.screen::before{
+  content:"";
+  position:absolute; inset:0;
+  background:repeating-linear-gradient(
+    to bottom, rgba(0,0,0,0) 0, rgba(0,0,0,0) 2px, rgba(0,0,0,.18) 3px, rgba(0,0,0,0) 4px);
+  pointer-events:none; z-index:60; mix-blend-mode:multiply;
+}
+/* vignette + phosphor bloom + flicker */
+.screen::after{
+  content:"";
+  position:absolute; inset:0;
+  background:
+    radial-gradient(120% 130% at 50% 30%, rgba(0,0,0,0) 55%, rgba(0,0,0,.55) 100%),
+    radial-gradient(90% 60% at 50% 0%, rgba(65,224,138,.06), rgba(0,0,0,0) 70%);
+  pointer-events:none; z-index:61;
+  animation:flicker 5s infinite steps(60);
+}
+@keyframes flicker{
+  0%,100%{opacity:1} 92%{opacity:1} 93%{opacity:.86} 94%{opacity:1} 97%{opacity:.93} 98%{opacity:1}
+}
+@media (prefers-reduced-motion: reduce){
+  .screen::after{animation:none}
+  *{animation-duration:.001ms !important; animation-iteration-count:1 !important}
+}
+
+/* chromatic-ish text glow for headings */
+.glow{ text-shadow:0 0 8px rgba(65,224,138,.45), 0 0 2px rgba(73,214,230,.35); }
+
+/* ---------- header / memo ---------- */
+.memo{
+  display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 14px;
+  border-bottom:2px dashed var(--ink-faint);
+  padding-bottom:12px; margin-bottom:14px;
+}
+.memo .stamp{
+  font-size:11px; letter-spacing:.28em; text-transform:uppercase;
+  color:var(--danger); border:2px solid var(--danger);
+  padding:3px 8px; border-radius:4px; transform:rotate(-3deg);
+  box-shadow:0 0 12px rgba(255,77,94,.25);
+}
+.memo h1{
+  font-size:clamp(20px,3.6vw,30px); margin:0; letter-spacing:.06em;
+  color:var(--phosphor); text-transform:uppercase;
+}
+.memo .sub{ color:var(--ink-dim); font-size:12px; letter-spacing:.06em; }
+.spacer{ flex:1 1 auto; }
+
+/* week / day tracker */
+.tracker{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.wk{ font-size:12px; color:var(--ink-dim); letter-spacing:.1em; }
+.days{ display:flex; gap:5px; }
+.day{
+  width:34px; height:26px; display:grid; place-items:center;
+  font-size:10px; letter-spacing:.05em; color:var(--ink-faint);
+  border:2px solid var(--grid); border-radius:5px; background:var(--panel-2);
+  text-transform:uppercase;
+}
+.day.spent{ color:#06110c; background:var(--phosphor); border-color:var(--phosphor); text-shadow:none; }
+.day.today{ color:var(--phosphor); border-color:var(--phosphor); box-shadow:0 0 10px rgba(65,224,138,.4); }
+.day.fri{ border-color:var(--danger); color:var(--danger); }
+.day.fri.spent{ background:var(--danger); color:#150406; border-color:var(--danger); }
+
+/* ---------- meters ---------- */
+.meters{
+  display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:14px;
+}
+@media(max-width:620px){ .meters{ grid-template-columns:1fr; } }
+.meter{
+  background:var(--panel); border:2px solid var(--grid); border-radius:8px;
+  padding:9px 11px; position:relative; overflow:hidden;
+}
+.meter .top{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px; }
+.meter .lab{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-dim); }
+.meter .val{ font-size:16px; font-variant-numeric:tabular-nums; font-weight:bold; }
+.bar{ height:12px; border-radius:3px; background:#06100e; overflow:hidden; border:1px solid #0a1a17; }
+.bar > i{ display:block; height:100%; width:0%; transition:width .5s cubic-bezier(.2,.8,.2,1); }
+.meter .goal{ font-size:10px; color:var(--ink-faint); margin-top:5px; letter-spacing:.04em; }
+
+.m-pip .val,.m-pip .lab{ color:var(--phosphor); }
+.m-pip .bar>i{ background:linear-gradient(90deg,#1f6e47,var(--phosphor)); box-shadow:0 0 10px rgba(65,224,138,.5); }
+.m-job .val,.m-job .lab{ color:var(--escape); }
+.m-job .bar>i{ background:linear-gradient(90deg,#1c6470,var(--escape)); box-shadow:0 0 10px rgba(73,214,230,.5); }
+.m-mh .val,.m-mh .lab{ color:var(--amber); }
+.m-mh .bar>i{ background:linear-gradient(90deg,#7a561a,var(--amber)); box-shadow:0 0 10px rgba(242,177,60,.5); }
+.m-heat .val,.m-heat .lab{ color:var(--danger); }
+.m-heat .bar>i{ background:linear-gradient(90deg,#7a2129,var(--danger)); box-shadow:0 0 10px rgba(255,77,94,.5); }
+
+/* secondary resource strip */
+.strip{
+  display:flex; flex-wrap:wrap; gap:8px 16px; align-items:center;
+  margin-bottom:16px; font-size:12px; color:var(--ink-dim); letter-spacing:.04em;
+}
+.pips{ display:inline-flex; gap:4px; vertical-align:middle; }
+.pips i{ width:12px; height:12px; border-radius:50%; border:2px solid var(--capital); display:inline-block; }
+.pips i.on{ background:var(--capital); box-shadow:0 0 8px rgba(199,155,255,.6); }
+.tag{ color:var(--capital); }
+
+/* ---------- section headers ---------- */
+.hd{
+  font-size:11px; letter-spacing:.24em; text-transform:uppercase; color:var(--ink-dim);
+  margin:2px 0 9px; display:flex; align-items:center; gap:10px;
+}
+.hd::after{ content:""; flex:1; height:2px; background:repeating-linear-gradient(90deg,var(--grid) 0 6px,transparent 6px 10px); }
+
+/* ---------- deliverables ---------- */
+.deliverables{ display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:11px; margin-bottom:18px; }
+.dcard{
+  background:linear-gradient(180deg,var(--panel),var(--panel-2));
+  border:2px solid var(--grid); border-radius:9px; padding:11px 12px 12px;
+  position:relative; transition:transform .12s, box-shadow .12s, border-color .12s;
+}
+.dcard .dtitle{ font-size:13px; line-height:1.3; margin-bottom:9px; min-height:34px; color:var(--ink); }
+.dcard .dmeta{ display:flex; justify-content:space-between; font-size:10.5px; color:var(--ink-dim); letter-spacing:.03em; }
+.dprog{ height:9px; background:#06100e; border-radius:3px; border:1px solid #0a1a17; margin:8px 0 7px; overflow:hidden; }
+.dprog>i{ display:block; height:100%; background:linear-gradient(90deg,#1f6e47,var(--phosphor)); transition:width .4s; }
+.dcard .ddl{ font-size:10px; letter-spacing:.08em; text-transform:uppercase; }
+.dcard .reward{ color:var(--phosphor); }
+.dcard.ready{ border-color:var(--phosphor); box-shadow:0 0 18px rgba(65,224,138,.28); }
+.dcard.urgent .ddl{ color:var(--danger); }
+.dcard.done{ opacity:.45; }
+.dbadge{
+  position:absolute; top:-8px; right:-6px; font-size:9px; letter-spacing:.1em;
+  text-transform:uppercase; padding:2px 6px; border-radius:4px; transform:rotate(4deg);
+}
+.dbadge.ready{ background:var(--phosphor); color:#06110c; }
+.dbadge.done{ background:var(--ink-faint); color:#06110c; }
+/* selecting mode */
+.selectable .dcard.pick{ cursor:pointer; border-color:var(--escape); box-shadow:0 0 16px rgba(73,214,230,.35); animation:pulse 1.1s infinite; }
+.selectable .dcard.nopick{ opacity:.35; }
+@keyframes pulse{ 0%,100%{box-shadow:0 0 8px rgba(73,214,230,.25)} 50%{box-shadow:0 0 22px rgba(73,214,230,.55)} }
+
+/* ---------- action cards ---------- */
+.actions{ display:grid; grid-template-columns:repeat(5,1fr); gap:10px; }
+@media(max-width:760px){ .actions{ grid-template-columns:repeat(2,1fr); } }
+.acard{
+  --c:var(--phosphor);
+  background:linear-gradient(180deg,#152025,#0e171a);
+  border:2px solid var(--grid); border-radius:11px; padding:12px 11px 13px;
+  cursor:pointer; text-align:left; color:var(--ink); font-family:var(--font);
+  transition:transform .12s cubic-bezier(.2,.8,.2,1), box-shadow .12s, border-color .12s;
+  position:relative; display:flex; flex-direction:column; gap:7px; min-height:150px;
+}
+.acard:hover,.acard:focus-visible{
+  transform:translateY(-6px) rotate(-1deg); border-color:var(--c);
+  box-shadow:0 12px 0 rgba(0,0,0,.4), 0 0 24px color-mix(in srgb, var(--c) 40%, transparent);
+  outline:none;
+}
+.acard .icon{ font-size:20px; line-height:1; }
+.acard .aname{ font-size:12.5px; letter-spacing:.03em; color:var(--c); font-weight:bold; text-transform:uppercase; }
+.acard .adesc{ font-size:11px; color:var(--ink-dim); line-height:1.35; flex:1; }
+.acard .aeff{ font-size:10px; letter-spacing:.02em; color:var(--ink-faint); border-top:1px dashed var(--ink-faint); padding-top:6px; }
+.acard[data-c=work]{ --c:var(--phosphor); }
+.acard[data-c=complete]{ --c:var(--phosphor); }
+.acard[data-c=job]{ --c:var(--escape); }
+.acard[data-c=network]{ --c:var(--capital); }
+.acard[data-c=meditate]{ --c:var(--amber); }
+.acard:disabled{ opacity:.4; cursor:not-allowed; transform:none; }
+
+/* ---------- floating juice numbers ---------- */
+#juice{ position:fixed; inset:0; pointer-events:none; z-index:200; }
+.fx{ position:absolute; font-weight:bold; font-size:16px; letter-spacing:.02em;
+  animation:rise 1s ease-out forwards; text-shadow:0 0 8px currentColor; }
+@keyframes rise{ 0%{opacity:0; transform:translateY(6px) scale(.8)} 15%{opacity:1} 100%{opacity:0; transform:translateY(-34px) scale(1.05)} }
+
+/* ---------- reckoning / modal ---------- */
+.veil{
+  position:absolute; inset:0; z-index:80; display:none;
+  align-items:center; justify-content:center; padding:18px;
+  background:rgba(4,7,6,.82); backdrop-filter:blur(2px);
+}
+.veil.show{ display:flex; }
+.reck{
+  width:min(560px,100%); background:linear-gradient(180deg,#1a0c0f,#120a0b);
+  border:2px solid var(--danger); border-radius:12px; padding:20px 20px 18px;
+  box-shadow:0 0 50px rgba(255,77,94,.3), var(--shadow);
+  animation:slam .35s cubic-bezier(.2,1.2,.3,1);
+}
+@keyframes slam{ 0%{transform:scale(.85) rotate(-1deg); opacity:0} 100%{transform:scale(1); opacity:1} }
+.reck .ehd{ font-size:11px; letter-spacing:.3em; text-transform:uppercase; color:var(--danger); margin-bottom:4px; }
+.reck .etitle{ font-size:19px; color:var(--ink); margin:0 0 10px; letter-spacing:.02em; }
+.reck .ecat{ display:inline-block; font-size:9.5px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--ink-dim); border:1px solid var(--ink-faint); padding:2px 7px; border-radius:20px; margin-bottom:12px; }
+.reck .edesc{ font-size:13.5px; color:var(--ink); line-height:1.5; margin-bottom:14px; }
+.reck .elog{ font-size:12.5px; color:var(--amber); line-height:1.6; margin:12px 0; min-height:1em; white-space:pre-line; }
+.reck .elog b.good{ color:var(--phosphor); } .reck .elog b.bad{ color:var(--danger); } .reck .elog b.cap{ color:var(--capital); } .reck .elog b.job{ color:var(--escape); }
+.choices{ display:flex; flex-direction:column; gap:9px; }
+.btn{
+  font-family:var(--font); cursor:pointer; text-align:left;
+  background:#1e0e11; border:2px solid var(--danger); color:var(--ink);
+  padding:11px 13px; border-radius:8px; font-size:12.5px; line-height:1.4;
+  transition:transform .1s, background .1s;
+}
+.btn:hover,.btn:focus-visible{ background:#2a1216; transform:translateX(3px); outline:none; }
+.btn .bl{ font-weight:bold; letter-spacing:.02em; display:block; }
+.btn .bd{ font-size:11px; color:var(--ink-dim); margin-top:3px; }
+.btn.primary{ background:#0e1a15; border-color:var(--phosphor); }
+.btn.primary:hover{ background:#12241c; }
+.btn.cap{ border-color:var(--capital); background:#170f1f; }
+
+/* network sub-choice modal reuses .reck but neutral color */
+.reck.neutral{ border-color:var(--capital); box-shadow:0 0 44px rgba(199,155,255,.25); background:linear-gradient(180deg,#140f1c,#0e0b14); }
+.reck.neutral .ehd{ color:var(--capital); }
+
+/* ---------- title & end screens ---------- */
+.overlay{
+  position:absolute; inset:0; z-index:90; display:none; flex-direction:column;
+  align-items:center; justify-content:center; text-align:center; padding:26px;
+  background:radial-gradient(120% 100% at 50% 30%, #0d1518, #06090a);
+}
+.overlay.show{ display:flex; }
+.overlay{ overflow-y:auto; }
+.overlay .big{ font-size:clamp(34px,8vw,72px); letter-spacing:.1em; margin:0; text-transform:uppercase; line-height:.95; }
+.overlay .lede{ max-width:520px; color:var(--ink-dim); font-size:13.5px; line-height:1.6; margin:16px 0 22px; }
+.overlay .cta{
+  font-family:var(--font); cursor:pointer; text-transform:uppercase; letter-spacing:.16em;
+  font-size:14px; padding:14px 26px; border-radius:9px; border:2px solid var(--phosphor);
+  background:#0e1a15; color:var(--phosphor); transition:transform .1s, box-shadow .1s;
+  box-shadow:0 0 22px rgba(65,224,138,.25);
+}
+.overlay .cta:hover{ transform:translateY(-3px); box-shadow:0 0 34px rgba(65,224,138,.5); }
+.overlay .flav{ color:var(--ink-faint); font-size:11px; letter-spacing:.1em; margin-top:20px; max-width:460px; line-height:1.7; }
+.win .big{ color:var(--phosphor); text-shadow:0 0 20px rgba(65,224,138,.5); }
+.escape .big{ color:var(--escape); text-shadow:0 0 20px rgba(73,214,230,.5); }
+.lose .big{ color:var(--danger); text-shadow:0 0 24px rgba(255,77,94,.55); }
+.blink{ animation:blink 1.1s steps(2) infinite; }
+@keyframes blink{ 50%{opacity:.25} }
+.cursor{ animation:blink 1s steps(2) infinite; }
+
+/* title screen intro list */
+.brief{ text-align:left; max-width:480px; margin:14px auto 0; font-size:12.5px; color:var(--ink-dim); line-height:1.7; }
+.brief b{ color:var(--ink); }
+.brief .k{ color:var(--phosphor); } .brief .e{ color:var(--escape); } .brief .a{ color:var(--amber); } .brief .d{ color:var(--danger); }
+
+/* screen shake */
+@keyframes shake{ 0%,100%{transform:translate(0,0)} 20%{transform:translate(-4px,2px)} 40%{transform:translate(4px,-2px)} 60%{transform:translate(-3px,-2px)} 80%{transform:translate(3px,2px)} }
+.shake{ animation:shake .38s; }
+
+.hint{ font-size:11px; color:var(--ink-faint); letter-spacing:.05em; text-align:center; margin-top:12px; min-height:1.2em; }
+.hint b{ color:var(--escape); }
+
+/* toast for undo of cancel */
+.miniactions{ display:flex; justify-content:center; gap:12px; margin-top:10px; }
+.linkbtn{ background:none; border:none; color:var(--ink-faint); font-family:var(--font);
+  font-size:11px; letter-spacing:.1em; text-transform:uppercase; cursor:pointer; }
+.linkbtn:hover{ color:var(--escape); }
+</style>
+</head>
+<body>
+<div class="monitor">
+  <div class="screen" id="screen">
+
+    <!-- ===== TITLE ===== -->
+    <div class="overlay show" id="title">
+      <div class="stamp" style="font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--danger);border:2px solid var(--danger);padding:3px 9px;border-radius:4px;transform:rotate(-3deg);margin-bottom:18px;">Confidential — HR</div>
+      <h1 class="big glow" style="color:var(--phosphor)">PIP</h1>
+      <div style="letter-spacing:.34em;font-size:12px;color:var(--ink-dim);text-transform:uppercase;margin-top:6px">Performance Improvement Plan</div>
+      <p class="lede">You've been placed on a Performance Improvement Plan. You have <b style="color:var(--ink)">four weeks</b>. The system is designed for you to fail. Prove it wrong.</p>
+      <div class="brief">
+        Every week you get <b>4 actions</b> (Mon–Thu). Friday, the company pushes back.<br><br>
+        <span class="k">▸ Survive</span> — hit <b>12 PIP Progress</b> by Friday of Week 4. Keep the job.<br>
+        <span class="e">▸ Escape</span> — reach <b>12 Job Search</b> before the clock runs out. Outrun it.<br>
+        <span class="a">▸ Don't break</span> — Mental Health at 0 is a breakdown.<br>
+        <span class="d">▸ Don't get caught</span> — Heat is how suspicious they are of your job hunt.
+      </div>
+      <button class="cta" style="margin-top:26px" onclick="Game.start()">Clock In ▸</button>
+      <div class="flav">"In theory, it's a support mechanism.<br>In practice, it's a paper trail."</div>
+    </div>
+
+    <!-- ===== END SCREEN ===== -->
+    <div class="overlay" id="endscreen">
+      <div class="ehd2" id="end-hd" style="letter-spacing:.3em;font-size:12px;text-transform:uppercase;margin-bottom:8px"></div>
+      <h1 class="big" id="end-title"></h1>
+      <p class="lede" id="end-lede"></p>
+      <button class="cta" id="end-cta" onclick="Game.start()">New PIP ▸</button>
+      <div class="flav" id="end-flav"></div>
+    </div>
+
+    <!-- ===== RECKONING / MODALS ===== -->
+    <div class="veil" id="veil"><div id="modalhost"></div></div>
+
+    <!-- ===== MAIN GAME ===== -->
+    <div id="game" style="display:none">
+      <div class="memo">
+        <span class="stamp">PIP</span>
+        <div>
+          <h1 class="glow">Performance Improvement Plan</h1>
+          <div class="sub">Employee: <span id="whoami">YOU</span> · Status: <span style="color:var(--danger)">Under Review</span></div>
+        </div>
+        <span class="spacer"></span>
+        <div class="tracker">
+          <span class="wk" id="wklabel">WEEK 1 / 4</span>
+          <div class="days" id="days"></div>
+        </div>
+      </div>
+
+      <div class="meters" id="meters"></div>
+      <div class="strip" id="strip"></div>
+
+      <div class="hd">Active Deliverables</div>
+      <div class="deliverables" id="deliverables"></div>
+
+      <div class="hd" id="phasehd">Choose Today's Action</div>
+      <div class="actions" id="actions"></div>
+      <div class="hint" id="hint"></div>
+    </div>
+
+  </div>
+</div>
+<div id="juice"></div>
+
+<script>
+(function(){
+"use strict";
+
+// ---------- content ----------
+const SURVIVE = 12, ESCAPE = 12, MH_MAX = 10, HEAT_MAX = 10, CAP_MAX = 5;
+
+const DELIVERABLE_POOL = [
+  {title:"Redesign the Client Dashboard", cost:3, reward:4},
+  {title:"Complete the Q3 Sales Report", cost:2, reward:3},
+  {title:"Migrate the Legacy Database", cost:4, reward:5},
+  {title:"Write the Post-Mortem Nobody Reads", cost:2, reward:3},
+  {title:"Fix the Production Bug (Again)", cost:2, reward:3},
+  {title:"Prepare the Board Deck Slides", cost:3, reward:4},
+  {title:"Refresh the Onboarding Docs", cost:2, reward:3},
+  {title:"Untangle the Spaghetti Codebase", cost:4, reward:5},
+  {title:'"Circle Back" on the Roadmap', cost:3, reward:4},
+  {title:"Automate the Manual Report", cost:2, reward:3},
+];
+
+// Encounter cards. Each: {id,title,cat,desc,min?,when?(g), resolve(g)->{log} | {prompt,choices:[{label,desc?,cls?,apply(g)->{log}}]}}
+// helpers on g: add(stat,n), set..., L(...) builds colored log fragments
+const ENCOUNTERS = [
+  {
+    id:"checkin", cat:"Mental Health", title:"HR 'Check-In' Meeting",
+    desc:"HR blocks 30 minutes for a check-in that's clearly a formality. There's a form. There's always a form.",
+    resolve:g=>({log:g.hit("mh",-1)})
+  },
+  {
+    id:"quality", cat:"Direct PIP Pressure", title:"Manager Questions the Quality",
+    desc:"Your manager 'has some concerns' about your last deliverable. Concerns are load-bearing here.",
+    resolve:g=>{
+      if(g.completedThisWeek>=2) return {log:"You completed <b class='good'>2 deliverables</b> this week. Even they can't spin that. No damage."};
+      return {log:g.hit("pip",-1)+" "+g.hit("mh",-1)};
+    }
+  },
+  {
+    id:"linkedin", cat:"Exposure Threat", title:"Someone Saw Your LinkedIn",
+    desc:'A coworker "loves the new profile photo!" in a tone that isn\'t entirely friendly.',
+    resolve:g=>{
+      if(g.heat>=4) return {log:"Your job hunt has a smell to it. "+g.hit("mh",-2)+" "+g.hit("heat",2)};
+      return {log:"You've kept a low profile. You laugh it off. No harm done."};
+    }
+  },
+  {
+    id:"training", cat:"Time Thief", title:"Mandatory Compliance Training",
+    desc:"A 4-hour training module appears on your calendar, self-assigned by a robot. It is due 'immediately.'",
+    resolve:g=>{ g.nextWeekActions=3; return {log:"Next week you'll have only <b class='bad'>3 actions</b> instead of 4."}; }
+  },
+  {
+    id:"happyhour", cat:"Coworker Dynamics", title:"Team Happy Hour",
+    desc:"Thursday, 5pm, a bar named after a pun. Attendance is 'optional' in the way these things are.",
+    resolve:g=>({prompt:"You can't be in two places at once.", choices:[
+      {label:"Show your face", cls:"primary", desc:"Play the game. Build goodwill, but it costs you tomorrow.",
+        apply:g=>{ g.nextWeekActions=Math.min(g.nextWeekActions,3); return {log:g.hit("cap",1)+" — but next week you'll have only <b class='bad'>3 actions</b>."}; }},
+      {label:"Slip out early to job hunt", desc:"Fire off applications instead. Someone will notice the empty chair.",
+        apply:g=>({log:g.hit("job",1)+" "+g.hit("heat",2)})}
+    ]})
+  },
+  {
+    id:"ambush", cat:"Forced Dilemma", title:"The 4 PM Ambush",
+    desc:'"Grab 15 min at 4?" lands from your manager — exactly when your phone interview is scheduled.',
+    resolve:g=>({prompt:"You booked that interview for a reason.", choices:[
+      {label:"Cancel the interview", cls:"primary", desc:"Take the manager meeting. Safe, but the recruiter won't wait forever.",
+        apply:g=>({log:g.hit("job",-2)})},
+      {label:"Duck out and risk being late", desc:"Take the call. Pray the meeting runs short. Coin flip.",
+        apply:g=>{ if(Math.random()<0.5) return {log:"The manager rescheduled anyway. You got away with it clean."};
+          return {log:"You slink in 20 minutes late. It's noted. "+g.hit("pip",-2)+" "+g.hit("mh",-1)}; }}
+    ]})
+  },
+  {
+    id:"scope", cat:"Direct PIP Pressure", title:"Scope Creep",
+    desc:"The requirements 'evolved.' Your most-progressed deliverable now has a different definition of done.",
+    resolve:g=>{
+      const d=g.mostProgressed();
+      if(!d) return {log:"Nothing in progress for them to move the goalposts on. Lucky."};
+      d.progress=Math.max(0,d.progress-1);
+      return {log:"<b class='bad'>“"+d.title+"”</b> loses 1 progress to the churn."};
+    }
+  },
+  {
+    id:"skiplevel", cat:"Coworker Dynamics", title:"Surprise Skip-Level",
+    desc:"Your manager's boss wants a 1:1. 'Just checking in.' The most dangerous four words in the building.",
+    resolve:g=>({prompt:"How honest do you want to be?", choices:[
+      {label:"Vent honestly about the PIP", desc:"It's cathartic. It also gets back to your manager.",
+        apply:g=>({log:g.hit("mh",2)+" — but word travels. "+g.hit("heat",2)})},
+      {label:"Play it cool and grey-rock", desc:"Say nothing quotable. Grind your teeth through it.",
+        apply:g=>({log:g.hit("mh",-1)})}
+    ]})
+  },
+  {
+    id:"replyall", cat:"Mental Health", title:"The Reply-All",
+    desc:"A thread with 40 people. Your manager @-mentions you to ask why something isn't done. In writing. Forever.",
+    resolve:g=>({log:g.hit("mh",-1)})
+  },
+  {
+    id:"recruiter", cat:"Forced Dilemma", title:"A Recruiter Comes Knocking", min:1,
+    when:g=>g.job>=4,
+    desc:"A recruiter dangles a real opening — but the process moves fast and it'll eat into your week.",
+    resolve:g=>({prompt:"Chase it, or keep your head down?", choices:[
+      {label:"Chase the lead hard", cls:"primary", desc:"Big jump toward the exit, but you'll be visibly distracted.",
+        apply:g=>({log:g.hit("job",3)+" "+g.hit("heat",2)+" "+g.hit("mh",-1)})},
+      {label:"Let it pass", desc:"Not worth the exposure right now. Stay focused.",
+        apply:g=>({log:"You thank them and ghost the thread. Nothing changes."})}
+    ]})
+  },
+  {
+    id:"surprise", cat:"Direct PIP Pressure", title:"Surprise Deliverable",
+    desc:"'Quick thing' — a rush task lands on your desk, due next week. It is neither quick nor a thing.",
+    resolve:g=>{ g.addDeliverable({title:"URGENT: The 'Quick Thing'", cost:2, reward:3}, g.week+1);
+      return {log:"A new deliverable appears, <b class='bad'>due next week</b>. Better make room."}; }
+  },
+  {
+    id:"micro", cat:"Time Thief", title:"Micromanager Mode",
+    desc:"Your manager now wants a written status update every morning. The updates are about writing updates.",
+    resolve:g=>({log:g.hit("mh",-1)+" "+g.hit("heat",1)+" from the constant surveillance."})
+  },
+  {
+    id:"ally", cat:"Coworker Dynamics", title:"Coffee With an Ally",
+    desc:"A work friend quietly covers a dropped ball for you and doesn't mention it in the channel.",
+    resolve:g=>({log:g.hit("cap",1)+" "+g.hit("mh",1)+". Someone in your corner."})
+  },
+  {
+    id:"praise", cat:"Direct PIP Pressure", title:"An Unexpected Kind Word",
+    desc:"A peer review comes back glowing. It even reaches your manager, who seems briefly, suspiciously human.",
+    resolve:g=>({log:g.hit("pip",2)+". Bank it before the feeling passes."})
+  },
+  {
+    id:"snitch", cat:"Exposure Threat", title:"The Snitch", min:2,
+    desc:"Someone forwarded evidence of your job hunting to HR. Whether it sticks depends on how exposed you are.",
+    resolve:g=>{
+      if(g.heat>=6){
+        if(g.cap>=2){ g.add("cap",-2); return {log:"HR opens a file on you — but you spend <b class='cap'>2 Political Capital</b> and an ally makes it disappear. That was close."}; }
+        g.terminate("Caught red-handed", "HR pulled the receipts on your job search. During a PIP, that's cause. Security walked you out by lunch.");
+        return {log:"<b class='bad'>You had no cover, and Heat was too high.</b>"};
+      }
+      return {log:"There's not enough here to pin on you — yet. "+g.hit("heat",3)+" "+g.hit("mh",-1)};
+    }
+  },
+  {
+    id:"reorg", cat:"Mental Health", title:"Reorg Rumors",
+    desc:"The org chart is 'being refreshed.' Nobody will say what that means, which means everybody knows what it means.",
+    resolve:g=>({prompt:"How do you spend the anxiety?", choices:[
+      {label:"Quietly update your resume tonight", cls:"primary", desc:"Turn dread into progress toward the door.",
+        apply:g=>({log:g.hit("job",1)+" "+g.hit("mh",-1)})},
+      {label:"Doomscroll and spiral", desc:"You can't stop refreshing the news. It does not help.",
+        apply:g=>({log:g.hit("mh",-2)})}
+    ]})
+  },
+  {
+    id:"firedrill", cat:"Time Thief", title:"Weekend Fire Drill",
+    desc:"Production is down. You 'volunteer.' Nothing says work-life balance like a Saturday incident bridge.",
+    resolve:g=>({log:"You save the day, exhausted. "+g.hit("mh",-2)+" "+g.hit("pip",1)+" for heroics under fire."})
+  },
+  {
+    id:"midpoint", cat:"Direct PIP Pressure", title:"Formal Midpoint Review", min:2,
+    desc:"HR wants a documented mid-PIP checkpoint. This is the meeting where the narrative gets locked in.",
+    resolve:g=>{
+      if(g.pip>=5) return {log:"You've got receipts. Your manager grudgingly concedes progress. "+g.hit("mh",1)};
+      return {log:"You're behind, and now it's in writing. "+g.hit("mh",-1)+" "+g.hit("heat",2)};
+    }
+  },
+  {
+    id:"counteroffer", cat:"Forced Dilemma", title:"The Retention Trap", min:3,
+    when:g=>g.job>=6,
+    desc:"Word of your interviews leaked upward. Your manager suddenly offers to 'pause the PIP' — if you commit to staying.",
+    resolve:g=>({prompt:"Do you trust a company that put you on a PIP?", choices:[
+      {label:"Take the pause, drop the search", desc:"Instant PIP relief — but you throw away your runway.",
+        apply:g=>{ g.job=Math.max(0,g.job-4); return {log:g.hit("pip",3)+", but "+g.hit("job",-4)+". You bet on them. Again."}; }},
+      {label:"Smile and keep both doors open", cls:"primary", desc:"Nod along, change nothing. Risky if they're watching.",
+        apply:g=>({log:g.hit("heat",2)+". You keep your options — and your suspicions."})}
+    ]})
+  },
+  {
+    id:"deadweight", cat:"Direct PIP Pressure", title:"Blamed for the Team Miss", min:3,
+    desc:"The whole team missed a target. Guess whose PIP makes them the convenient single point of failure.",
+    resolve:g=>({log:g.hit("pip",-1)+" "+g.hit("mh",-1)+". Rank has its privileges; you have none."})
+  },
+];
+
+// ---------- state ----------
+const G = {};
+function newGame(){
+  Object.assign(G,{
+    week:1, day:0, actionsThisWeek:4, nextWeekActions:4,
+    pip:0, job:0, mh:MH_MAX, heat:0, cap:0,
+    deliverables:[], deck:[], discard:[],
+    completedThisWeek:0, jobHuntedThisWeek:0,
+    over:false, phase:"action"
+  });
+  // starting deliverables
+  G.deliverables = [];
+  const pool = shuffle(DELIVERABLE_POOL.slice());
+  G.pool = pool;
+  addDeliverableFromPool(2); // wk2
+  addDeliverableFromPool(3); // wk3
+  // build encounter deck (week-gated cards added as weeks advance handled at draw)
+}
+
+function addDeliverableFromPool(deadlineWeek){
+  const spec = G.pool.pop();
+  if(!spec) return;
+  G.deliverables.push({ id:uid(), title:spec.title, cost:spec.cost, reward:spec.reward,
+    progress:0, deadline:deadlineWeek, done:false, missed:false });
+}
+
+// ---------- helpers on G ----------
+G.add = function(stat,n){
+  if(stat==="mh") G.mh = clamp(G.mh+n,0,MH_MAX);
+  else if(stat==="heat") G.heat = clamp(G.heat+n,0,HEAT_MAX);
+  else if(stat==="cap") G.cap = clamp(G.cap+n,0,CAP_MAX);
+  else if(stat==="pip") G.pip = Math.max(0,G.pip+n);
+  else if(stat==="job") G.job = Math.max(0,G.job+n);
+};
+// hit: apply + return a colored log fragment + spawn juice
+G.hit = function(stat,n){
+  const before = G[stat];
+  G.add(stat,n);
+  const applied = G[stat]-before;
+  const names={pip:"PIP",job:"Job Search",mh:"Mental Health",heat:"Heat",cap:"Political Capital"};
+  const cls={pip:"good",job:"job",mh:n>0?"good":"bad",heat:n>0?"bad":"good",cap:"cap"}[stat];
+  const sign = n>0?"+":"";
+  spawnJuice(stat, (n>0?"+":"")+n);
+  return "<b class='"+cls+"'>"+sign+n+" "+names[stat]+"</b>";
+};
+G.mostProgressed = function(){
+  const act = G.deliverables.filter(d=>!d.done&&!d.missed&&d.progress>0);
+  act.sort((a,b)=>b.progress-a.progress);
+  return act[0]||null;
+};
+G.addDeliverable = function(spec, deadlineWeek){
+  G.deliverables.push({ id:uid(), title:spec.title, cost:spec.cost, reward:spec.reward,
+    progress:0, deadline:deadlineWeek, done:false, missed:false });
+};
+G.terminate = function(hd, lede){ G.pendingTerminate={hd,lede}; };
+
+// ---------- utils ----------
+function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+let _id=0; function uid(){ return "d"+(++_id); }
+
+// ---------- DOM refs ----------
+const $ = s=>document.querySelector(s);
+const el = {
+  title:$("#title"), end:$("#endscreen"), game:$("#game"), veil:$("#veil"),
+  modalhost:$("#modalhost"), days:$("#days"), wklabel:$("#wklabel"),
+  meters:$("#meters"), strip:$("#strip"), deliverables:$("#deliverables"),
+  actions:$("#actions"), hint:$("#hint"), phasehd:$("#phasehd"), screen:$("#screen")
+};
+
+// ---------- juice ----------
+const statColors={pip:"var(--phosphor)",job:"var(--escape)",mh:"var(--amber)",heat:"var(--danger)",cap:"var(--capital)"};
+function spawnJuice(stat,text){
+  const meter = document.querySelector("[data-meter='"+stat+"']");
+  const host=$("#juice");
+  const n=document.createElement("div");
+  n.className="fx"; n.textContent=text; n.style.color=statColors[stat]||"#fff";
+  let x=window.innerWidth/2, y=140;
+  if(meter){ const r=meter.getBoundingClientRect(); x=r.left+r.width*0.5+(Math.random()*30-15); y=r.top+8; }
+  n.style.left=x+"px"; n.style.top=y+"px";
+  host.appendChild(n);
+  setTimeout(()=>n.remove(),1000);
+}
+function shake(){ el.screen.classList.remove("shake"); void el.screen.offsetWidth; el.screen.classList.add("shake"); }
+
+// ---------- render ----------
+function render(){
+  // week/day tracker
+  el.wklabel.textContent="WEEK "+G.week+" / 4";
+  const dl=["Mon","Tue","Wed","Thu","Fri"];
+  el.days.innerHTML="";
+  for(let i=0;i<5;i++){
+    const d=document.createElement("div");
+    d.className="day"+(i===4?" fri":"");
+    d.textContent=dl[i];
+    if(i<4){
+      if(i<G.day) d.classList.add("spent");
+      if(i===G.day && G.phase==="action") d.classList.add("today");
+    } else {
+      if(G.phase!=="action") d.classList.add("spent");
+    }
+    el.days.appendChild(d);
+  }
+
+  // meters
+  el.meters.innerHTML="";
+  el.meters.appendChild(meter("pip","PIP Progress","m-pip",G.pip,SURVIVE,"Survive at "+SURVIVE));
+  el.meters.appendChild(meter("job","Job Search","m-job",G.job,ESCAPE,"Escape at "+ESCAPE));
+  el.meters.appendChild(meter("mh","Mental Health","m-mh",G.mh,MH_MAX,"Breakdown at 0"));
+  el.meters.appendChild(meter("heat","Heat / Suspicion","m-heat",G.heat,HEAT_MAX,"Higher = riskier"));
+
+  // strip
+  const capPips = Array.from({length:CAP_MAX},(_,i)=>"<i class='"+(i<G.cap?"on":"")+"'></i>").join("");
+  el.strip.innerHTML =
+    "<span class='tag'>Political Capital</span> <span class='pips'>"+capPips+"</span>"
+    + "<span>Actions this week: <b style='color:var(--ink)'>"+(G.actionsThisWeek-G.day)+" left</b></span>"
+    + "<span>Deliverables done: <b style='color:var(--phosphor)'>"+G.deliverables.filter(d=>d.done).length+"</b></span>";
+
+  renderDeliverables();
+  renderActions();
+}
+
+function meter(key,label,cls,val,max,goal){
+  const pct=clamp(val/max*100,0,100);
+  const w=document.createElement("div");
+  w.className="meter "+cls; w.setAttribute("data-meter",key);
+  w.innerHTML=
+    "<div class='top'><span class='lab'>"+label+"</span><span class='val'>"+val+(max<=HEAT_MAX?" / "+max:"")+"</span></div>"
+    +"<div class='bar'><i style='width:"+pct+"%'></i></div>"
+    +"<div class='goal'>"+goal+"</div>";
+  return w;
+}
+
+function renderDeliverables(){
+  const host=el.deliverables; host.innerHTML="";
+  const selecting = G.selectMode;
+  host.parent; el.game.classList.toggle("selectable",!!selecting);
+  el.deliverables.classList.toggle("selectable",!!selecting);
+  const active = G.deliverables.filter(d=>!d.missed);
+  if(active.length===0){ host.innerHTML="<div style='color:var(--ink-faint);font-size:12px'>No active deliverables. Enjoy the calm.</div>"; }
+  active.forEach(d=>{
+    const ready = !d.done && d.progress>=d.cost;
+    const urgent = !d.done && d.deadline<=G.week;
+    const card=document.createElement("div");
+    card.className="dcard"+(ready?" ready":"")+(urgent&&!ready?" urgent":"")+(d.done?" done":"");
+    // selection state
+    if(selecting){
+      const pickable = selecting==="work" ? (!d.done) : (ready);
+      card.classList.add(pickable?"pick":"nopick");
+      if(pickable){ card.onclick=()=>chooseDeliverable(d); card.tabIndex=0;
+        card.onkeydown=e=>{ if(e.key==="Enter"||e.key===" "){e.preventDefault();chooseDeliverable(d);} }; }
+    }
+    const pct=clamp(d.progress/d.cost*100,0,100);
+    let badge="";
+    if(d.done) badge="<span class='dbadge done'>Complete</span>";
+    else if(ready) badge="<span class='dbadge ready'>Ready</span>";
+    card.innerHTML=badge
+      +"<div class='dtitle'>"+d.title+"</div>"
+      +"<div class='dmeta'><span>Progress "+d.progress+"/"+d.cost+"</span><span class='reward'>+"+d.reward+" PIP</span></div>"
+      +"<div class='dprog'><i style='width:"+pct+"%'></i></div>"
+      +"<div class='dmeta'><span class='ddl'>"+(d.done?"Filed away":("Due: Week "+d.deadline))+"</span>"
+      +"<span class='ddl' style='color:var(--ink-faint)'>Cost "+d.cost+"</span></div>";
+    host.appendChild(card);
+  });
+}
+
+const ACTIONS=[
+  {c:"work", icon:"📝", name:"Work on Deliverable", desc:"Grind out one unit of progress on a task you pick.", eff:"+1 progress"},
+  {c:"complete", icon:"✅", name:"Complete Deliverable", desc:"Ship a finished task and bank the PIP credit.", eff:"convert to PIP"},
+  {c:"job", icon:"🕵️", name:"Job Hunt", desc:"Apply, interview, scheme. Fast escape — but you leave tracks.", eff:"+3 Job · +2 Heat · −1 MH"},
+  {c:"network", icon:"🤝", name:"Network", desc:"Play politics inside, or work your contacts outside.", eff:"internal or external"},
+  {c:"meditate", icon:"🧘", name:"Meditate / Cry", desc:"Recover. Advances neither goal — and the clock still ticks.", eff:"+3 Mental Health"},
+];
+function renderActions(){
+  const host=el.actions; host.innerHTML="";
+  const disabled = G.phase!=="action" || G.selectMode;
+  ACTIONS.forEach(a=>{
+    const b=document.createElement("button");
+    b.className="acard"; b.setAttribute("data-c",a.c);
+    // complete disabled if none ready
+    let dis=disabled;
+    if(a.c==="complete" && !G.deliverables.some(d=>!d.done&&!d.missed&&d.progress>=d.cost)) dis=true;
+    if(a.c==="work" && !G.deliverables.some(d=>!d.done&&!d.missed)) dis=true;
+    b.disabled=dis;
+    b.innerHTML="<div class='icon'>"+a.icon+"</div><div class='aname'>"+a.name+"</div>"
+      +"<div class='adesc'>"+a.desc+"</div><div class='aeff'>"+a.eff+"</div>";
+    b.onclick=()=>onAction(a.c);
+    host.appendChild(b);
+  });
+  // hint
+  if(G.selectMode==="work") el.hint.innerHTML="Pick a deliverable to <b>work on</b>, or <button class='linkbtn' onclick='Game.cancelSelect()'>cancel</button>";
+  else if(G.selectMode==="complete") el.hint.innerHTML="Pick a <b>ready</b> deliverable to complete, or <button class='linkbtn' onclick='Game.cancelSelect()'>cancel</button>";
+  else el.hint.innerHTML="Day "+(G.day+1)+" of the work week. Every action is a turn you don't get back.";
+}
+
+// ---------- actions ----------
+function onAction(c){
+  if(G.phase!=="action"||G.over) return;
+  if(c==="work"||c==="complete"){ G.selectMode=c; render(); return; }
+  if(c==="job"){ spendDay(()=>{
+      const l=[G.hit("job",3),G.hit("heat",2),G.hit("mh",-1)];
+      flashLog("You spend the day job hunting.", l);
+    }); return; }
+  if(c==="meditate"){ spendDay(()=>{
+      flashLog("You take the day to breathe.", [G.hit("mh",3)]);
+    }); return; }
+  if(c==="network"){ openNetworkChoice(); return; }
+}
+
+function chooseDeliverable(d){
+  const mode=G.selectMode; G.selectMode=null;
+  if(mode==="work"){
+    spendDay(()=>{ d.progress=Math.min(d.cost,d.progress+1); spawnJuice("pip","+1"); flashLog("Progress on “"+d.title+"”.", ["<b class='good'>+1 progress</b> ("+d.progress+"/"+d.cost+")"]); });
+  } else if(mode==="complete"){
+    if(d.progress>=d.cost){
+      spendDay(()=>{ d.done=true; G.completedThisWeek++; flashLog("You ship “"+d.title+"”.", [G.hit("pip",d.reward)]); });
+    } else { render(); }
+  }
+}
+
+function openNetworkChoice(){
+  const host=el.modalhost;
+  host.innerHTML=
+    "<div class='reck neutral'>"
+    +"<div class='ehd'>Network</div>"
+    +"<h3 class='etitle'>Which network do you invest in?</h3>"
+    +"<div class='ecat'>One action · two very different bets</div>"
+    +"<div class='edesc'>Play the room inside for standing and cover — or quietly work your outside contacts toward the exit.</div>"
+    +"<div class='choices'>"
+    +"<button class='btn primary' id='net-int'><span class='bl'>Internal — build political capital</span><span class='bd'>+1 Political Capital, +1 PIP Progress. Allies vouch for you and pad your standing.</span></button>"
+    +"<button class='btn cap' id='net-ext'><span class='bl'>External — work your contacts</span><span class='bd'>+1 Job Search, −2 Heat. Slower than job hunting, but discreet — it cools suspicion.</span></button>"
+    +"<button class='btn' id='net-cancel' style='border-color:var(--ink-faint)'><span class='bl'>Cancel</span></button>"
+    +"</div></div>";
+  el.veil.classList.add("show");
+  $("#net-int").onclick=()=>{ el.veil.classList.remove("show"); spendDay(()=>flashLog("You work the room internally.", [G.hit("cap",1),G.hit("pip",1)])); };
+  $("#net-ext").onclick=()=>{ el.veil.classList.remove("show"); spendDay(()=>flashLog("You quietly work your contacts.", [G.hit("job",1),G.hit("heat",-2)])); };
+  $("#net-cancel").onclick=()=>{ el.veil.classList.remove("show"); };
+}
+
+// applies an action's day cost, runs effect, then checks continuous loss + advances
+function spendDay(effect){
+  effect();
+  G.day++;
+  // continuous checks
+  if(checkContinuousLoss()) return;
+  render();
+  if(G.day>=G.actionsThisWeek){
+    setTimeout(startReckoning, 420);
+  }
+}
+
+function flashLog(title,frags){
+  // brief non-blocking feedback via hint line
+  el.hint.innerHTML = frags.join("  ");
+}
+
+// ---------- reckoning (Friday) ----------
+function startReckoning(){
+  if(G.over) return;
+  G.phase="reckoning"; G.selectMode=null;
+  render();
+  // build the week's encounters
+  const cards = drawEncounters();
+  runEncounterQueue(cards, 0, ()=>afterEncounters());
+}
+
+function availableDeck(){
+  return ENCOUNTERS.filter(c=>{
+    if(c.min && G.week<c.min) return false;
+    if(c.when && !c.when(G)) return false;
+    if(G.seen && G.seen.has(c.id)) return false;
+    return true;
+  });
+}
+function drawEncounters(){
+  const n = G.week>=3?2:(G.week===2?2:1); // wk1:1, wk2:2, wk3-4:2 (escalation)
+  if(!G.seen) G.seen=new Set();
+  const out=[];
+  for(let i=0;i<n;i++){
+    let pool=availableDeck();
+    if(pool.length===0){ G.seen.clear(); pool=availableDeck().filter(c=>!out.includes(c)); }
+    pool=pool.filter(c=>!out.includes(c));
+    if(pool.length===0) break;
+    const card=pool[Math.floor(Math.random()*pool.length)];
+    out.push(card); G.seen.add(card.id);
+  }
+  return out;
+}
+
+function runEncounterQueue(cards, idx, done){
+  if(idx>=cards.length){ done(); return; }
+  showEncounter(cards[idx], ()=>runEncounterQueue(cards, idx+1, done));
+}
+
+function showEncounter(card, next){
+  const host=el.modalhost;
+  const stepInfo = "";
+  host.innerHTML=
+    "<div class='reck'>"
+    +"<div class='ehd'>Friday · Reckoning — Week "+G.week+"</div>"
+    +"<h3 class='etitle'>"+card.title+"</h3>"
+    +"<div class='ecat'>"+card.cat+"</div>"
+    +"<div class='edesc'>"+card.desc+"</div>"
+    +"<div class='elog' id='elog'></div>"
+    +"<div class='choices' id='echoices'></div>"
+    +"</div>";
+  el.veil.classList.add("show");
+  const result = card.resolve(G);
+  const choicesEl=$("#echoices"), logEl=$("#elog");
+
+  if(result.choices){
+    if(result.prompt){ logEl.innerHTML="<span style='color:var(--ink-dim)'>"+result.prompt+"</span>"; }
+    result.choices.forEach(ch=>{
+      const b=document.createElement("button");
+      b.className="btn"+(ch.cls?(" "+ch.cls):"");
+      b.innerHTML="<span class='bl'>"+ch.label+"</span>"+(ch.desc?"<span class='bd'>"+ch.desc+"</span>":"");
+      b.onclick=()=>{
+        const out=ch.apply(G);
+        logEl.innerHTML=out.log||"";
+        renderMetersOnly();
+        if(isBadLog(out.log)) shake();
+        showContinue(choicesEl,()=>{ closeVeil(); if(!checkContinuousLoss()) next(); });
+      };
+      choicesEl.appendChild(b);
+    });
+  } else {
+    logEl.innerHTML=result.log||"";
+    renderMetersOnly();
+    if(isBadLog(result.log)) shake();
+    showContinue(choicesEl,()=>{ closeVeil(); if(!checkContinuousLoss()) next(); });
+  }
+}
+function isBadLog(s){ return typeof s==="string" && s.indexOf("class='bad'")>=0; }
+function showContinue(host, cb){
+  host.innerHTML="";
+  const b=document.createElement("button");
+  b.className="btn primary"; b.innerHTML="<span class='bl'>Continue ▸</span>";
+  b.onclick=cb; host.appendChild(b); b.focus();
+}
+function closeVeil(){ el.veil.classList.remove("show"); }
+function renderMetersOnly(){
+  el.meters.innerHTML="";
+  el.meters.appendChild(meter("pip","PIP Progress","m-pip",G.pip,SURVIVE,"Survive at "+SURVIVE));
+  el.meters.appendChild(meter("job","Job Search","m-job",G.job,ESCAPE,"Escape at "+ESCAPE));
+  el.meters.appendChild(meter("mh","Mental Health","m-mh",G.mh,MH_MAX,"Breakdown at 0"));
+  el.meters.appendChild(meter("heat","Heat / Suspicion","m-heat",G.heat,HEAT_MAX,"Higher = riskier"));
+  // strip cap pips
+  const capPips = Array.from({length:CAP_MAX},(_,i)=>"<i class='"+(i<G.cap?"on":"")+"'></i>").join("");
+  el.strip.innerHTML="<span class='tag'>Political Capital</span> <span class='pips'>"+capPips+"</span>";
+}
+
+// after all encounter cards resolved: deadlines, week advance, win/loss
+function afterEncounters(){
+  if(G.over) return;
+  if(G.pendingTerminate){ const t=G.pendingTerminate; G.pendingTerminate=null; return lose("terminated",t.hd,t.lede); }
+
+  // deadline evaluation for deliverables due THIS week
+  const due = G.deliverables.filter(d=>!d.done&&!d.missed&&d.deadline===G.week);
+  if(due.length){
+    runDeadlineQueue(due,0,()=>afterDeadlines());
+  } else {
+    afterDeadlines();
+  }
+}
+
+function runDeadlineQueue(list,idx,done){
+  if(idx>=list.length){ done(); return; }
+  const d=list[idx];
+  const host=el.modalhost;
+  let log, tripwire=false;
+  if(d.progress===0){
+    tripwire=true;
+    log="You never even started <b class='bad'>“"+d.title+"”</b>. Abandoning an assigned deliverable during a PIP is textbook cause.";
+  } else {
+    d.missed=true;
+    log="You blew the deadline on <b class='bad'>“"+d.title+"”</b> ("+d.progress+"/"+d.cost+"). "+G.hit("pip",-2)+" "+G.hit("mh",-1);
+  }
+  host.innerHTML=
+    "<div class='reck'>"
+    +"<div class='ehd'>Deadline Passed — Week "+G.week+"</div>"
+    +"<h3 class='etitle'>"+(tripwire?"Deliverable Abandoned":"Missed Deadline")+"</h3>"
+    +"<div class='ecat'>Direct PIP Pressure</div>"
+    +"<div class='edesc'>"+log+"</div>"
+    +"<div class='choices' id='dchoices'></div></div>";
+  el.veil.classList.add("show");
+  renderMetersOnly(); shake();
+  showContinue($("#dchoices"), ()=>{
+    closeVeil();
+    if(tripwire){ lose("terminated","Terminated for cause","You let an assigned deliverable rot untouched past its deadline. That's the paper trail they needed."); return; }
+    if(checkContinuousLoss()) return;
+    done();
+  });
+}
+
+function afterDeadlines(){
+  if(G.over) return;
+  // remove missed/kept; end-of-week bookkeeping
+  // Friday of week 4 -> final evaluation
+  if(G.week>=4){ return finalEvaluation(); }
+  // escape can trigger at any Friday
+  if(G.job>=ESCAPE){ return win("escape"); }
+  advanceWeek();
+}
+
+function advanceWeek(){
+  G.week++;
+  G.day=0;
+  G.completedThisWeek=0; G.jobHuntedThisWeek=0;
+  G.actionsThisWeek=G.nextWeekActions; G.nextWeekActions=4;
+  G.heat=Math.max(0,G.heat-1); // suspicion cools slightly each week
+  G.phase="action";
+  render();
+  // weekly briefing
+  const host=el.modalhost;
+  const acts = G.actionsThisWeek;
+  host.innerHTML=
+    "<div class='reck neutral'>"
+    +"<div class='ehd'>New Week</div>"
+    +"<h3 class='etitle'>Week "+G.week+" of 4</h3>"
+    +"<div class='ecat'>"+(G.week===4?"Final week — the walls are closing in":"The clock keeps ticking")+"</div>"
+    +"<div class='edesc' id='briefing'></div>"
+    +"<div class='choices' id='bchoices'></div></div>";
+  const lines=[];
+  lines.push("You have <b style='color:var(--ink)'>"+acts+" action"+(acts===1?"":"s")+"</b> this week.");
+  lines.push("PIP <b style='color:var(--phosphor)'>"+G.pip+"/"+SURVIVE+"</b> · Job Search <b style='color:var(--escape)'>"+G.job+"/"+ESCAPE+"</b> · Mental Health <b style='color:var(--amber)'>"+G.mh+"</b> · Heat <b style='color:var(--danger)'>"+G.heat+"</b>.");
+  const openDl=G.deliverables.filter(d=>!d.done&&!d.missed);
+  if(openDl.length) lines.push(openDl.length+" deliverable"+(openDl.length===1?"":"s")+" still open.");
+  $("#briefing").innerHTML=lines.join("<br>");
+  el.veil.classList.add("show");
+  showContinue($("#bchoices"), ()=>{ closeVeil(); render(); });
+}
+
+// ---------- win/loss ----------
+function checkContinuousLoss(){
+  if(G.over) return true;
+  if(G.mh<=0){ lose("breakdown","Breakdown","Your Mental Health hit zero. You stop showing up — first mentally, then literally. The PIP outlasted you."); return true; }
+  return false;
+}
+
+function finalEvaluation(){
+  // Friday week 4 — the final reckoning
+  if(G.job>=ESCAPE) return win("escape");
+  if(G.pip>=SURVIVE) return win("survive");
+  return lose("fired","Fired","Four weeks are up. You didn't hit your metrics, and you didn't make it out. The PIP did exactly what it was built to do.");
+}
+
+function win(kind){
+  if(G.over) return; G.over=true; G.phase="over";
+  closeVeil();
+  const s=el.end; s.className="overlay show "+(kind==="escape"?"escape":"win");
+  if(kind==="escape"){
+    $("#end-hd").textContent="You Escaped";
+    $("#end-title").textContent="I QUIT";
+    $("#end-lede").innerHTML="You hit <b style='color:var(--escape)'>"+G.job+" Job Search</b> and landed somewhere new before the axe fell. You didn't beat the system — you outran it. Two weeks' notice never felt so good.";
+    $("#end-flav").innerHTML="Final tally · PIP "+G.pip+" · Job "+G.job+" · MH "+G.mh+" · Heat "+G.heat+"<br>The best revenge is a start date.";
+  } else {
+    $("#end-hd").textContent="You Survived the PIP";
+    $("#end-title").textContent="STILL HERE";
+    $("#end-lede").innerHTML="You hit <b style='color:var(--phosphor)'>"+G.pip+" PIP Progress</b>. The system said you'd fail. You didn't. Your manager files the paperwork with visible disappointment.";
+    $("#end-flav").innerHTML="Final tally · PIP "+G.pip+" · Job "+G.job+" · MH "+G.mh+" · Heat "+G.heat+"<br>You kept the job. Now you get to keep it.";
+  }
+}
+function lose(kind,hd,lede){
+  if(G.over) return; G.over=true; G.phase="over";
+  closeVeil();
+  const s=el.end; s.className="overlay show lose";
+  $("#end-hd").textContent="Case Closed";
+  $("#end-title").textContent = kind==="breakdown" ? "BURNED OUT" : (kind==="terminated"?"TERMINATED":"FIRED");
+  $("#end-lede").innerHTML=lede;
+  $("#end-flav").innerHTML="Reached Week "+G.week+" · PIP "+G.pip+" · Job "+G.job+" · MH "+G.mh+" · Heat "+G.heat+"<br>Please return your badge and laptop.";
+}
+
+// ---------- boot ----------
+window.Game = {
+  start(){
+    newGame();
+    el.title.classList.remove("show");
+    el.end.classList.remove("show");
+    closeVeil();
+    el.game.style.display="block";
+    G.phase="action";
+    render();
+  },
+  cancelSelect(){ G.selectMode=null; render(); }
+};
+})();
+</script>
+</body>
+</html>
