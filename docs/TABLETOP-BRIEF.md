@@ -118,8 +118,8 @@ that file is the single source of truth for card text and tuning.
 ## 6. Digital → physical translation notes
 
 - **Telegraph**: reveal the boss's next intent card at week start; resolve it Friday. Ports 1:1.
-- **Goal-lock**: pure rules text — "check goals when you end your week; a reached goal
-  can't be lost, but Friday can still kill you."
+- **Goal-end**: pure rules text — "the moment PIP hits the goal, the level ends; take
+  the review (or the exit, if the Job goal is also met)."
 - **Evolutions**: double-sided starter cards, flip on purchase. Cleanest physical analog.
 - **First-run onboarding** (digital: Escape locked until your first career ends): as a
   rulebook **First Game variant** — "remove the Job Hunt cards and ignore the Job Search
