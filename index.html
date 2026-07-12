@@ -621,7 +621,7 @@ function startLevel(){
   R.pip=0; R.js=0; R.heat=0;                 // Capital persists across the run
   if(fx('start_capital')) R.cap=clamp(R.cap+2,0,CAP_MAX);
   R.focus=BASE_FOCUS; R.nextFocusPenalty=0;
-  R.week=1; R.completedThisWeek=0; R.shipsThisLevel=0; R.skipIntent=false;
+  R.week=1; R.completedThisWeek=0; R.shipsThisLevel=0; R.skipIntent=false; R.pipSnapshot=0; R.jsSnapshot=0;
   R.allyUsed=false; R.corpUsed=false; R.skipBossUsed=false;
   R.pendingTerminate=null; R.over=false; R.phase="play"; R.selecting=null; R.seenEnc=new Set();
   R.rolePool=shuffle(ROLES[R.roleId].pool.slice());
@@ -875,6 +875,7 @@ function openNetwork(idx){
 /* ============ FRIDAY ============ */
 function endWeek(){ if(R.phase!=="play"||R.over) return; R.selecting=null;
   const haunts=R.hand.filter(c=>CARDS[c]&&CARDS[c].haunt).length;
+  R.pipSnapshot=R.pip; R.jsSnapshot=R.js;
   R.hand.forEach(dpush); R.hand=[]; R.phase="friday"; render();
   if(haunts) g.add("mh",-haunts);   // Dread left unplayed gnaws at you
   const steps=[done=>bossStep(done)];
@@ -927,22 +928,24 @@ function afterHeat(){
   if(fx('friday_calm')) g.add("mh",1);
   if(fx('cap_gen')) g.add("cap",1);
   renderLive();
-  const canEscape = escapeUnlocked && R.week>=3 && R.js>=R.jsGoal;
-  const survived = R.pip>=R.pipGoal;
-  if(canEscape) return offerPathChoice(survived);
-  if(R.week>=MAX_WEEKS){ if(survived) return doSurvive(); return gameOver("fired","Fired","Four weeks. No PIP, no exit. The plan worked as designed."); }
+  const survived = R.pip>=R.pipGoal || R.pipSnapshot>=R.pipGoal;
+  const canEscape = escapeUnlocked && R.week>=3 && (R.js>=R.jsGoal || R.jsSnapshot>=R.jsGoal);
+  if(survived && R.week>=MAX_WEEKS && !canEscape) return doSurvive();
+  if(survived || canEscape) return offerFridayChoice(survived, canEscape);
+  if(R.week>=MAX_WEEKS) return gameOver("fired","Fired","Four weeks. No PIP, no exit. The plan worked as designed.");
   offerCardDraft(()=>advanceWeek());
 }
 
 /* ============ PATH CHOICE ============ */
-function offerPathChoice(survived){
+function offerFridayChoice(survived, canEscape){
   R.phase="choice"; const isLast=R.companyIdx>=COMPANIES.length-1; const next=COMPANIES[R.companyIdx+1];
   const choices=[];
-  choices.push({cls:"esc", label:isLast?"Walk out — for good":"Leave for "+next.name+" → Rare card", act:()=>doEscape()});
-  if(R.week<MAX_WEEKS){ choices.push({cls:"primary", label:"Stay — play on", act:()=>offerCardDraft(()=>advanceWeek())}); }
-  else if(survived){ choices.push({cls:"primary", label:"Stay → Office Perk", act:()=>doSurvive()}); }
-  else { choices.push({cls:"plain", label:"Turn it down (fired)", act:()=>gameOver("fired","Fired","Turned down the exit, missed the PIP.")}); }
-  choiceModal("escape2","A Firm Offer","An offer is on the table.",choices);
+  if(survived) choices.push({cls:"primary", label:"Take the review → Office Perk", act:()=>doSurvive()});
+  if(canEscape) choices.push({cls:"esc", label:isLast?"Walk out — for good":"Leave for "+next.name+" → Rare card", act:()=>doEscape()});
+  if(R.week<MAX_WEEKS) choices.push({cls:"plain", label:"Keep working", act:()=>offerCardDraft(()=>advanceWeek())});
+  else if(!survived) choices.push({cls:"plain", label:"Turn it down (fired)", act:()=>gameOver("fired","Fired","Turned down the exit, missed the PIP.")});
+  const title = survived&&canEscape ? "Two Doors" : (survived ? "Review Available" : "A Firm Offer");
+  choiceModal(canEscape?"escape2":"good2", title, survived?"You hit your number.":"An offer is on the table.", choices);
 }
 function doEscape(){ R.phase="cleared"; R.journey.push({co:R.company.name,lvl:R.level,out:"esc"}); offerRareDraft(()=>jumpCompany()); }
 function doSurvive(){ R.phase="cleared"; R.journey.push({co:R.company.name,lvl:R.level,out:"surv"}); offerPerkDraft(()=>levelUp()); }
