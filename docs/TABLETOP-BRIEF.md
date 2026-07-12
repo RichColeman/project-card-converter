@@ -84,7 +84,8 @@ Checked at the end of the week the player closes (goal-lock), offered every Frid
   take an exclusive **Rare card**. The fast/mercenary build.
 - Hold both → choose. Hold neither at Week 4 → **fired**.
 
-**Goals:** RedFlonic 8 PIP / 10 Job · SailHorse 10/12 · McCrapsey 12/14, each **+1 per
+**Goals:** RedFlonic 8 PIP / 10 Job · SailHorse 12/14 · McCrapsey 16/18 — a deliberate
+cliff between companies: arriving underbuilt (e.g. escaping early) should be felt. Each **+1 per
 level** within the company.
 
 **Win the run:** clear all three companies — escape McCrapsey (*Free*) or survive to its
@@ -98,14 +99,14 @@ top (*Partner*).
 | Draftable pool | ~24 | 11 designs ×2–3 copies (Deep Work, Sandbag, Résumé, Coffee Chat, Kiss Up, Skip the Meeting, Ghost a Task, Delegate, LinkedIn Blitz, Therapy, Two Weeks' Notice) |
 | Rare cards | 5 | Escape rewards only (Insider Referral, Portfolio Piece, Signing Bonus, Burn Bridge, Fresh Start) |
 | Curses | ~9 | Busywork / Red Tape / Dread ×3 |
-| **Card upgrades** | — | 12 cards have upgraded versions → **print double-sided: base / upgraded**, flip when bought. No extra cards needed |
+| **Card evolutions** | — | The 6 starter designs evolve into stronger forms: Work→Deep Work · Breathe→Therapy · Job Hunt→LinkedIn Blitz · Ship It→Overdeliver · Network→Power Lunch · Overtime→Crunch Mode → **print starter cards double-sided**, flip on upgrade. No extra cards |
 | Deliverables | 18 | 3 role decks (Engineering / Design / Operations) × 6; face shows work cost, deadline, reward |
 | Encounter deck | 13 | Office events; ~5 are decision cards (choose A/B), 1 uses a coin flip → die roll |
 | Manager bosses | 6 | 2 per company, 3 intents each → per-boss intent mini-deck or a boss board with a cube |
 | Greater demons | 3 | Beelzebub / Leviathan / Lucifer — Level-5 bosses; 2 rotating intents + a **fixed Week-4 finale** that checks deliverables shipped this level (≥3 softens it) |
 | Company boards | 3 | Goal table per level, perk pool, palette identity |
 | Company Perks | 15 | 5 exclusive per company (e.g. Move Fast: Work +1 progress; Corporate Card: cancel one termination/level; The Rolodex: escape cards +1 Job) |
-| Break Room (shop) | 1 card/board | Between levels if Capital ≥2: Therapy +6 MH (2◆) · Purge a curse (2◆) · Upgrade a card (3◆) · Random Rare (3◆) |
+| Break Room (shop) | 1 card/board | Between levels if Capital ≥2: Therapy +6 MH (2◆) · Purge a curse (2◆) · Evolve a starter card (3◆) · Random Rare (3◆) |
 | Trackers | — | MH (0–12), Heat (0–10), PIP & Job Search (0–20ish), Capital (0–14), 4 Focus tokens, week marker, level/company marker, progress cubes for deliverables |
 
 Every number above lives as plain data at the top of `index.html`'s script block —
@@ -116,7 +117,7 @@ that file is the single source of truth for card text and tuning.
 - **Telegraph**: reveal the boss's next intent card at week start; resolve it Friday. Ports 1:1.
 - **Goal-lock**: pure rules text — "check goals when you end your week; a reached goal
   can't be lost, but Friday can still kill you."
-- **Upgrades**: double-sided cards (flip on purchase). Cleanest physical analog.
+- **Evolutions**: double-sided starter cards, flip on purchase. Cleanest physical analog.
 - **First-run onboarding** (digital: Escape locked until your first career ends): as a
   rulebook **First Game variant** — "remove the Job Hunt cards and ignore the Job Search
   track" — or a sealed envelope if you want legacy flavor.
