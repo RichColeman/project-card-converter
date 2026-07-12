@@ -216,6 +216,39 @@ body{ margin:0; background:radial-gradient(120% 90% at 50% 0%,#0e1518 0%,var(--g
 .sumrow{ font-size:11.5px; color:var(--ink-dim); }
 .sumrow b{ color:var(--ink); }
 .perkline{ font-size:19px; letter-spacing:3px; }
+
+/* ===== curse cards ===== */
+:root{ --curse:#c65b8a; }
+.pcard[data-r=curse]{ --c:var(--curse); background:linear-gradient(180deg,#1c1016,#0f0a0d); }
+.pcard[data-r=curse] .art{ background:radial-gradient(circle at 50% 42%,#1e1016,#080406 78%); }
+.pcard[data-r=curse] .cost{ background:radial-gradient(circle at 50% 35%,#e79ec0,#a23e6e 60%,#3a1020 100%); border-color:#e28cb4; }
+
+/* ===== animated sigils ===== */
+.pcard .art svg [data-spin]{ transform-box:fill-box; transform-origin:center; animation:sig-spin 30s linear infinite; }
+.pcard[data-r=rare] .art svg [data-spin]{ animation-duration:22s; }
+.pcard .art svg .motif{ transform-box:fill-box; transform-origin:center; animation:motif-pulse 3.4s ease-in-out infinite; }
+@keyframes sig-spin{ to{ transform:rotate(360deg); } }
+@keyframes motif-pulse{ 0%,100%{ opacity:.72; } 50%{ opacity:1; } }
+/* demon eye blink */
+.boss .face .eye{ animation:blink 5.5s steps(1) infinite; }
+@keyframes blink{ 0%,96%,100%{ opacity:1; } 97%,99%{ opacity:.15; } }
+/* boss intent telegraph pulse */
+.boss .intenttxt:not(.skipped){ animation:intent-pulse 2.6s ease-in-out infinite; }
+@keyframes intent-pulse{ 0%,100%{ text-shadow:0 0 0 transparent; } 50%{ text-shadow:0 0 9px color-mix(in srgb,var(--amber) 60%,transparent); } }
+@media (prefers-reduced-motion:reduce){ .pcard .art svg [data-spin],.pcard .art svg .motif,.boss .face .eye,.boss .intenttxt{ animation:none!important; } }
+
+/* ===== Break Room shop ===== */
+.shopgrid{ display:flex; flex-direction:column; gap:8px; margin:6px 0 12px; }
+.shopitem{ display:flex; align-items:center; gap:12px; text-align:left; font-family:var(--font); cursor:pointer;
+  background:#140f1c; border:2px solid var(--capital); color:var(--ink); border-radius:9px; padding:10px 12px; transition:transform .1s,background .1s; }
+.shopitem:hover:not(:disabled){ background:#1b1327; transform:translateX(3px); }
+.shopitem:disabled{ opacity:.4; cursor:not-allowed; }
+.shopitem .sicon{ font-size:22px; line-height:1; }
+.shopitem .sbody{ flex:1; }
+.shopitem .sname{ font-weight:bold; font-size:13px; }
+.shopitem .sdesc{ font-size:10.5px; color:var(--ink-dim); }
+.shopitem .sprice{ font-size:12px; color:var(--capital); white-space:nowrap; font-weight:bold; }
+.capnum{ color:var(--capital); font-weight:bold; font-variant-numeric:tabular-nums; }
 </style>
 </head>
 <body>
@@ -291,7 +324,7 @@ body{ margin:0; background:radial-gradient(120% 90% at 50% 0%,#0e1518 0%,var(--g
 "use strict";
 
 /* ============ CONSTANTS ============ */
-const MH_BASE=12, HEAT_MAX=10, CAP_MAX=5, HAND_SIZE=5, BASE_FOCUS=4, MAX_WEEKS=4, LEVELS=5;
+const MH_BASE=12, HEAT_MAX=10, CAP_MAX=14, HAND_SIZE=5, BASE_FOCUS=4, MAX_WEEKS=4, LEVELS=5;
 const BEST_KEY="pip_best_v2";
 
 /* ============ CARDS ============
@@ -367,9 +400,51 @@ const CARDS = {
   freshstart:{name:"Fresh Start", cost:0, r:"rare", type:"Recover", rare:true,
     desc:"+4 MH · draw 2",
     play:(g)=>{ const l=g.hit("mh",4); gDraw(2); return l+" · <b class='foc'>drew 2</b>"; }},
+  // ---- curses (demons file these into your deck; purge only at the Break Room) ----
+  busywork:  {name:"Busywork", cost:0, r:"curse", type:"Curse", curse:true, playable:()=>false,
+    desc:"Unplayable. Wastes a hand slot."},
+  redtape:   {name:"Red Tape", cost:2, r:"curse", type:"Curse", curse:true,
+    desc:"Play it to be rid of it. Accomplishes nothing else.",
+    play:()=>"You file the form. It changes nothing."},
+  dread:     {name:"Dread", cost:0, r:"curse", type:"Curse", curse:true, haunt:true, playable:()=>false,
+    desc:"Unplayable. −1 MH if still in hand Friday."},
 };
 function prog(n,d){ return "<b class='good'>+"+n+" progress</b> ("+d.progress+"/"+d.cost+")"; }
 const RARES=["referral","portfolio","signing","burnbridge","freshstart"];
+const CURSES=["busywork","redtape","dread"];
+
+// ---- upgraded card variants (bought at the Break Room). Generated as "<id>_up". ----
+const UPGRADES = {
+  work:     {name:"Work+",           play:(g,d)=>{ const n=2+(fx('work_boost')?1:0); d.progress=Math.min(d.cost,d.progress+n); return prog(n,d)+" "+g.hit("mh",-1); }},
+  deepwork: {name:"Deep Work+",      play:(g,d)=>{ const n=4+(fx('work_boost')?1:0)+(fx('deep_boost')?2:0); d.progress=Math.min(d.cost,d.progress+n); return prog(n,d)+" "+g.hit("mh",-1); }},
+  sandbag:  {name:"Sandbag+",        play:(g,d)=>{ d.progress=Math.min(d.cost,d.progress+3); return prog(3,d); }},
+  shipit:   {name:"Ship It+", cost:0, play:(g,d)=>{ d.done=true; R.completedThisWeek++; let l=g.hit("pip",d.reward); if(fx('billable')) l+=" "+g.hit("js",1); return l; }},
+  jobhunt:  {name:"Job Hunt+",       play:(g)=>g.hit("js",3+(fx('cheap_escape')?1:0))+" "+g.hit("heat",2)+" "+g.hit("mh",-1)},
+  resume:   {name:"Update Résumé+",  play:(g)=>g.hit("js",3+(fx('cheap_escape')?1:0))},
+  breathe:  {name:"Breathe+",        play:(g)=>g.hit("mh",5+(fx('recover_boost')?2:0))},
+  coffee:   {name:"Coffee Chat+",    play:(g)=>g.hit("cap",2)+" "+g.hit("js",1)},
+  kissup:   {name:"Kiss Up+",        play:(g)=>g.hit("heat",-4)+" "+g.hit("cap",2)},
+  delegate: {name:"Delegate+",       play:(g,d)=>{ d.progress=Math.min(d.cost,d.progress+4); return prog(4,d)+" "+g.hit("heat",1); }},
+  blitz:    {name:"LinkedIn Blitz+", play:(g)=>g.hit("js",6+(fx('cheap_escape')?1:0))+" "+g.hit("heat",3)},
+  overtime: {name:"Overtime+",       play:(g)=>{ R.focus+=2; spawnJuice("focus","+2"); return "<b class='foc'>+2 Focus</b> "+g.hit("mh",-1); }},
+};
+(function buildUpgrades(){
+  for(const base in UPGRADES){
+    const b=CARDS[base], u=UPGRADES[base];
+    CARDS[base+"_up"]=Object.assign({}, b, {name:u.name, play:u.play, cost:(u.cost!=null?u.cost:b.cost), upgraded:true, pool:false, rare:false});
+  }
+})();
+function upBase(id){ return id.endsWith("_up") ? id.slice(0,-3) : id; }
+function isUpgradeable(id){ return !id.endsWith("_up") && UPGRADES[id]; }
+
+// ---- bespoke illustrations for the escape-reward rares (replace the generic sigil motif) ----
+const RARE_ART = {
+  referral:  '<path d="M40 34 L40 66 L60 66 L60 30 L48 30" stroke-width="2"/><path d="M40 34 L48 30 L48 66" /><circle cx="44" cy="50" r="1.6" fill="currentColor" stroke="none"/><path d="M62 50 L74 50 M69 45 L74 50 L69 55"/>',
+  portfolio: '<rect x="34" y="42" width="32" height="22" rx="2"/><path d="M44 42 L44 37 L56 37 L56 42"/><path d="M50 46 L52 51 L57 51 L53 54 L55 59 L50 56 L45 59 L47 54 L43 51 L48 51 Z" stroke-width="1.2"/>',
+  signing:   '<circle cx="50" cy="50" r="15"/><path d="M50 41 L50 59 M46 44 Q50 41 54 44 Q54 48 50 50 Q46 52 46 56 Q50 59 54 56"/>',
+  burnbridge:'<path d="M32 56 L68 56 M36 56 L36 48 M44 56 L44 48 M56 56 L56 48 M64 56 L64 48 M32 48 L44 48 M56 48 L68 48"/><path d="M50 52 C46 47 54 45 50 38 C58 44 54 50 50 52 Z" fill="currentColor" stroke="none" opacity=".9"/>',
+  freshstart:'<circle cx="50" cy="54" r="11"/><path d="M32 54 L68 54"/><path d="M50 40 L50 34 M62 44 L66 40 M38 44 L34 40 M60 54 L66 54 M40 54 L34 54"/>',
+};
 
 /* ============ OFFICE PERKS (company-exclusive) ============
    fx tags drive effects. Each perk belongs to one company's pool. */
@@ -426,14 +501,14 @@ const BOSSES = {
   partner:{icon:"🔥", name:"The Partner", demon:"Mammon, Who Bills by the Soul", desc:"Up or out. You are, so far, out.",
     intents:[
       {tel:"Brutal case review — <b>−2 PIP</b>", run:g=>g.hit("pip",-2)+" — 'not partner material.'"},
-      {tel:"Weekend deck request — <b>−1 MH · +1 Heat</b>", run:g=>g.hit("mh",-1)+" "+g.hit("heat",1)},
+      {tel:"Papering your file — <b>a Curse enters your deck</b>", run:g=>{ const n=addCurse(); return "A <b class='bad'>"+n+"</b> curse is filed into your record."; }},
       {tel:"Client 'ask' lands on you — <b>new deliverable</b>", run:g=>{ addDeliverable(R.week+1); return "A client fire drill, due next week."; }},
     ]},
   managingdir:{icon:"💼", name:"The Managing Director", demon:"Asmodeus, Harvester of Credit", desc:"Your work is their promotion packet.",
     intents:[
       {tel:"Piling on scope — <b>new deliverable</b>", run:g=>{ addDeliverable(R.week+2); return "Another workstream for the pile."; }},
       {tel:"Taking credit upstairs — <b>−2 PIP</b>", run:g=>g.hit("pip",-2)+" — your win, their slide."},
-      {tel:"Booking your calendar solid — <b>−1 Focus next week</b>", run:g=>{ R.nextFocusPenalty++; return "Back-to-backs all week. <b class='foc'>−1 Focus next week</b>."; }},
+      {tel:"Documenting concerns — <b>a Curse enters your deck</b>", run:g=>{ const n=addCurse(); return "A <b class='bad'>"+n+"</b> curse joins your deck."; }},
     ]},
 };
 
@@ -502,7 +577,7 @@ function saveBest(depth,label){ if(depth>best.depth){ best={depth,label}; try{ l
 
 /* ============ RUN / LEVEL SETUP ============ */
 function newRun(){
-  Object.assign(R,{ companyIdx:0, level:1, mh:MH_BASE,
+  Object.assign(R,{ companyIdx:0, level:1, mh:MH_BASE, cap:0,
     deck:["work","work","work","work","shipit","shipit","jobhunt","jobhunt","network","breathe","breathe","overtime"],
     perks:[], unlockedThisRun:[], lastBoss:null, journey:[] });
   startLevel();
@@ -514,7 +589,8 @@ function startLevel(){
   R.roleId=Object.keys(ROLES)[Math.floor(Math.random()*Object.keys(ROLES).length)];
   R.pipGoal=co.pipBase+(R.level-1);
   R.jsGoal =co.jsBase +(R.level-1);
-  R.pip=0; R.js=0; R.heat=0; R.cap=fx('start_capital')?2:0;
+  R.pip=0; R.js=0; R.heat=0;                 // Capital persists across the run
+  if(fx('start_capital')) R.cap=clamp(R.cap+2,0,CAP_MAX);
   R.focus=BASE_FOCUS; R.nextFocusPenalty=0;
   R.week=1; R.completedThisWeek=0; R.skipIntent=false;
   R.allyUsed=false; R.corpUsed=false; R.skipBossUsed=false;
@@ -531,6 +607,7 @@ function addDeliverable(deadlineWeek){
   return true;
 }
 function chooseIntent(){ const b=BOSSES[R.bossId]; R.intent=b.intents[Math.floor(Math.random()*b.intents.length)]; }
+function addCurse(id){ id=id||CURSES[Math.floor(Math.random()*CURSES.length)]; R.deck.push(id); R.discard.push(id); return CARDS[id].name; }
 
 /* ============ DECK OPS ============ */
 function drawHand(){ R.hand=[]; drawCards(HAND_SIZE+(fx('big_hand')?1:0)); }
@@ -571,7 +648,7 @@ const $=s=>document.querySelector(s);
 /* ============ JUICE ============ */
 const statColors={pip:"var(--phosphor)",js:"var(--escape)",mh:"var(--amber)",heat:"var(--danger)",cap:"var(--capital)",focus:"var(--focus)"};
 function spawnJuice(stat,text){
-  const anchor = stat==="focus" ? $("#strip .focusdots") : document.querySelector("[data-meter='"+stat+"']") || $("#strip .pips");
+  const anchor = stat==="focus" ? $("#strip .focusdots") : stat==="cap" ? $("#strip .capnum") : document.querySelector("[data-meter='"+stat+"']");
   const n=document.createElement("div"); n.className="fx"; n.textContent=text; n.style.color=statColors[stat]||"#fff";
   let x=window.innerWidth/2,y=150; if(anchor){ const r=anchor.getBoundingClientRect(); x=r.left+r.width*0.5+(Math.random()*24-12); y=r.top+2; }
   n.style.left=x+"px"; n.style.top=y+"px"; $("#juice").appendChild(n); setTimeout(()=>n.remove(),1000);
@@ -607,11 +684,14 @@ function sigil(id,type){
   const star=starPath(50,50,31,P,step,rot);
   let nodes=""; for(let i=0;i<P;i++){ const a=rot+i*2*Math.PI/P; nodes+='<circle cx="'+(50+31*Math.cos(a)).toFixed(1)+'" cy="'+(50+31*Math.sin(a)).toFixed(1)+'" r="1.6"/>'; }
   const dbl = R()<0.5 ? '<circle cx="50" cy="50" r="38" opacity=".35"/>' : "";
+  const centre = RARE_ART[id] || sigilMotif(type);
   return '<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round">'
     +'<circle cx="50" cy="50" r="46" stroke-width="1.7"/><circle cx="50" cy="50" r="42" opacity=".5"/>'+dbl
-    +'<path d="'+ticks+'" opacity=".8"/><path d="'+star+'" opacity=".9"/>'
+    +'<g data-spin><path d="'+ticks+'" opacity=".8"/></g>'
+    +'<path d="'+star+'" opacity=".9"/>'
     +'<circle cx="50" cy="50" r="18" opacity=".5"/>'
-    +'<g fill="currentColor" stroke="none">'+nodes+'</g>'+sigilMotif(type)+'</svg>';
+    +'<g fill="currentColor" stroke="none">'+nodes+'</g>'
+    +'<g class="motif">'+centre+'</g></svg>';
 }
 const DEMONS={
   founder:    {horn:"curl",   eyes:3, acc:"neck"},
@@ -689,12 +769,13 @@ function meter(key,label,cls,val,max,goal){
   return w;
 }
 function renderStrip(){
-  const capPips=Array.from({length:CAP_MAX},(_,i)=>"<i class='"+(i<R.cap?"on":"")+"'></i>").join("");
   const focDots=Array.from({length:Math.max(R.focus,BASE_FOCUS)},(_,i)=>"<i class='"+(i<R.focus?"on":"")+"'></i>").join("");
   let perkHtml = R.perks.length ? ("<span class='relicbar'>"+R.perks.map(id=>{ const p=PERKS[id]; const spent=(p.fx==="ally"&&R.allyUsed)||(p.fx==="corp_card"&&R.corpUsed)||(p.fx==="skip_boss"&&R.skipBossUsed); return "<span class='relic"+(spent?" spent":"")+"' title='"+p.name+" — "+p.desc+"'>"+p.icon+"</span>"; }).join("")+"</span>") : "<span style='color:var(--ink-faint)'>No perks yet</span>";
+  const curses=R.deck.filter(id=>CARDS[id]&&CARDS[id].curse).length;
   $("#strip").innerHTML="<span class='focuschip'>Focus</span> <span class='focusdots'>"+focDots+"</span>"
-    +"<span style='color:var(--capital)'>Capital</span> <span class='pips'>"+capPips+"</span>"
-    +"<span>Perks "+perkHtml+"</span>";
+    +"<span style='color:var(--capital)'>Capital</span> <span class='capnum'>◆ "+R.cap+"</span>"
+    +"<span>Perks "+perkHtml+"</span>"
+    +(curses?"<span style='color:var(--curse)'>Curses <b>"+curses+"</b></span>":"");
 }
 function renderDeliverables(){
   const host=$("#deliverables"); host.innerHTML=""; $("#game").classList.toggle("selecting",!!R.selecting);
@@ -721,7 +802,7 @@ function renderHand(){
     if(!ok) b.classList.add("unplayable");
     if(R.selecting && R.selecting.idx===idx) b.classList.add("selarm");
     b.innerHTML=cardInner(cid);
-    b.onclick= ok ? ()=>onPlay(idx) : ()=>{ flash(!affordable?"Not enough Focus.":!targetable?"No valid target.":!extra?"Only from Week 3.":""); };
+    b.onclick= ok ? ()=>onPlay(idx) : ()=>{ flash(c.curse&&!extra?"A curse. Purge it at the Break Room.":!affordable?"Not enough Focus.":!targetable?"No valid target.":!extra?"Only from Week 3.":""); };
     host.appendChild(b);
   });
 }
@@ -751,7 +832,10 @@ function openNetwork(idx){
 }
 
 /* ============ FRIDAY ============ */
-function endWeek(){ if(R.phase!=="play"||R.over) return; R.selecting=null; R.hand.forEach(dpush); R.hand=[]; R.phase="friday"; render();
+function endWeek(){ if(R.phase!=="play"||R.over) return; R.selecting=null;
+  const haunts=R.hand.filter(c=>CARDS[c]&&CARDS[c].haunt).length;
+  R.hand.forEach(dpush); R.hand=[]; R.phase="friday"; render();
+  if(haunts) g.add("mh",-haunts);   // Dread left unplayed gnaws at you
   const steps=[done=>bossStep(done)];
   const encN=1+(R.week>=3?1:0);
   drawEncounters(encN).forEach(card=>steps.push(done=>encounterStep(card,done)));
@@ -782,7 +866,7 @@ function afterFridayEvents(){
 function continueFriday(){ const due=R.deliverables.filter(d=>!d.done&&!d.missed&&d.deadline===R.week); runSteps(due.map(d=>done=>deadlineStep(d,done)),()=>afterDeadlines()); }
 function deadlineStep(d,done){
   d.missed=true; let log,title;
-  if(d.progress===0){ title="Deliverable Abandoned"; log="Never even started <b class='bad'>“"+d.title+"”</b>. "+g.hit("pip",-3)+" "+g.hit("mh",-2)+" "+g.hit("heat",2); }
+  if(d.progress===0){ title="Deliverable Abandoned"; const cn=addCurse("busywork"); log="Never even started <b class='bad'>“"+d.title+"”</b>. "+g.hit("pip",-3)+" "+g.hit("mh",-2)+" · a <b class='bad'>"+cn+"</b> curse enters your deck."; }
   else { title="Missed Deadline"; log="Blew the deadline on <b class='bad'>“"+d.title+"”</b>. "+g.hit("pip",-2)+" "+g.hit("mh",-1); }
   $("#modalhost").innerHTML=modal("danger","Deadline Passed",title,"PIP Pressure","",log); $("#veil").classList.add("show"); renderLive(); shake();
   cont(()=>{ if(checkLossContinuous()) return; done(); });
@@ -822,9 +906,40 @@ function offerPathChoice(survived){
 function doEscape(){ R.phase="cleared"; R.journey.push({co:R.company.name,lvl:R.level,out:"esc"}); offerRareDraft(()=>jumpCompany()); }
 function doSurvive(){ R.phase="cleared"; R.journey.push({co:R.company.name,lvl:R.level,out:"surv"}); info("good2","Survived","You Survived — "+R.company.name+" · Level "+R.level,"They couldn't fire you. Pick your reward.",()=>offerPerkDraft(()=>levelUp())); }
 
-function jumpCompany(){ g.add("mh",2); R.companyIdx++; if(R.companyIdx>=COMPANIES.length) return winRun("freedom"); R.level=1; startLevel(); render(); $("#veil").classList.remove("show"); }
-function levelUp(){ g.add("mh",2); if(R.level>=LEVELS){ promote(); } else { R.level++; startLevel(); render(); $("#veil").classList.remove("show"); } }
-function promote(){ R.companyIdx++; if(R.companyIdx>=COMPANIES.length) return winRun("partner"); R.level=1; startLevel(); render(); const co=R.company; info("good2","Promoted","Onward and Upward","You topped out — welcome to <b>"+co.name+"</b>, "+co.archetype+". "+co.blurb,()=>{ render(); $("#veil").classList.remove("show"); }); }
+function goToLevel(promo){
+  const after=()=>{ startLevel(); render(); $("#veil").classList.remove("show");
+    if(promo){ const co=R.company; info("good2","Promoted","Onward and Upward","You topped out — welcome to <b>"+co.name+"</b>, "+co.archetype+". "+co.blurb,()=>{ render(); $("#veil").classList.remove("show"); }); } };
+  if(R.cap>=2) openShop(after); else after();
+}
+function levelUp(){ g.add("mh",2); if(R.level>=LEVELS){ R.companyIdx++; if(R.companyIdx>=COMPANIES.length) return winRun("partner"); R.level=1; goToLevel(true); } else { R.level++; goToLevel(false); } }
+function jumpCompany(){ g.add("mh",2); R.companyIdx++; if(R.companyIdx>=COMPANIES.length) return winRun("freedom"); R.level=1; goToLevel(false); }
+
+/* ============ THE BREAK ROOM (shop) ============ */
+function openShop(done){ R.phase="shop"; renderShop(done); }
+function renderShop(done){
+  const cap=R.cap, hasCurse=R.deck.some(id=>CARDS[id]&&CARDS[id].curse), hasUp=R.deck.some(id=>isUpgradeable(id));
+  const items=[
+    {icon:"🛋️", name:"Therapy Session", desc:"+6 Mental Health.", price:2, on:cap>=2&&R.mh<mhMax(), buy:()=>{ R.cap-=2; g.add("mh",6); spawnJuice("mh","+6"); }},
+    {icon:"🧹", name:"Purge a Curse", desc:"Strike one curse from your record.", price:2, on:cap>=2&&hasCurse, buy:()=>{ R.cap-=2; const i=R.deck.findIndex(id=>CARDS[id]&&CARDS[id].curse); if(i>=0) R.deck.splice(i,1); }},
+    {icon:"✨", name:"Upgrade a Card", desc:"Empower one card for the whole run.", price:3, on:cap>=3&&hasUp, special:"up"},
+    {icon:"📇", name:"Headhunter Tip", desc:"Slip a Rare card into your deck.", price:3, on:cap>=3, buy:()=>{ R.cap-=3; const pool=RARES.filter(id=>!R.deck.includes(id)); const pick=(pool.length?pool:RARES)[Math.floor(Math.random()*(pool.length?pool.length:RARES.length))]; R.deck.push(pick); R.discard.push(pick); }},
+  ];
+  $("#modalhost").innerHTML="<div class='reck neutral'><div class='ehd'>The Break Room</div><h3 class='etitle'>Spend Political Capital</h3><div class='ecat'>Balance: <span class='capnum'>◆ "+R.cap+"</span></div><div class='shopgrid' id='shopgrid'></div><div class='choices'><button class='btn plain' id='shopleave'><span class='bl'>Back to work ▸</span></button></div></div>";
+  $("#veil").classList.add("show");
+  const grid=$("#shopgrid");
+  items.forEach(it=>{ const b=document.createElement("button"); b.className="shopitem"; b.disabled=!it.on;
+    b.innerHTML="<span class='sicon'>"+it.icon+"</span><span class='sbody'><span class='sname'>"+it.name+"</span><span class='sdesc'>"+it.desc+"</span></span><span class='sprice'>◆ "+it.price+"</span>";
+    b.onclick=()=>{ if(!it.on) return; if(it.special==="up"){ shopUpgrade(done); return; } it.buy(); renderShop(done); };
+    grid.appendChild(b); });
+  $("#shopleave").onclick=()=>done();
+}
+function shopUpgrade(done){
+  const uniq=[...new Set(R.deck.filter(id=>isUpgradeable(id)))]; const show=shuffle(uniq.slice()).slice(0,3);
+  $("#modalhost").innerHTML="<div class='reck neutral'><div class='ehd'>Upgrade</div><h3 class='etitle'>Empower which card?</h3><div class='draftgrid' id='upg'></div><div class='choices'><button class='btn plain' id='upgback'><span class='bl'>Back</span></button></div></div>";
+  $("#veil").classList.add("show"); const grid=$("#upg"); let picked=false;
+  show.forEach(id=>{ const el=document.createElement("button"); el.className="pcard"; el.setAttribute("data-r",CARDS[id].r); el.innerHTML=cardInner(id); el.onclick=()=>{ if(picked)return; picked=true; R.cap-=3; const i=R.deck.indexOf(id); if(i>=0) R.deck[i]=id+"_up"; renderShop(done); }; grid.appendChild(el); });
+  $("#upgback").onclick=()=>{ if(picked)return; picked=true; renderShop(done); };
+}
 
 /* ============ DRAFTS ============ */
 function offerCardDraft(done){

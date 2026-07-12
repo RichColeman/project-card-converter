@@ -85,6 +85,13 @@ Union Rep, The Rolodex, Billable Hours…). **Escaping** hands you a **Rare card
 get any other way (Insider Referral, Portfolio Piece, Burn Bridge…). Deck, perks, and
 Mental Health persist the whole career; Heat and deliverables reset each level.
 
+**Curses & the Break Room.** The nastier demons *file curses into your deck* — Busywork,
+Red Tape, Dread — dead weight that clogs your hand (Dread even gnaws at your Mental Health
+if you sit on it). You can only be rid of them at the **Break Room**, a shop between levels
+where **Political Capital** (banked from Networking and social cards, and persistent across
+the run) finally spends: a Therapy Session, purge a curse, **upgrade a card** for the whole
+run, or a Headhunter Tip that slips a Rare into your deck.
+
 ### The antagonists
 
 Each company fields its own managers, and they play differently — the startup's **Founder**
