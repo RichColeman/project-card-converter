@@ -562,12 +562,12 @@ const ENCOUNTERS = [
     resolve:g=>{ const d=g.mostProgressed(); if(!d) return {log:"No effect."}; d.progress=Math.max(0,d.progress-1); return {log:"“"+d.title+"” <b class='bad'>−1 progress</b>."}; }},
   {id:"happyhour", cat:"Coworker", title:"Team Happy Hour", desc:"Optional the way these things are optional.",
     resolve:g=>({choices:[
-      {label:"Show your face", cls:"primary", apply:g=>{ R.nextFocusPenalty++; return {log:g.hit("cap",1)+" · <b class='foc'>−1 Focus next week</b>"}; }},
-      {label:"Slip out to job hunt", apply:g=>({log:g.hit("js",1)+" "+g.hit("heat",2)})}]})},
-  {id:"ambush", cat:"Forced Dilemma", title:"The 4 PM Ambush", desc:"A 'quick 15' lands on your phone interview.",
+      {label:"Show your face", cls:"primary", fx:"+1 Capital · −1 Focus next week", apply:g=>{ R.nextFocusPenalty++; return {log:g.hit("cap",1)+" · <b class='foc'>−1 Focus next week</b>"}; }},
+      {label:"Slip out to job hunt", fx:"+1 Job · +2 Heat", apply:g=>({log:g.hit("js",1)+" "+g.hit("heat",2)})}]})},
+  {id:"ambush", cat:"Forced Dilemma", title:"The 4 PM Ambush", when:()=>escapeUnlocked, desc:"A 'quick 15' lands on your phone interview.",
     resolve:g=>({choices:[
-      {label:"Cancel the interview", cls:"primary", apply:g=>({log:g.hit("js",-2)})},
-      {label:"Risk being late", apply:g=> Math.random()<0.5 ? ({log:"No effect."}) : ({log:g.hit("pip",-2)+" "+g.hit("mh",-1)})}]})},
+      {label:"Cancel the interview", cls:"primary", fx:"−2 Job", apply:g=>({log:g.hit("js",-2)})},
+      {label:"Risk being late", fx:"50%: nothing · 50%: −2 PIP −1 MH", apply:g=> Math.random()<0.5 ? ({log:"No effect."}) : ({log:g.hit("pip",-2)+" "+g.hit("mh",-1)})}]})},
   {id:"praise", cat:"PIP Pressure", title:"An Unexpected Kind Word", desc:"A peer review comes back glowing.", resolve:g=>({log:g.hit("pip",2), good:true})},
   {id:"ally", cat:"Coworker", title:"Coffee With an Ally", desc:"A friend quietly covers for you.", resolve:g=>({log:g.hit("cap",1)+" "+g.hit("mh",1), good:true})},
   {id:"snitch", cat:"Exposure", title:"The Snitch", min:2, desc:"Someone forwarded your job-board activity to HR.",
@@ -575,8 +575,8 @@ const ENCOUNTERS = [
   {id:"firedrill", cat:"Time Thief", title:"Weekend Fire Drill", desc:"Prod is down. You 'volunteer.'", resolve:g=>({log:g.hit("mh",-2)+" "+g.hit("pip",1)})},
   {id:"reorg", cat:"Mental Health", title:"Layoff Rumors", desc:"The org chart is 'being refreshed.'",
     resolve:g=>({choices:[
-      {label:"Update your résumé tonight", cls:"primary", apply:g=>({log:g.hit("js",1)+" "+g.hit("mh",-1)})},
-      {label:"Doomscroll and spiral", apply:g=>({log:g.hit("mh",-2)})}]})},
+      {label:"Update your résumé tonight", cls:"primary", fx:"+1 Job · −1 MH", apply:g=>({log:g.hit("js",1)+" "+g.hit("mh",-1)})},
+      {label:"Doomscroll and spiral", fx:"−2 MH", apply:g=>({log:g.hit("mh",-2)})}]})},
   {id:"blame", cat:"PIP Pressure", title:"Blamed for the Team Miss", min:2, desc:"You're the tidy scapegoat.", resolve:g=>({log:g.hit("pip",-1)+" "+g.hit("mh",-1)})},
 ];
 
@@ -647,9 +647,9 @@ const g = {
     else if(stat==="heat") R.heat=clamp(R.heat+n,0,HEAT_MAX);
     else if(stat==="cap") R.cap=clamp(R.cap+n,0,CAP_MAX);
     else if(stat==="pip") R.pip=Math.max(0,R.pip+n);
-    else if(stat==="js") R.js=Math.max(0,R.js+n);
+    else if(stat==="js"){ if(escapeUnlocked) R.js=Math.max(0,R.js+n); }
   },
-  hit(stat,n){ g.add(stat,n);
+  hit(stat,n){ if(stat==="js"&&!escapeUnlocked) return ""; g.add(stat,n);
     const names={pip:"PIP",js:"Job",mh:"MH",heat:"Heat",cap:"Capital"};
     const cls={pip:"good",js:"job",mh:n>0?"good":"bad",heat:n>0?"bad":"good",cap:"cap"}[stat];
     spawnJuice(stat,(n>0?"+":"")+n);
@@ -852,9 +852,10 @@ function resolvePlay(idx,target){ const cid=R.hand[idx], c=CARDS[cid]; R.focus-=
   R.hand.splice(idx,1); dpush(cid); R.selecting=null; render(); $("#hint").innerHTML=log; checkLossContinuous(); }
 function openNetwork(idx){
   const cid=R.hand[idx], big = cid==="powerlunch" ? 2 : 1;
+  const extFx = escapeUnlocked ? "+"+big+" Job · −2 Heat" : "−2 Heat";
   $("#modalhost").innerHTML="<div class='reck neutral'><div class='ehd'>"+CARDS[cid].name+"</div><h3 class='etitle'>Which network?</h3><div class='choices'>"
     +"<button class='btn primary' id='n-int'><span class='bl'>Internal</span><span class='bd'>+"+big+" Capital · +1 PIP</span></button>"
-    +"<button class='btn cap' id='n-ext'><span class='bl'>External</span><span class='bd'>+"+big+" Job · −2 Heat</span></button>"
+    +"<button class='btn cap' id='n-ext'><span class='bl'>External</span><span class='bd'>"+extFx+"</span></button>"
     +"<button class='btn plain' id='n-cancel'><span class='bl'>Cancel</span></button></div></div>";
   $("#veil").classList.add("show"); let done=false;
   const fin=make=>{ if(done) return; done=true; $("#veil").classList.remove("show"); R.focus-=CARDS[cid].cost; R.hand.splice(idx,1); dpush(cid); const log=make(); render(); $("#hint").innerHTML=log; checkLossContinuous(); };
@@ -874,13 +875,14 @@ function endWeek(){ if(R.phase!=="play"||R.over) return; R.selecting=null;
   drawEncounters(encN).forEach(card=>steps.push(done=>encounterStep(card,done)));
   runSteps(steps,()=>afterFridayEvents());
 }
-function drawEncounters(n){ const out=[]; for(let i=0;i<n;i++){ let pool=ENCOUNTERS.filter(c=>(!c.min||R.week>=c.min)&&!R.seenEnc.has(c.id)&&!out.includes(c)); if(!pool.length){ R.seenEnc.clear(); pool=ENCOUNTERS.filter(c=>(!c.min||R.week>=c.min)&&!out.includes(c)); } if(!pool.length) break; const card=pool[Math.floor(Math.random()*pool.length)]; out.push(card); R.seenEnc.add(card.id); } return out; }
+function drawEncounters(n){ const out=[]; for(let i=0;i<n;i++){ let pool=ENCOUNTERS.filter(c=>(!c.min||R.week>=c.min)&&(!c.when||c.when())&&!R.seenEnc.has(c.id)&&!out.includes(c)); if(!pool.length){ R.seenEnc.clear(); pool=ENCOUNTERS.filter(c=>(!c.min||R.week>=c.min)&&(!c.when||c.when())&&!out.includes(c)); } if(!pool.length) break; const card=pool[Math.floor(Math.random()*pool.length)]; out.push(card); R.seenEnc.add(card.id); } return out; }
 function bossStep(done){
   const b=BOSSES[R.bossId];
   if(!R.skipIntent && fx('skip_boss') && !R.skipBossUsed && R.intent && /−|new deliverable|creeps/i.test(R.intent.tel)){ R.skipBossUsed=true; R.skipIntent=true; }
   if(R.skipIntent){ $("#modalhost").innerHTML=modal("danger","Friday · Week "+R.week,"Move Skipped","","",stripTags(R.intent.tel)); $("#veil").classList.add("show"); R.skipIntent=false; return cont(done); }
+  const move=R.intent?stripTags(R.intent.tel).split("—")[0].trim():"";
   const log=R.intent?R.intent.run(g):"No move this week."; renderLive(); if(bad(log)) shake();
-  $("#modalhost").innerHTML=modal("danger","Friday · Week "+R.week,b.name,"","",log); $("#veil").classList.add("show");
+  $("#modalhost").innerHTML=modal("danger","Friday · Week "+R.week,b.name,"",move,log); $("#veil").classList.add("show");
   cont(()=>{ if(checkLossContinuous()) return; done(); });
 }
 function encounterStep(card,done){
@@ -888,7 +890,10 @@ function encounterStep(card,done){
   $("#modalhost").innerHTML=modal(cls,"Friday · Office",card.title,card.cat,card.desc,""); $("#veil").classList.add("show");
   const logEl=()=>$("#modalhost .elog"), choEl=()=>$("#modalhost .choices");
   if(res.choices){ let chosen=false;
-    res.choices.forEach(ch=>{ const btn=document.createElement("button"); btn.className="btn"+(ch.cls?(" "+ch.cls):""); btn.innerHTML="<span class='bl'>"+ch.label+"</span>"; btn.onclick=()=>{ if(chosen) return; chosen=true; const out=ch.apply(g); logEl().innerHTML=out.log||""; renderLive(); if(bad(out.log)) shake(); cont(()=>{ if(checkLossContinuous()) return; done(); }); }; choEl().appendChild(btn); });
+    res.choices.forEach(ch=>{ const btn=document.createElement("button"); btn.className="btn"+(ch.cls?(" "+ch.cls):"");
+      let fx=ch.fx||""; if(!escapeUnlocked) fx=fx.split(" · ").filter(p=>!/Job/i.test(p)).join(" · ");
+      btn.innerHTML="<span class='bl'>"+ch.label+"</span>"+(fx?"<span class='bd'>"+fx+"</span>":"");
+      btn.onclick=()=>{ if(chosen) return; chosen=true; const out=ch.apply(g); logEl().innerHTML=out.log||""; renderLive(); if(bad(out.log)) shake(); cont(()=>{ if(checkLossContinuous()) return; done(); }); }; choEl().appendChild(btn); });
   } else { logEl().innerHTML=res.log||""; renderLive(); if(bad(res.log)&&!res.good) shake(); cont(()=>{ if(checkLossContinuous()) return; done(); }); }
 }
 function afterFridayEvents(){
@@ -911,7 +916,7 @@ function heatCheck(done){
     if(g.spendCap(2)){ return info("neutral","Exposure","Bought Off","<b class='cap'>−2 Capital</b> "+g.hit("heat",-3),()=>{ renderLive(); done(); }); }
     return gameOver("terminated","Terminated for Cause","Heat hit 10. They connected the dots.");
   }
-  if(R.heat>=8){ return info("danger","Exposure","A Close Call",g.hit("mh",-1),()=>{ renderLive(); done(); }); }
+  if(R.heat>=8){ return info("danger","Exposure","A Close Call","Your job hunt is drawing looks. "+g.hit("mh",-1),()=>{ renderLive(); done(); }); }
   done();
 }
 function afterHeat(){
@@ -960,7 +965,7 @@ function renderShop(done){
     {icon:"🛋️", name:"Therapy Session", desc:"+6 Mental Health.", price:2, on:cap>=2&&R.mh<mhMax(), buy:()=>{ R.cap-=2; g.add("mh",6); spawnJuice("mh","+6"); }},
     {icon:"🧹", name:"Purge a Curse", desc:"Strike one curse from your record.", price:2, on:cap>=2&&hasCurse, buy:()=>{ R.cap-=2; const i=R.deck.findIndex(id=>CARDS[id]&&CARDS[id].curse); if(i>=0) R.deck.splice(i,1); }},
     {icon:"✨", name:"Upgrade a Card", desc:"Evolve a starter card (Work → Deep Work…).", price:3, on:cap>=3&&hasUp, special:"up"},
-    {icon:"📇", name:"Headhunter Tip", desc:"Slip a Rare card into your deck.", price:3, on:cap>=3, buy:()=>{ R.cap-=3; const pool=RARES.filter(id=>!R.deck.includes(id)); const pick=(pool.length?pool:RARES)[Math.floor(Math.random()*(pool.length?pool.length:RARES.length))]; R.deck.push(pick); R.discard.push(pick); }},
+    {icon:"📇", name:"Headhunter Tip", desc:"Slip a Rare card into your deck.", price:3, on:cap>=3&&escapeUnlocked, buy:()=>{ R.cap-=3; const pool=RARES.filter(id=>!R.deck.includes(id)); const pick=(pool.length?pool:RARES)[Math.floor(Math.random()*(pool.length?pool.length:RARES.length))]; R.deck.push(pick); R.discard.push(pick); }},
   ];
   $("#modalhost").innerHTML="<div class='reck neutral'><div class='ehd'>The Break Room</div><h3 class='etitle'>Spend Political Capital</h3><div class='ecat'>Balance: <span class='capnum'>◆ "+R.cap+"</span></div><div class='shopgrid' id='shopgrid'></div><div class='choices'><button class='btn plain' id='shopleave'><span class='bl'>Back to work ▸</span></button></div></div>";
   $("#veil").classList.add("show");
