@@ -267,7 +267,7 @@ body{ margin:0; background:radial-gradient(120% 90% at 50% 0%,#0e1518 0%,var(--g
     <div class="stamp" style="margin-bottom:16px">Confidential — HR</div>
     <h1 class="big glow" style="color:var(--phosphor)">PIP</h1>
     <div style="letter-spacing:.3em;font-size:11px;color:var(--ink-dim);text-transform:uppercase;margin-top:6px">A Corporate Roguelike Deckbuilder</div>
-    <p class="lede">You've been placed on a Performance Improvement Plan. Nobody mentioned the company is Hell — HR just hasn't put it in the handbook yet. Build a deck of workplace tactics, read your (demonic) manager, and climb three companies before the system gets you.</p>
+    <p class="lede">You're on a Performance Improvement Plan. The company is Hell. Climb out.</p>
     <div class="brief" id="brief"></div>
     <div class="tiers">
       <div class="tier"><b>RedFlonic</b>the hungry startup</div>
@@ -335,10 +335,10 @@ const BEST_KEY="pip_best_v2";
    Keep descriptions terse: the numbers do the talking. */
 const CARDS = {
   work:     {name:"Work", cost:1, r:"common", type:"Action", target:"any", pool:false,
-    desc:"+1 progress. −1 MH.",
+    desc:"+1 progress · −1 MH",
     play:(g,d)=>{ const n=1+(fx('work_boost')?1:0); d.progress=Math.min(d.cost,d.progress+n); return prog(n,d)+" "+g.hit("mh",-1); }},
   shipit:   {name:"Ship It", cost:1, r:"common", type:"Action", target:"ready",
-    desc:"Finish a ready deliverable → PIP.",
+    desc:"Ship a ready deliverable → PIP",
     play:(g,d)=>{ d.done=true; R.completedThisWeek++; R.shipsThisLevel++; let l=g.hit("pip",d.reward); if(fx('billable')) l+=" "+g.hit("js",1); return l; }},
   jobhunt:  {name:"Job Hunt", cost:1, r:"common", type:"Escape",
     desc:"+2 Job · +2 Heat · −1 MH",
@@ -346,20 +346,20 @@ const CARDS = {
   network:  {name:"Network", cost:1, r:"common", type:"Social", choose:true,
     desc:"Internal or external."},
   breathe:  {name:"Breathe", cost:1, r:"common", type:"Recover",
-    desc:"+3 Mental Health.",
+    desc:"+3 MH",
     play:(g)=>g.hit("mh",3+(fx('recover_boost')?2:0))},
   overtime: {name:"Overtime", cost:0, r:"common", type:"Tempo",
     desc:"+1 Focus · −1 MH",
     play:(g)=>{ R.focus++; spawnJuice("focus","+1"); return "<b class='foc'>+1 Focus</b> "+g.hit("mh",-1); }},
   // ---- weekly-draft pool ----
   deepwork: {name:"Deep Work", cost:2, r:"uncommon", type:"Action", target:"any", pool:true,
-    desc:"+3 progress. −2 MH.",
+    desc:"+3 progress · −2 MH",
     play:(g,d)=>{ const n=3+(fx('work_boost')?1:0)+(fx('deep_boost')?2:0); d.progress=Math.min(d.cost,d.progress+n); return prog(n,d)+" "+g.hit("mh",-2); }},
   sandbag:  {name:"Sandbag", cost:1, r:"uncommon", type:"Action", target:"any", pool:true,
-    desc:"+2 progress. No drain.",
+    desc:"+2 progress",
     play:(g,d)=>{ d.progress=Math.min(d.cost,d.progress+2); return prog(2,d); }},
   resume:   {name:"Update Résumé", cost:1, r:"uncommon", type:"Escape", pool:true,
-    desc:"+2 Job. No Heat.",
+    desc:"+2 Job · quiet",
     play:(g)=>g.hit("js",2+(fx('cheap_escape')?1:0))},
   coffee:   {name:"Coffee Chat", cost:1, r:"uncommon", type:"Social", pool:true,
     desc:"+1 Capital · +1 Job",
@@ -368,10 +368,10 @@ const CARDS = {
     desc:"−3 Heat · +1 Capital",
     play:(g)=>g.hit("heat",-3)+" "+g.hit("cap",1)},
   skipmtg:  {name:"Skip the Meeting", cost:1, r:"uncommon", type:"Tempo", pool:true,
-    desc:"Cancel Friday's manager move. +2 Heat",
+    desc:"Cancel Friday's boss move · +2 Heat",
     play:(g)=>{ R.skipIntent=true; return "<b class='foc'>Move cancelled.</b> "+g.hit("heat",2); }},
   ghosttask:{name:"Ghost a Task", cost:1, r:"uncommon", type:"Tempo", target:"any", pool:true,
-    desc:"Push a deadline back a week.",
+    desc:"Deadline +1 week",
     play:(g,d)=>{ d.deadline++; return "“"+d.title+"” → <b class='foc'>Week "+d.deadline+"</b>."; }},
   delegate: {name:"Delegate", cost:1, r:"uncommon", type:"Action", target:"any", pool:true,
     desc:"+3 progress · +1 Heat",
@@ -380,18 +380,18 @@ const CARDS = {
     desc:"+4 Job · +3 Heat",
     play:(g)=>g.hit("js",4+(fx('cheap_escape')?1:0))+" "+g.hit("heat",3)},
   therapy:  {name:"Therapy", cost:2, r:"rare", type:"Recover", pool:true,
-    desc:"+5 MH · draw a card",
+    desc:"+5 MH · draw 1",
     play:(g)=>{ const l=g.hit("mh",5+(fx('recover_boost')?2:0)); gDraw(1); return l+" · <b class='foc'>drew 1</b>"; }},
   twoweeks: {name:"Two Weeks' Notice", cost:3, r:"rare", type:"Escape", pool:true,
-    desc:"+3 Job. Week 3+.",
+    desc:"+3 Job · Wk 3+",
     playable:()=>R.week>=3,
     play:(g)=>g.hit("js",3+(fx('cheap_escape')?1:0))},
   // ---- escape-reward rares (not in weekly pool) ----
   referral: {name:"Insider Referral", cost:1, r:"rare", type:"Escape", rare:true,
-    desc:"+5 Job Search.",
+    desc:"+5 Job",
     play:(g)=>g.hit("js",5+(fx('cheap_escape')?1:0))},
   portfolio:{name:"Portfolio Piece", cost:2, r:"rare", type:"Action", target:"any", rare:true,
-    desc:"Finish any deliverable now.",
+    desc:"Complete any deliverable",
     play:(g,d)=>{ d.done=true; R.completedThisWeek++; R.shipsThisLevel++; return g.hit("pip",d.reward)+" — “"+d.title+"” done."; }},
   signing:  {name:"Signing Bonus", cost:1, r:"rare", type:"Recover", rare:true,
     desc:"+2 Capital · +3 MH",
@@ -404,12 +404,12 @@ const CARDS = {
     play:(g)=>{ const l=g.hit("mh",4); gDraw(2); return l+" · <b class='foc'>drew 2</b>"; }},
   // ---- curses (demons file these into your deck; purge only at the Break Room) ----
   busywork:  {name:"Busywork", cost:0, r:"curse", type:"Curse", curse:true, playable:()=>false,
-    desc:"Unplayable. Wastes a hand slot."},
+    desc:"Unplayable"},
   redtape:   {name:"Red Tape", cost:2, r:"curse", type:"Curse", curse:true,
-    desc:"Play it to be rid of it. Accomplishes nothing else.",
-    play:()=>"You file the form. It changes nothing."},
+    desc:"No effect",
+    play:()=>"Filed."},
   dread:     {name:"Dread", cost:0, r:"curse", type:"Curse", curse:true, haunt:true, playable:()=>false,
-    desc:"Unplayable. −1 MH if still in hand Friday."},
+    desc:"Unplayable · −1 MH if held Friday"},
 };
 function prog(n,d){ return "<b class='good'>+"+n+" progress</b> ("+d.progress+"/"+d.cost+")"; }
 const RARES=["referral","portfolio","signing","burnbridge","freshstart"];
@@ -477,59 +477,59 @@ const BOSSES = {
   founder:{icon:"🦄", name:"The Founder", demon:"Belphaz, Archfiend of the Pivot", desc:"A visionary. The vision changes weekly.",
     intents:[
       {tel:"Pivoting the whole roadmap — <b>a deadline creeps up</b>", run:g=>{ const d=g.soonest(); if(!d) return "Nothing to pull forward."; d.deadline=Math.max(R.week,d.deadline-1); return "“"+d.title+"” now due <b class='bad'>Week "+d.deadline+"</b>."; }},
-      {tel:"Dreaming up a 'quick win' — <b>new deliverable</b>", run:g=>{ addDeliverable(R.week+1); return "A new deliverable, due next week."; }},
-      {tel:"All-hands vision session — <b>−1 Focus next week</b>", run:g=>{ R.nextFocusPenalty++; return "The vibes were immaculate. <b class='foc'>−1 Focus next week</b>."; }},
+      {tel:"Dreaming up a 'quick win' — <b>new deliverable</b>", run:g=>{ addDeliverable(R.week+1); return "New deliverable · due next week."; }},
+      {tel:"All-hands vision session — <b>−1 Focus next week</b>", run:g=>{ R.nextFocusPenalty++; return "<b class='foc'>−1 Focus next week</b>"; }},
     ]},
   culturefit:{icon:"🎉", name:"The Culture Fit", demon:"Moloch, Devourer of Boundaries", desc:"Cares more about vibes than output.",
     intents:[
-      {tel:"Mandatory fun event — <b>−1 MH</b>", run:g=>g.hit("mh",-1)+" of forced whimsy."},
-      {tel:"Reviewing your 'energy' — <b>−1 PIP</b>", run:g=>g.hit("pip",-1)+" for insufficient enthusiasm."},
-      {tel:"Oversharing in #general — <b>+2 Heat</b>", run:g=>g.hit("heat",2)+" — your name came up."},
+      {tel:"Mandatory fun event — <b>−1 MH</b>", run:g=>g.hit("mh",-1)},
+      {tel:"Reviewing your 'energy' — <b>−1 PIP</b>", run:g=>g.hit("pip",-1)},
+      {tel:"Oversharing in #general — <b>+2 Heat</b>", run:g=>g.hit("heat",2)},
     ]},
   // SailHorse
   middlemgr:{icon:"📎", name:"The Middle Manager", demon:"Bureaucrax, Clerk of the Ninth Circle", desc:"Wants a status update on your status updates.",
     intents:[
-      {tel:"Status report due — <b>−1 Focus next week</b>", run:g=>{ R.nextFocusPenalty++; return "Paperwork about paperwork. <b class='foc'>−1 Focus next week</b>."; }},
-      {tel:"Nitpicking your work — <b>−1 PIP</b>", run:g=>g.hit("pip",-1)+" to 'quality concerns.'"},
-      {tel:"Watching your screen — <b>+2 Heat</b>", run:g=>g.hit("heat",2)+" from the over-shoulder."},
+      {tel:"Status report due — <b>−1 Focus next week</b>", run:g=>{ R.nextFocusPenalty++; return "<b class='foc'>−1 Focus next week</b>"; }},
+      {tel:"Nitpicking your work — <b>−1 PIP</b>", run:g=>g.hit("pip",-1)},
+      {tel:"Watching your screen — <b>+2 Heat</b>", run:g=>g.hit("heat",2)},
     ]},
   thereorg:{icon:"🌀", name:"The Reorg", demon:"Chaosiel, the Ever-Shifting Org Chart", desc:"Nobody knows who they report to anymore.",
     intents:[
       {tel:"Shuffling priorities — <b>a deadline creeps up</b>", run:g=>{ const d=g.soonest(); if(!d) return "Nothing to reshuffle."; d.deadline=Math.max(R.week,d.deadline-1); return "“"+d.title+"” now due <b class='bad'>Week "+d.deadline+"</b>."; }},
-      {tel:"Left you on read — <b>−1 MH</b>", run:g=>g.hit("mh",-1)+" — six days, no reply."},
-      {tel:"Reassigning your win — <b>−1 PIP</b>", run:g=>g.hit("pip",-1)+" — credit went sideways."},
+      {tel:"Left you on read — <b>−1 MH</b>", run:g=>g.hit("mh",-1)},
+      {tel:"Reassigning your win — <b>−1 PIP</b>", run:g=>g.hit("pip",-1)},
     ]},
   // McCrapsey
   partner:{icon:"🔥", name:"The Partner", demon:"Mammon, Who Bills by the Soul", desc:"Up or out. You are, so far, out.",
     intents:[
-      {tel:"Brutal case review — <b>−2 PIP</b>", run:g=>g.hit("pip",-2)+" — 'not partner material.'"},
-      {tel:"Papering your file — <b>a Curse enters your deck</b>", run:g=>{ const n=addCurse(); return "A <b class='bad'>"+n+"</b> curse is filed into your record."; }},
-      {tel:"Client 'ask' lands on you — <b>new deliverable</b>", run:g=>{ addDeliverable(R.week+1); return "A client fire drill, due next week."; }},
+      {tel:"Brutal case review — <b>−2 PIP</b>", run:g=>g.hit("pip",-2)},
+      {tel:"Papering your file — <b>a Curse enters your deck</b>", run:g=>{ const n=addCurse(); return "<b class='bad'>"+n+"</b> curse added."; }},
+      {tel:"Client 'ask' lands on you — <b>new deliverable</b>", run:g=>{ addDeliverable(R.week+1); return "New deliverable · due next week."; }},
     ]},
   managingdir:{icon:"💼", name:"The Managing Director", demon:"Asmodeus, Harvester of Credit", desc:"Your work is their promotion packet.",
     intents:[
-      {tel:"Piling on scope — <b>new deliverable</b>", run:g=>{ addDeliverable(R.week+2); return "Another workstream for the pile."; }},
-      {tel:"Taking credit upstairs — <b>−2 PIP</b>", run:g=>g.hit("pip",-2)+" — your win, their slide."},
-      {tel:"Documenting concerns — <b>a Curse enters your deck</b>", run:g=>{ const n=addCurse(); return "A <b class='bad'>"+n+"</b> curse joins your deck."; }},
+      {tel:"Piling on scope — <b>new deliverable</b>", run:g=>{ addDeliverable(R.week+2); return "New deliverable."; }},
+      {tel:"Taking credit upstairs — <b>−2 PIP</b>", run:g=>g.hit("pip",-2)},
+      {tel:"Documenting concerns — <b>a Curse enters your deck</b>", run:g=>{ const n=addCurse(); return "<b class='bad'>"+n+"</b> curse added."; }},
     ]},
   // ---- Level-5 greater demons (final boss of each company). Last intent is the Week-4 finale. ----
   beelzebub:{icon:"🪰", name:"Beelzebub, VP of Growth", demon:"Prince of the Hockey-Stick", desc:"Wants results that violate physics. Weekly.", greater:true,
     intents:[
-      {tel:"Demanding 10× numbers — <b>−2 PIP</b>", run:g=>g.hit("pip",-2)+" — 'think bigger.'"},
-      {tel:"Poaching your team — <b>new deliverable + −1 Focus</b>", run:g=>{ addDeliverable(R.week+1); R.nextFocusPenalty++; return "Half your team 'reallocated.' <b class='foc'>−1 Focus next week</b>."; }},
-      {tel:"▲ THE BOARD REVIEW — <b>−4 PIP</b> (−1 if you shipped 3+ this level)", run:g=> R.shipsThisLevel>=3 ? (g.hit("pip",-1)+" — the numbers barely defend you.") : (g.hit("pip",-4)+" — 'not a fit for our trajectory.'")},
+      {tel:"Demanding 10× numbers — <b>−2 PIP</b>", run:g=>g.hit("pip",-2)},
+      {tel:"Poaching your team — <b>new deliverable + −1 Focus</b>", run:g=>{ addDeliverable(R.week+1); R.nextFocusPenalty++; return "New deliverable · <b class='foc'>−1 Focus next week</b>"; }},
+      {tel:"▲ THE BOARD REVIEW — <b>−4 PIP</b> (−1 if you shipped 3+ this level)", run:g=> R.shipsThisLevel>=3 ? g.hit("pip",-1) : g.hit("pip",-4)},
     ]},
   leviathan:{icon:"🐋", name:"Leviathan, SVP of Ops", demon:"Warden of the Approval Chain", desc:"Every decision needs one more signature. Forever.", greater:true,
     intents:[
-      {tel:"Endless approvals — <b>−1 Focus + a Curse</b>", run:g=>{ R.nextFocusPenalty++; const n=addCurse("redtape"); return "<b class='foc'>−1 Focus next week</b> · a <b class='bad'>"+n+"</b> curse."; }},
-      {tel:"Audit finding pinned on you — <b>−2 PIP</b>", run:g=>g.hit("pip",-2)+" — the finding has your name on it."},
-      {tel:"▲ THE COMMITTEE VERDICT — <b>+3 Heat · −2 MH · a Curse</b>", run:g=>{ const n=addCurse(); return g.hit("heat",3)+" "+g.hit("mh",-2)+" · a <b class='bad'>"+n+"</b> curse."; }},
+      {tel:"Endless approvals — <b>−1 Focus + a Curse</b>", run:g=>{ R.nextFocusPenalty++; const n=addCurse("redtape"); return "<b class='foc'>−1 Focus next week</b> · <b class='bad'>"+n+"</b> curse."; }},
+      {tel:"Audit finding pinned on you — <b>−2 PIP</b>", run:g=>g.hit("pip",-2)},
+      {tel:"▲ THE COMMITTEE VERDICT — <b>+3 Heat · −2 MH · a Curse</b>", run:g=>{ const n=addCurse(); return g.hit("heat",3)+" "+g.hit("mh",-2)+" · <b class='bad'>"+n+"</b> curse."; }},
     ]},
   lucifer:{icon:"😈", name:"Lucifer, Senior Managing Partner", demon:"The Morningstar, Made Partner", desc:"Up or out. He decides which, and he's already decided.", greater:true,
     intents:[
       {tel:"Up-or-out ultimatum — <b>−2 PIP · −1 MH</b>", run:g=>g.hit("pip",-2)+" "+g.hit("mh",-1)},
       {tel:"Filing on you personally — <b>a Curse + −1 PIP</b>", run:g=>{ const n=addCurse(); return "A <b class='bad'>"+n+"</b> curse · "+g.hit("pip",-1); }},
-      {tel:"▲ THE PARTNERSHIP VOTE — <b>−5 PIP</b> (or +2 Heat if you shipped 3+)", run:g=> R.shipsThisLevel>=3 ? ("The vote squeaks your way. "+g.hit("heat",2)) : (g.hit("pip",-5)+" — the vote is unanimous. Against you.")},
+      {tel:"▲ THE PARTNERSHIP VOTE — <b>−5 PIP</b> (or +2 Heat if you shipped 3+)", run:g=> R.shipsThisLevel>=3 ? g.hit("heat",2) : g.hit("pip",-5)},
     ]},
 };
 
@@ -564,12 +564,12 @@ const ROLES = {
 
 /* ============ ENCOUNTER DECK ============ */
 const ENCOUNTERS = [
-  {id:"hr", cat:"Mental Health", title:"HR 'Check-In'", desc:"A demon from HR blocks 30 minutes that could have been an email.", resolve:g=>({log:g.hit("mh",-1)})},
+  {id:"hr", cat:"Mental Health", title:"HR 'Check-In'", desc:"Thirty minutes that could have been an email.", resolve:g=>({log:g.hit("mh",-1)})},
   {id:"linkedin", cat:"Exposure", title:"Someone Saw Your LinkedIn", desc:'"Love the new headline!" — eyebrow raised.',
-    resolve:g=> g.heat>=4 ? ({log:"Your search has a smell. "+g.hit("mh",-1)+" "+g.hit("heat",1)}) : ({log:"Low profile. No harm done."})},
+    resolve:g=> g.heat>=4 ? ({log:g.hit("mh",-1)+" "+g.hit("heat",1)}) : ({log:"No effect."})},
   {id:"reply", cat:"Mental Health", title:"The Reply-All", desc:"Forty people watch you get asked why it isn't done.", resolve:g=>({log:g.hit("mh",-1)})},
   {id:"scope", cat:"PIP Pressure", title:"Scope Creep", desc:"'Done' now means something else.",
-    resolve:g=>{ const d=g.mostProgressed(); if(!d) return {log:"Nothing to sabotage. Lucky."}; d.progress=Math.max(0,d.progress-1); return {log:"“"+d.title+"” <b class='bad'>−1 progress</b>."}; }},
+    resolve:g=>{ const d=g.mostProgressed(); if(!d) return {log:"No effect."}; d.progress=Math.max(0,d.progress-1); return {log:"“"+d.title+"” <b class='bad'>−1 progress</b>."}; }},
   {id:"happyhour", cat:"Coworker", title:"Team Happy Hour", desc:"Optional the way these things are optional.",
     resolve:g=>({choices:[
       {label:"Show your face", cls:"primary", apply:g=>{ R.nextFocusPenalty++; return {log:g.hit("cap",1)+" · <b class='foc'>−1 Focus next week</b>"}; }},
@@ -577,11 +577,11 @@ const ENCOUNTERS = [
   {id:"ambush", cat:"Forced Dilemma", title:"The 4 PM Ambush", desc:"A 'quick 15' lands on your phone interview.",
     resolve:g=>({choices:[
       {label:"Cancel the interview", cls:"primary", apply:g=>({log:g.hit("js",-2)})},
-      {label:"Risk being late", apply:g=> Math.random()<0.5 ? ({log:"Rescheduled anyway. Clean."}) : ({log:"Late, and noted. "+g.hit("pip",-2)+" "+g.hit("mh",-1)})}]})},
+      {label:"Risk being late", apply:g=> Math.random()<0.5 ? ({log:"No effect."}) : ({log:g.hit("pip",-2)+" "+g.hit("mh",-1)})}]})},
   {id:"praise", cat:"PIP Pressure", title:"An Unexpected Kind Word", desc:"A peer review comes back glowing.", resolve:g=>({log:g.hit("pip",2), good:true})},
   {id:"ally", cat:"Coworker", title:"Coffee With an Ally", desc:"A friend quietly covers for you.", resolve:g=>({log:g.hit("cap",1)+" "+g.hit("mh",1), good:true})},
   {id:"snitch", cat:"Exposure", title:"The Snitch", min:2, desc:"Someone forwarded your job-board activity to HR.",
-    resolve:g=>{ if(g.heat>=6){ if(g.spendCap(2)) return {log:"An ally buries it — <b class='cap'>−2 Capital</b>."}; return {log:"It sticks. "+g.hit("pip",-4)+" "+g.hit("mh",-2)}; } return {log:"Nothing to pin — yet. "+g.hit("heat",2)}; }},
+    resolve:g=>{ if(g.heat>=6){ if(g.spendCap(2)) return {log:"<b class='cap'>−2 Capital</b> — buried."}; return {log:g.hit("pip",-4)+" "+g.hit("mh",-2)}; } return {log:g.hit("heat",2)}; }},
   {id:"firedrill", cat:"Time Thief", title:"Weekend Fire Drill", desc:"Prod is down. You 'volunteer.'", resolve:g=>({log:g.hit("mh",-2)+" "+g.hit("pip",1)})},
   {id:"reorg", cat:"Mental Health", title:"Layoff Rumors", desc:"The org chart is 'being refreshed.'",
     resolve:g=>({choices:[
@@ -850,7 +850,7 @@ function renderHand(){
 function renderPiles(){ $("#drawc").textContent="Draw "+R.draw.length; $("#discardc").textContent="Discard "+R.discard.length; }
 function renderHint(){
   if(R.selecting){ $("#hint").innerHTML="Pick a "+(R.selecting.target==="ready"?"<b>ready</b> ":"")+"deliverable, or <button class='linkbtn' onclick='Game.cancelSelect()'>cancel</button>"; return; }
-  $("#hint").innerHTML="Spend Focus. Friday, <b style='color:var(--danger)'>"+BOSSES[R.bossId].name+"</b> acts — then End Week.";
+  const n=1+(R.week>=3?1:0); $("#hint").innerHTML="Friday: boss move + "+n+" office event"+(n>1?"s":"")+".";
 }
 function flash(m){ if(m) $("#hint").innerHTML="<span style='color:var(--danger)'>"+m+"</span>"; }
 
@@ -886,9 +886,9 @@ function drawEncounters(n){ const out=[]; for(let i=0;i<n;i++){ let pool=ENCOUNT
 function bossStep(done){
   const b=BOSSES[R.bossId];
   if(!R.skipIntent && fx('skip_boss') && !R.skipBossUsed && R.intent && /−|new deliverable|creeps/i.test(R.intent.tel)){ R.skipBossUsed=true; R.skipIntent=true; }
-  if(R.skipIntent){ $("#modalhost").innerHTML=modal("danger","Friday · Manager","Move Skipped",b.name+" "+b.icon,"","You dodged: "+stripTags(R.intent.tel)+"."); $("#veil").classList.add("show"); R.skipIntent=false; return cont(done); }
-  const log=R.intent?R.intent.run(g):"Your manager is mercifully absent."; renderLive(); if(bad(log)) shake();
-  $("#modalhost").innerHTML=modal("danger","Friday · Manager","The Manager Acts",b.name+" "+b.icon,"",log); $("#veil").classList.add("show");
+  if(R.skipIntent){ $("#modalhost").innerHTML=modal("danger","Friday · Week "+R.week,"Move Skipped","","",stripTags(R.intent.tel)); $("#veil").classList.add("show"); R.skipIntent=false; return cont(done); }
+  const log=R.intent?R.intent.run(g):"No move this week."; renderLive(); if(bad(log)) shake();
+  $("#modalhost").innerHTML=modal("danger","Friday · Week "+R.week,b.name,"","",log); $("#veil").classList.add("show");
   cont(()=>{ if(checkLossContinuous()) return; done(); });
 }
 function encounterStep(card,done){
@@ -907,19 +907,19 @@ function afterFridayEvents(){
 function continueFriday(){ const due=R.deliverables.filter(d=>!d.done&&!d.missed&&d.deadline===R.week); runSteps(due.map(d=>done=>deadlineStep(d,done)),()=>afterDeadlines()); }
 function deadlineStep(d,done){
   d.missed=true; let log,title;
-  if(d.progress===0){ title="Deliverable Abandoned"; const cn=addCurse("busywork"); log="Never even started <b class='bad'>“"+d.title+"”</b>. "+g.hit("pip",-3)+" "+g.hit("mh",-2)+" · a <b class='bad'>"+cn+"</b> curse enters your deck."; }
-  else { title="Missed Deadline"; log="Blew the deadline on <b class='bad'>“"+d.title+"”</b>. "+g.hit("pip",-2)+" "+g.hit("mh",-1); }
+  if(d.progress===0){ title="Deliverable Abandoned"; const cn=addCurse("busywork"); log="“"+d.title+"” — never started. "+g.hit("pip",-3)+" "+g.hit("mh",-2)+" · <b class='bad'>"+cn+"</b> curse added."; }
+  else { title="Missed Deadline"; log="“"+d.title+"” "+g.hit("pip",-2)+" "+g.hit("mh",-1); }
   $("#modalhost").innerHTML=modal("danger","Deadline Passed",title,"PIP Pressure","",log); $("#veil").classList.add("show"); renderLive(); shake();
   cont(()=>{ if(checkLossContinuous()) return; done(); });
 }
 function afterDeadlines(){ if(R.over) return; heatCheck(()=>afterHeat()); }
 function heatCheck(done){
   if(R.heat>=10){
-    if(fx('ally')&&!R.allyUsed){ R.allyUsed=true; return info("good2","Union Rep","They Vouch For You","Heat maxed, but the rep steps in — this once.",()=>{ g.add("heat",-3); renderLive(); done(); }); }
-    if(g.spendCap(2)){ return info("neutral","Exposure","Bought Off","<b class='cap'>−2 Capital</b> makes it a misunderstanding. "+g.hit("heat",-3),()=>{ renderLive(); done(); }); }
-    return gameOver("terminated","Terminated for Cause","Your Heat hit the ceiling. Someone connected the dots on your job search. Security has your badge.");
+    if(fx('ally')&&!R.allyUsed){ R.allyUsed=true; return info("good2","Union Rep","They Vouch For You","The rep steps in. Once.",()=>{ g.add("heat",-3); renderLive(); done(); }); }
+    if(g.spendCap(2)){ return info("neutral","Exposure","Bought Off","<b class='cap'>−2 Capital</b> "+g.hit("heat",-3),()=>{ renderLive(); done(); }); }
+    return gameOver("terminated","Terminated for Cause","Heat hit 10. They connected the dots.");
   }
-  if(R.heat>=8){ return info("danger","Exposure","A Close Call","Whispers are reaching the wrong ears. "+g.hit("mh",-1),()=>{ renderLive(); done(); }); }
+  if(R.heat>=8){ return info("danger","Exposure","A Close Call",g.hit("mh",-1),()=>{ renderLive(); done(); }); }
   done();
 }
 function afterHeat(){
@@ -930,7 +930,7 @@ function afterHeat(){
   const canEscape = escapeUnlocked && R.week>=3 && R.js>=R.jsGoal;
   const survived = R.pip>=R.pipGoal;
   if(canEscape) return offerPathChoice(survived);
-  if(R.week>=MAX_WEEKS){ if(survived) return doSurvive(); return gameOver("fired","Fired","Four weeks up. You didn't hit your PIP and you didn't make it out. The plan worked as designed."); }
+  if(R.week>=MAX_WEEKS){ if(survived) return doSurvive(); return gameOver("fired","Fired","Four weeks. No PIP, no exit. The plan worked as designed."); }
   offerCardDraft(()=>advanceWeek());
 }
 
@@ -938,18 +938,18 @@ function afterHeat(){
 function offerPathChoice(survived){
   R.phase="choice"; const isLast=R.companyIdx>=COMPANIES.length-1; const next=COMPANIES[R.companyIdx+1];
   const choices=[];
-  choices.push({cls:"esc", label:isLast?"Walk out the front door":"Take the offer at "+next.name, desc:isLast?"Escape for good. You're free.":"Leave "+R.company.name+" with a Rare card.", act:()=>doEscape()});
-  if(R.week<MAX_WEEKS){ choices.push({cls:"primary", label:"Stay — keep grinding", desc:"Play on. Survive here for an Office Perk.", act:()=>offerCardDraft(()=>advanceWeek())}); }
-  else if(survived){ choices.push({cls:"primary", label:"Turn it down & stay", desc:"You hit your PIP. Survive → Office Perk + promotion.", act:()=>doSurvive()}); }
-  else { choices.push({cls:"plain", label:"Turn it down", desc:"Refuse the offer — and take the firing.", act:()=>gameOver("fired","Fired","You turned down the exit and missed your PIP. Bold. Fatal.")}); }
-  choiceModal("escape2","A Firm Offer","An offer just landed. You can leave "+R.company.name+" now — or stay and prove them wrong.",choices);
+  choices.push({cls:"esc", label:isLast?"Walk out — for good":"Leave for "+next.name+" → Rare card", act:()=>doEscape()});
+  if(R.week<MAX_WEEKS){ choices.push({cls:"primary", label:"Stay — play on", act:()=>offerCardDraft(()=>advanceWeek())}); }
+  else if(survived){ choices.push({cls:"primary", label:"Stay → Office Perk", act:()=>doSurvive()}); }
+  else { choices.push({cls:"plain", label:"Turn it down (fired)", act:()=>gameOver("fired","Fired","Turned down the exit, missed the PIP.")}); }
+  choiceModal("escape2","A Firm Offer","An offer is on the table.",choices);
 }
 function doEscape(){ R.phase="cleared"; R.journey.push({co:R.company.name,lvl:R.level,out:"esc"}); offerRareDraft(()=>jumpCompany()); }
-function doSurvive(){ R.phase="cleared"; R.journey.push({co:R.company.name,lvl:R.level,out:"surv"}); info("good2","Survived","You Survived — "+R.company.name+" · Level "+R.level,"They couldn't fire you. Pick your reward.",()=>offerPerkDraft(()=>levelUp())); }
+function doSurvive(){ R.phase="cleared"; R.journey.push({co:R.company.name,lvl:R.level,out:"surv"}); offerPerkDraft(()=>levelUp()); }
 
 function goToLevel(promo){
   const after=()=>{ startLevel(); render(); $("#veil").classList.remove("show");
-    if(promo){ const co=R.company; info("good2","Promoted","Onward and Upward","You topped out — welcome to <b>"+co.name+"</b>, "+co.archetype+". "+co.blurb,()=>{ render(); $("#veil").classList.remove("show"); }); } };
+    if(promo){ const co=R.company; info("good2","Promoted",co.name+" · "+co.archetype,co.blurb,()=>{ render(); $("#veil").classList.remove("show"); }); } };
   if(R.cap>=2) openShop(after); else after();
 }
 function levelUp(){ g.add("mh",2); if(R.level>=LEVELS){ g.add("mh",3); R.companyIdx++; if(R.companyIdx>=COMPANIES.length) return winRun("partner"); R.level=1; goToLevel(true); } else { R.level++; goToLevel(false); } }
@@ -1001,7 +1001,7 @@ function offerPerkDraft(done){
   const co=R.company; const owned=new Set(R.perks); const pool=co.perks.filter(id=>!owned.has(id));
   if(!pool.length) return done();
   const show=shuffle(pool.slice()).slice(0,3);
-  $("#modalhost").innerHTML="<div class='reck good2'><div class='ehd'>Survived · "+co.name+" Perk</div><h3 class='etitle'>Choose an Office Perk</h3><div class='ecat'>Only earned by staying · lasts the run</div><div class='draftgrid' id='rg'></div></div>";
+  $("#modalhost").innerHTML="<div class='reck good2'><div class='ehd'>Survived · "+co.name+" Perk</div><h3 class='etitle'>Choose an Office Perk</h3><div class='ecat'>Lasts the run</div><div class='draftgrid' id='rg'></div></div>";
   $("#veil").classList.add("show"); const rg=$("#rg"); let picked=false;
   show.forEach(id=>{ const p=PERKS[id]; const el=document.createElement("button"); el.className="reliccard"; el.innerHTML="<div class='ricon'>"+p.icon+"</div><div class='rname'>"+p.name+"</div><div class='rdesc'>"+p.desc+"</div>"; el.onclick=()=>{ if(picked)return; picked=true; R.perks.push(id); $("#veil").classList.remove("show"); done(); }; rg.appendChild(el); });
 }
@@ -1009,22 +1009,19 @@ function offerPerkDraft(done){
 /* ============ WEEK ADVANCE ============ */
 function advanceWeek(){
   R.week++; R.focus=Math.max(1,BASE_FOCUS-R.nextFocusPenalty); R.nextFocusPenalty=0; R.completedThisWeek=0; R.skipIntent=false; R.phase="play";
-  chooseIntent(); drawHand(); render();
-  const lines=["Focus: <b class='foc'>"+R.focus+"</b> · Manager: <b style='color:var(--amber)'>"+stripTags(R.intent?R.intent.tel:"—")+"</b>",
-    "PIP <b style='color:var(--phosphor)'>"+R.pip+"/"+R.pipGoal+"</b> · Job <b style='color:var(--escape)'>"+R.js+"/"+R.jsGoal+"</b>"+(R.week>=3?" (escape open)":"")+" · MH <b style='color:var(--amber)'>"+R.mh+"</b> · Heat <b style='color:var(--danger)'>"+R.heat+"</b>"];
-  $("#modalhost").innerHTML=modal("neutral","New Week","Week "+R.week+" of "+MAX_WEEKS,"",R.week===MAX_WEEKS?"Final week.":"",lines.join("\n"));
-  $("#veil").classList.add("show"); cont(()=>{ $("#veil").classList.remove("show"); render(); });
+  chooseIntent(); drawHand();
+  $("#veil").classList.remove("show"); render();
 }
 
 /* ============ LOSS / WIN ============ */
-function checkLossContinuous(){ if(R.over) return true; if(R.mh<=0){ gameOver("breakdown","Burned Out","Your Mental Health hit zero. You stop showing up — first in spirit, then in fact. The plan outlasted you."); return true; } return false; }
+function checkLossContinuous(){ if(R.over) return true; if(R.mh<=0){ gameOver("breakdown","Burned Out","Mental Health hit zero. The plan outlasted you."); return true; } return false; }
 function depthNum(){ return R.companyIdx*LEVELS + R.level; }
 function depthLabel(){ return R.company.name+" · Level "+R.level; }
-function revealBanner(){ return "<div class='unlockbox' style='border-color:var(--escape)'><div class='ul' style='color:var(--escape)'>🔓 Unlocked — the way out</div><div class='ui'>Turns out you could have <b style='color:var(--escape)'>Job Hunt</b>ed your way out this whole time. The <b style='color:var(--escape)'>Escape</b> path opens on your next run.</div></div>"; }
+function revealBanner(){ return "<div class='unlockbox' style='border-color:var(--escape)'><div class='ul' style='color:var(--escape)'>🔓 Unlocked — the way out</div><div class='ui'><b style='color:var(--escape)'>Job Hunt</b> unlocked. The <b style='color:var(--escape)'>Escape</b> path opens next run.</div></div>"; }
 function runSummary(won){
   let j = R.journey.length
     ? "<div class='journey'>"+R.journey.map(s=>"<span class='jstep "+(s.out==="surv"?"surv":"esc")+"'>"+(s.out==="surv"?"Survived ":"Escaped ")+s.co+" L"+s.lvl+"</span>").join("")+"</div>"
-    : "<div class='sumrow' style='text-align:center'>You didn't clear a single Plan. The house barely noticed.</div>";
+    : "<div class='sumrow' style='text-align:center'>No plans cleared.</div>";
   const perkIcons = R.perks.length ? "<span class='perkline'>"+R.perks.map(id=>PERKS[id].icon).join(" ")+"</span>" : "<span style='color:var(--ink-faint)'>none</span>";
   return "<div class='summary'>"+j
     +"<div class='sumrow' style='text-align:center'>Deck: <b>"+R.deck.length+" cards</b> · Perks: "+perkIcons+"</div>"
@@ -1046,8 +1043,8 @@ function winRun(kind){
   saveBest(99, kind==="freedom"?"Escaped the ladder":"Made Partner");
   const s=$("#endscreen"); s.className="overlay show "+(kind==="freedom"?"escape":"win");
   $("#end-hd").textContent="Career Complete";
-  if(kind==="freedom"){ $("#end-title").textContent="FREE"; $("#end-lede").innerHTML="You escaped McCrapsey — and the whole ladder. Three PIPs, three exits, and a deck full of leverage. Nobody's putting you on a plan ever again."; }
-  else { $("#end-title").textContent="PARTNER"; $("#end-lede").innerHTML="You clawed through all three companies and survived to the top of McCrapsey. They made you partner. Now <i>you</i> get to write the plans."; }
+  if(kind==="freedom"){ $("#end-title").textContent="FREE"; $("#end-lede").innerHTML="Out of McCrapsey — out of the ladder. Nobody puts you on a plan again."; }
+  else { $("#end-title").textContent="PARTNER"; $("#end-lede").innerHTML="Top of McCrapsey. They made you partner. Now <i>you</i> write the plans."; }
   const rev=unlockEscape();
   $("#end-unlocks").innerHTML=(rev?revealBanner():"")+runSummary(true);
   $("#end-flav").innerHTML="A rare win. The house usually takes it.";
@@ -1082,17 +1079,15 @@ window.Game={
 // Title brief — hide the Escape line until it's unlocked (the first-run reveal)
 (function initBrief(){
   const b=$("#brief"); if(!b) return;
-  const common="Draw a hand, spend <span class='f'>Focus</span>. Friday, your manager acts — <b>telegraphed</b>, so plan ahead.<br>";
+  const common="Draw a hand, spend <span class='f'>Focus</span>. Friday, the office hits back.<br>";
   b.innerHTML = escapeUnlocked
     ? common
-      +"<span class='k'>▸ Survive</span> (hit PIP) → keep your seat, earn an <b>Office Perk</b>, climb a level here.<br>"
-      +"<span class='e'>▸ Escape</span> (hit Job Search, Week 3+) → jump to the next company with a <b>Rare card</b>.<br>"
-      +"<span class='a'>▸ Your deck, perks &amp; Mental Health carry over.</span> Heat &amp; deadlines reset.<br>"
-      +"<span class='d'>▸ Fired, burned out, or caught</span> ends the run."
+      +"<span class='k'>▸ Survive</span> — hit PIP → Office Perk, climb.<br>"
+      +"<span class='e'>▸ Escape</span> — hit Job Search (Wk 3+) → Rare card, next company.<br>"
+      +"<span class='d'>▸ Fired · burned out · caught</span> — run over."
     : common
-      +"<span class='k'>▸ Survive</span> (hit PIP by Week 4) → keep your seat and earn an <b>Office Perk</b>.<br>"
-      +"<span class='a'>▸ Climb all three companies.</span> Your deck, perks &amp; Mental Health carry over.<br>"
-      +"<span class='d'>▸ Burn out or get fired</span> and the run ends.";
+      +"<span class='k'>▸ Survive</span> — hit PIP by Week 4.<br>"
+      +"<span class='d'>▸ Burn out or get fired</span> — run over.";
 })();
 window.__PIP={ state:()=>({companyIdx:R.companyIdx,level:R.level,escapeUnlocked,depth:depthNum(),week:R.week,phase:R.phase,focus:R.focus,pip:R.pip,js:R.js,mh:R.mh,heat:R.heat,cap:R.cap,pipGoal:R.pipGoal,jsGoal:R.jsGoal,over:R.over,perks:R.perks.slice(),hand:R.hand.slice(),handCosts:R.hand.map(c=>CARDS[c].cost),dels:R.deliverables.filter(d=>!d.missed).map(d=>({t:d.title,p:d.progress,c:d.cost,done:d.done,ready:!d.done&&d.progress>=d.cost}))}) };
 })();
