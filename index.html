@@ -249,6 +249,14 @@ body{ margin:0; background:radial-gradient(120% 90% at 50% 0%,#0e1518 0%,var(--g
 .shopitem .sdesc{ font-size:10.5px; color:var(--ink-dim); }
 .shopitem .sprice{ font-size:12px; color:var(--capital); white-space:nowrap; font-weight:bold; }
 .capnum{ color:var(--capital); font-weight:bold; font-variant-numeric:tabular-nums; }
+
+/* ===== Level-5 final boss ===== */
+.boss.finalboss{ border-color:var(--danger); box-shadow:0 0 24px rgba(255,77,94,.32),inset 0 0 30px rgba(255,77,94,.08); animation:bosspulse 2.2s ease-in-out infinite; }
+@keyframes bosspulse{ 0%,100%{ box-shadow:0 0 18px rgba(255,77,94,.26),inset 0 0 26px rgba(255,77,94,.06); } 50%{ box-shadow:0 0 30px rgba(255,77,94,.5),inset 0 0 34px rgba(255,77,94,.12); } }
+.boss.finalboss .face{ color:var(--danger); filter:drop-shadow(0 0 9px rgba(255,77,94,.6)); }
+.boss.finalboss .face .eye{ fill:var(--danger); }
+.bosstag{ display:inline-block; font-size:9px; letter-spacing:.22em; text-transform:uppercase; color:var(--danger); border:1px solid var(--danger); border-radius:4px; padding:1px 6px; margin-bottom:3px; }
+@media (prefers-reduced-motion:reduce){ .boss.finalboss{ animation:none; } }
 </style>
 </head>
 <body>
@@ -337,7 +345,7 @@ const CARDS = {
     play:(g,d)=>{ const n=1+(fx('work_boost')?1:0); d.progress=Math.min(d.cost,d.progress+n); return prog(n,d)+" "+g.hit("mh",-1); }},
   shipit:   {name:"Ship It", cost:1, r:"common", type:"Action", target:"ready",
     desc:"Finish a ready deliverable → PIP.",
-    play:(g,d)=>{ d.done=true; R.completedThisWeek++; let l=g.hit("pip",d.reward); if(fx('billable')) l+=" "+g.hit("js",1); return l; }},
+    play:(g,d)=>{ d.done=true; R.completedThisWeek++; R.shipsThisLevel++; let l=g.hit("pip",d.reward); if(fx('billable')) l+=" "+g.hit("js",1); return l; }},
   jobhunt:  {name:"Job Hunt", cost:1, r:"common", type:"Escape",
     desc:"+2 Job · +2 Heat · −1 MH",
     play:(g)=>g.hit("js",2+(fx('cheap_escape')?1:0))+" "+g.hit("heat",2)+" "+g.hit("mh",-1)},
@@ -390,7 +398,7 @@ const CARDS = {
     play:(g)=>g.hit("js",5+(fx('cheap_escape')?1:0))},
   portfolio:{name:"Portfolio Piece", cost:2, r:"rare", type:"Action", target:"any", rare:true,
     desc:"Finish any deliverable now.",
-    play:(g,d)=>{ d.done=true; R.completedThisWeek++; return g.hit("pip",d.reward)+" — “"+d.title+"” done."; }},
+    play:(g,d)=>{ d.done=true; R.completedThisWeek++; R.shipsThisLevel++; return g.hit("pip",d.reward)+" — “"+d.title+"” done."; }},
   signing:  {name:"Signing Bonus", cost:1, r:"rare", type:"Recover", rare:true,
     desc:"+2 Capital · +3 MH",
     play:(g)=>g.hit("cap",2)+" "+g.hit("mh",3)},
@@ -418,7 +426,7 @@ const UPGRADES = {
   work:     {name:"Work+",           play:(g,d)=>{ const n=2+(fx('work_boost')?1:0); d.progress=Math.min(d.cost,d.progress+n); return prog(n,d)+" "+g.hit("mh",-1); }},
   deepwork: {name:"Deep Work+",      play:(g,d)=>{ const n=4+(fx('work_boost')?1:0)+(fx('deep_boost')?2:0); d.progress=Math.min(d.cost,d.progress+n); return prog(n,d)+" "+g.hit("mh",-1); }},
   sandbag:  {name:"Sandbag+",        play:(g,d)=>{ d.progress=Math.min(d.cost,d.progress+3); return prog(3,d); }},
-  shipit:   {name:"Ship It+", cost:0, play:(g,d)=>{ d.done=true; R.completedThisWeek++; let l=g.hit("pip",d.reward); if(fx('billable')) l+=" "+g.hit("js",1); return l; }},
+  shipit:   {name:"Ship It+", cost:0, play:(g,d)=>{ d.done=true; R.completedThisWeek++; R.shipsThisLevel++; let l=g.hit("pip",d.reward); if(fx('billable')) l+=" "+g.hit("js",1); return l; }},
   jobhunt:  {name:"Job Hunt+",       play:(g)=>g.hit("js",3+(fx('cheap_escape')?1:0))+" "+g.hit("heat",2)+" "+g.hit("mh",-1)},
   resume:   {name:"Update Résumé+",  play:(g)=>g.hit("js",3+(fx('cheap_escape')?1:0))},
   breathe:  {name:"Breathe+",        play:(g)=>g.hit("mh",5+(fx('recover_boost')?2:0))},
@@ -510,19 +518,38 @@ const BOSSES = {
       {tel:"Taking credit upstairs — <b>−2 PIP</b>", run:g=>g.hit("pip",-2)+" — your win, their slide."},
       {tel:"Documenting concerns — <b>a Curse enters your deck</b>", run:g=>{ const n=addCurse(); return "A <b class='bad'>"+n+"</b> curse joins your deck."; }},
     ]},
+  // ---- Level-5 greater demons (final boss of each company). Last intent is the Week-4 finale. ----
+  beelzebub:{icon:"🪰", name:"Beelzebub, VP of Growth", demon:"Prince of the Hockey-Stick", desc:"Wants results that violate physics. Weekly.", greater:true,
+    intents:[
+      {tel:"Demanding 10× numbers — <b>−2 PIP</b>", run:g=>g.hit("pip",-2)+" — 'think bigger.'"},
+      {tel:"Poaching your team — <b>new deliverable + −1 Focus</b>", run:g=>{ addDeliverable(R.week+1); R.nextFocusPenalty++; return "Half your team 'reallocated.' <b class='foc'>−1 Focus next week</b>."; }},
+      {tel:"▲ THE BOARD REVIEW — <b>−4 PIP</b> (−1 if you shipped 3+ this level)", run:g=> R.shipsThisLevel>=3 ? (g.hit("pip",-1)+" — the numbers barely defend you.") : (g.hit("pip",-4)+" — 'not a fit for our trajectory.'")},
+    ]},
+  leviathan:{icon:"🐋", name:"Leviathan, SVP of Ops", demon:"Warden of the Approval Chain", desc:"Every decision needs one more signature. Forever.", greater:true,
+    intents:[
+      {tel:"Endless approvals — <b>−1 Focus + a Curse</b>", run:g=>{ R.nextFocusPenalty++; const n=addCurse("redtape"); return "<b class='foc'>−1 Focus next week</b> · a <b class='bad'>"+n+"</b> curse."; }},
+      {tel:"Audit finding pinned on you — <b>−2 PIP</b>", run:g=>g.hit("pip",-2)+" — the finding has your name on it."},
+      {tel:"▲ THE COMMITTEE VERDICT — <b>+3 Heat · −2 MH · a Curse</b>", run:g=>{ const n=addCurse(); return g.hit("heat",3)+" "+g.hit("mh",-2)+" · a <b class='bad'>"+n+"</b> curse."; }},
+    ]},
+  lucifer:{icon:"😈", name:"Lucifer, Senior Managing Partner", demon:"The Morningstar, Made Partner", desc:"Up or out. He decides which, and he's already decided.", greater:true,
+    intents:[
+      {tel:"Up-or-out ultimatum — <b>−2 PIP · −1 MH</b>", run:g=>g.hit("pip",-2)+" "+g.hit("mh",-1)},
+      {tel:"Filing on you personally — <b>a Curse + −1 PIP</b>", run:g=>{ const n=addCurse(); return "A <b class='bad'>"+n+"</b> curse · "+g.hit("pip",-1); }},
+      {tel:"▲ THE PARTNERSHIP VOTE — <b>−5 PIP</b> (or +2 Heat if you shipped 3+)", run:g=> R.shipsThisLevel>=3 ? ("The vote squeaks your way. "+g.hit("heat",2)) : (g.hit("pip",-5)+" — the vote is unanimous. Against you.")},
+    ]},
 };
 
 /* ============ COMPANIES (ordered ladder) ============ */
 const COMPANIES = [
   {id:"redflonic", name:"RedFlonic", icon:"🚩", archetype:"Series-C Startup",
     blurb:'"We\'re not a company, we\'re a family." A family that feeds. Equity vests posthumously.',
-    bosses:["founder","culturefit"], perks:["coldbrew","movefast","hoodie","pingpong","equity"], pipBase:8, jsBase:10},
+    bosses:["founder","culturefit"], boss5:"beelzebub", perks:["coldbrew","movefast","hoodie","pingpong","equity"], pipBase:8, jsBase:10},
   {id:"sailhorse", name:"SailHorse", icon:"🏢", archetype:"Legacy Megacorp",
     blurb:"Forty thousand souls. Nobody's sure what it does. The paperwork is eternal, literally.",
-    bosses:["middlemgr","thereorg"], perks:["corpcard","unionrep","parking","pension","badge"], pipBase:10, jsBase:12},
+    bosses:["middlemgr","thereorg"], boss5:"leviathan", perks:["corpcard","unionrep","parking","pension","badge"], pipBase:10, jsBase:12},
   {id:"mccrapsey", name:"McCrapsey", icon:"💼", archetype:"Elite Consultancy",
     blurb:"Up or out — and here, 'out' has a specific, sulfurous meaning.",
-    bosses:["partner","managingdir"], perks:["expense","rolodex","corner","billable","airline"], pipBase:12, jsBase:14},
+    bosses:["partner","managingdir"], boss5:"lucifer", perks:["expense","rolodex","corner","billable","airline"], pipBase:12, jsBase:14},
 ];
 
 /* ============ ROLES (deliverable decks) ============ */
@@ -585,14 +612,16 @@ function newRun(){
 function startLevel(){
   const co=COMPANIES[R.companyIdx]; R.company=co;
   const scr=$("#screen"); if(scr) scr.dataset.co=R.companyIdx;
-  const bpool=co.bosses.filter(b=>b!==R.lastBoss); R.bossId=(bpool.length?bpool:co.bosses)[Math.floor(Math.random()*(bpool.length?bpool.length:co.bosses.length))]; R.lastBoss=R.bossId;
+  R.isBossLevel = (R.level===LEVELS);
+  if(R.isBossLevel){ R.bossId=co.boss5; }
+  else { const bpool=co.bosses.filter(b=>b!==R.lastBoss); R.bossId=(bpool.length?bpool:co.bosses)[Math.floor(Math.random()*(bpool.length?bpool.length:co.bosses.length))]; R.lastBoss=R.bossId; }
   R.roleId=Object.keys(ROLES)[Math.floor(Math.random()*Object.keys(ROLES).length)];
   R.pipGoal=co.pipBase+(R.level-1);
   R.jsGoal =co.jsBase +(R.level-1);
   R.pip=0; R.js=0; R.heat=0;                 // Capital persists across the run
   if(fx('start_capital')) R.cap=clamp(R.cap+2,0,CAP_MAX);
   R.focus=BASE_FOCUS; R.nextFocusPenalty=0;
-  R.week=1; R.completedThisWeek=0; R.skipIntent=false;
+  R.week=1; R.completedThisWeek=0; R.shipsThisLevel=0; R.skipIntent=false;
   R.allyUsed=false; R.corpUsed=false; R.skipBossUsed=false;
   R.pendingTerminate=null; R.over=false; R.phase="play"; R.selecting=null; R.seenEnc=new Set();
   R.rolePool=shuffle(ROLES[R.roleId].pool.slice());
@@ -606,7 +635,12 @@ function addDeliverable(deadlineWeek){
   R.deliverables.push({id:uid(),title:spec.title,cost:spec.cost,reward:spec.reward,progress:0,deadline:Math.min(deadlineWeek,MAX_WEEKS),done:false,missed:false});
   return true;
 }
-function chooseIntent(){ const b=BOSSES[R.bossId]; R.intent=b.intents[Math.floor(Math.random()*b.intents.length)]; }
+function chooseIntent(){ const b=BOSSES[R.bossId];
+  if(b.greater){ const finale=b.intents[b.intents.length-1];
+    if(R.week>=MAX_WEEKS){ R.intent=finale; return; }               // Week 4 = the scripted finale
+    const rest=b.intents.slice(0,-1); R.intent=rest[Math.floor(Math.random()*rest.length)]; return; }
+  R.intent=b.intents[Math.floor(Math.random()*b.intents.length)];
+}
 function addCurse(id){ id=id||CURSES[Math.floor(Math.random()*CURSES.length)]; R.deck.push(id); R.discard.push(id); return CARDS[id].name; }
 
 /* ============ DECK OPS ============ */
@@ -700,6 +734,9 @@ const DEMONS={
   thereorg:   {horn:"asym",   eyes:2, acc:"none"},
   partner:    {horn:"long",   eyes:2, acc:"tie"},
   managingdir:{horn:"crown",  eyes:2, acc:"tielanyard"},
+  beelzebub:  {horn:"crown",  eyes:3, acc:"tie"},
+  leviathan:  {horn:"long",   eyes:2, acc:"lanyard"},
+  lucifer:    {horn:"long",   eyes:3, acc:"tie"},
 };
 function demonPortrait(bossId){
   const d=DEMONS[bossId]||DEMONS.founder;
@@ -745,14 +782,17 @@ function renderTop(){
   const co=R.company;
   $("#company").textContent=co.name;
   $("#jobline").textContent=co.archetype+" · "+ROLES[R.roleId].name+" · Under Review";
-  $("#codots").innerHTML="Company <b>"+(R.companyIdx+1)+"/3</b> · Level <b>"+R.level+"/"+LEVELS+"</b>";
+  $("#codots").innerHTML="Company <b>"+(R.companyIdx+1)+"/3</b> · Level <b>"+R.level+"/"+LEVELS+"</b>"+(R.isBossLevel?" · <b style='color:var(--danger)'>FINAL</b>":"");
   const wk=$("#wk"); wk.innerHTML="";
   for(let i=1;i<=MAX_WEEKS;i++){ const d=document.createElement("span"); d.className="dot"+((i<R.week||(i===R.week&&R.phase==="play"))?" on":""); wk.appendChild(d); }
   const fri=document.createElement("span"); fri.className="dot fri"+(R.phase!=="play"?" on":""); wk.appendChild(fri);
 }
 function renderBoss(){
-  const b=BOSSES[R.bossId];
-  $("#boss").innerHTML="<div class='face'>"+demonPortrait(R.bossId)+"</div><div class='bmeta'><div class='bname'>"+b.name+"</div>"
+  const b=BOSSES[R.bossId], boss=R.isBossLevel;
+  const el=$("#boss"); el.className="boss"+(boss?" finalboss":"");
+  el.innerHTML="<div class='face'>"+demonPortrait(R.bossId)+"</div><div class='bmeta'>"
+    +(boss?"<div class='bosstag'>▲ Final Review</div>":"")
+    +"<div class='bname'>"+b.name+"</div>"
     +(b.demon?"<span class='demtag'>"+b.demon+"</span>":"")+"<div class='bdesc'>"+b.desc+"</div></div>"
     +"<div class='intent'><div class='intentlab'>Friday · Week "+R.week+"</div><div class='intenttxt"+(R.skipIntent?" skipped":"")+"'>"+(R.intent?R.intent.tel:"—")+"</div></div>";
 }
@@ -911,7 +951,7 @@ function goToLevel(promo){
     if(promo){ const co=R.company; info("good2","Promoted","Onward and Upward","You topped out — welcome to <b>"+co.name+"</b>, "+co.archetype+". "+co.blurb,()=>{ render(); $("#veil").classList.remove("show"); }); } };
   if(R.cap>=2) openShop(after); else after();
 }
-function levelUp(){ g.add("mh",2); if(R.level>=LEVELS){ R.companyIdx++; if(R.companyIdx>=COMPANIES.length) return winRun("partner"); R.level=1; goToLevel(true); } else { R.level++; goToLevel(false); } }
+function levelUp(){ g.add("mh",2); if(R.level>=LEVELS){ g.add("mh",3); R.companyIdx++; if(R.companyIdx>=COMPANIES.length) return winRun("partner"); R.level=1; goToLevel(true); } else { R.level++; goToLevel(false); } }
 function jumpCompany(){ g.add("mh",2); R.companyIdx++; if(R.companyIdx>=COMPANIES.length) return winRun("freedom"); R.level=1; goToLevel(false); }
 
 /* ============ THE BREAK ROOM (shop) ============ */

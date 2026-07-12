@@ -97,7 +97,13 @@ run, or a Headhunter Tip that slips a Rare into your deck.
 Each company fields its own managers, and they play differently — the startup's **Founder**
 pivots the roadmap and pulls deadlines in; the megacorp's **Middle Manager** steals Focus
 and nitpicks; the consultancy's **Partner** runs up-or-out reviews that gut your PIP. Their
-Friday move is always telegraphed. The encounter deck attacks different systems (PIP,
+Friday move is always telegraphed.
+
+**Level 5 is a boss fight.** The top level of every company pits you against a **greater
+demon** — Beelzebub (VP of Growth), Leviathan (SVP of Ops), and finally Lucifer (Senior
+Managing Partner). They hit harder every Friday and, on Week 4, unleash a scripted **finale**
+that checks whether you actually shipped this level (e.g. *The Board Review* / *The
+Partnership Vote*). The board goes red; beat one and you're promoted (and get a real breather). The encounter deck attacks different systems (PIP,
 mental health, exposure, tempo, coworker politics), and the best cards present a
 **decision**, not just a tax.
 
