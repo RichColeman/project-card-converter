@@ -47,7 +47,7 @@ What digital **cannot** answer — this is your domain:
 ## 3. Core loop (rules as built)
 
 **Week turn (repeat ×4 per level):**
-1. Draw a hand of **5** cards. You have **4 Focus**.
+1. Draw a hand of **5** cards. You have **3 Focus** (perks and cards can add more).
 2. Play cards (cost 0–3 Focus). Targeted cards place progress on deliverables; **a filled
    deliverable scores immediately** — there is no separate "complete" action. Unplayed cards discard. Discards reshuffle when the draw pile empties.
 3. **End Week → Friday reckoning**, in order:
@@ -74,7 +74,7 @@ pile never empties, so the PIP goal is always reachable.
 | Mental Health | 0–12 | **carries across whole run** | 0 = burnout, run over. Work −1, Deep Work −2, Job Hunt −1 |
 | Heat | 0–10 | resets per level | 10 = caught. Visible, player-managed |
 | Political Capital | 0–14 | **carries across whole run** | Currency for the Break Room + emergency saves |
-| Focus | 4/week | weekly | Boss moves and events can dock next week's |
+| Focus | 3/week base | weekly | Each company has a +1 Focus/week perk (stackable across companies); Overtime/Crunch/Cancel-the-1:1 add in-week Focus. Boss moves and events can dock next week's |
 
 ## 4. The fork: Survive vs. Escape
 
@@ -101,7 +101,7 @@ top (*Partner*).
 | Component | Count | Notes |
 |---|---|---|
 | Starter deck | 12 | 5 Work, 1 Sandbag, 2 Job Hunt, 1 Network, 2 Breathe, 1 Overtime |
-| Draftable pool | ~24 | 11 designs ×2–3 copies (Deep Work, Sandbag, Résumé, Coffee Chat, Kiss Up, Skip the Meeting, Ghost a Task, Delegate, LinkedIn Blitz, Therapy, Two Weeks' Notice) |
+| Draftable pool | ~26 | 12 designs ×2–3 copies (Deep Work, Sandbag, Résumé, Coffee Chat, Kiss Up, Skip the Meeting, Ghost a Task, Delegate, Cancel the 1:1, LinkedIn Blitz, Therapy, Two Weeks' Notice) |
 | Rare cards | 5 | Escape rewards only (Insider Referral, Portfolio Piece, Signing Bonus, Burn Bridge, Fresh Start) |
 | Curses | ~9 | Busywork / Red Tape / Dread ×3 |
 | **Card evolutions** | — | The 6 starter designs evolve into stronger forms: Work→Deep Work · Breathe→Therapy · Job Hunt→LinkedIn Blitz · Sandbag→Flow State · Network→Power Lunch · Overtime→Crunch Mode → **print starter cards double-sided**, flip on upgrade. No extra cards |
@@ -110,9 +110,9 @@ top (*Partner*).
 | Manager bosses | 6 | 2 per company, 3 intents each → per-boss intent mini-deck or a boss board with a cube |
 | Greater demons | 3 | Beelzebub / Leviathan / Lucifer — Level-5 bosses; 2 rotating intents + a **fixed Week-4 finale** that checks deliverables shipped this level (≥3 softens it) |
 | Company boards | 3 | Goal table per level, perk pool, palette identity |
-| Company Perks | 15 | 5 exclusive per company (e.g. Move Fast: Work +1 progress; Corporate Card: cancel one termination/level; The Rolodex: escape cards +1 Job) |
+| Company Perks | 18 | 6 exclusive per company (each includes a +1 Focus/week perk — e.g. Move Fast: Work +1 progress; Corporate Card: cancel one termination/level; Standing Desk: +1 Focus/week) |
 | Break Room (shop) | 1 card/board | Between levels if Capital ≥2: Therapy +6 MH (2◆) · Purge a curse (2◆) · Evolve a starter card (3◆) · Random Rare (3◆) |
-| Trackers | — | MH (0–12), Heat (0–10), PIP & Job Search (0–20ish), Capital (0–14), 4 Focus tokens, week marker, level/company marker, progress cubes for deliverables |
+| Trackers | — | MH (0–12), Heat (0–10), PIP & Job Search (0–20ish), Capital (0–14), 6 Focus tokens, week marker, level/company marker, progress cubes for deliverables |
 
 Every number above lives as plain data at the top of `index.html`'s script block —
 that file is the single source of truth for card text and tuning.

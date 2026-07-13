@@ -326,7 +326,7 @@ body{ margin:0; background:radial-gradient(120% 90% at 50% 0%,#0e1518 0%,var(--g
 "use strict";
 
 /* ============ CONSTANTS ============ */
-const MH_BASE=12, HEAT_MAX=10, CAP_MAX=14, HAND_SIZE=5, BASE_FOCUS=4, MAX_WEEKS=4, LEVELS=5;
+const MH_BASE=12, HEAT_MAX=10, CAP_MAX=14, HAND_SIZE=5, BASE_FOCUS=3, MAX_WEEKS=4, LEVELS=5;
 const BEST_KEY="pip_best_v2";
 
 /* ============ CARDS ============
@@ -370,6 +370,9 @@ const CARDS = {
   ghosttask:{name:"Ghost a Task", cost:1, r:"uncommon", type:"Tempo", target:"any", pool:true,
     desc:"Deadline +1 week",
     play:(g,d)=>{ d.deadline++; return "“"+d.title+"” → <b class='foc'>Week "+d.deadline+"</b>."; }},
+  cancel11: {name:"Cancel the 1:1", cost:0, r:"uncommon", type:"Tempo", pool:true,
+    desc:"+1 Focus · +1 Heat",
+    play:(g)=>{ R.focus++; spawnJuice("focus","+1"); return "<b class='foc'>+1 Focus</b> "+g.hit("heat",1); }},
   delegate: {name:"Delegate", cost:1, r:"uncommon", type:"Action", target:"any", pool:true,
     desc:"+3 progress · +1 Heat",
     play:(g,d)=>addProgress(d,3)+" "+g.hit("heat",1)},
@@ -441,18 +444,21 @@ const RARE_ART = {
    fx tags drive effects. Each perk belongs to one company's pool. */
 const PERKS = {
   // RedFlonic — the startup: speed, hustle, "culture"
+  standdesk:{icon:"🪑", name:"Standing Desk", fx:"focus_plus", desc:"+1 Focus each week."},
   coldbrew:{icon:"☕", name:"Cold Brew on Tap", fx:"recover_boost", desc:"Breathe & Therapy heal +2."},
   movefast:{icon:"⚡", name:"Move Fast", fx:"work_boost", desc:"Work & Deep Work give +1 progress."},
   hoodie:  {icon:"🧥", name:"Company Hoodie", fx:"max_mh", desc:"+2 max Mental Health."},
   pingpong:{icon:"🏓", name:"Ping-Pong Table", fx:"friday_calm", desc:"+1 MH after each Friday."},
   equity:  {icon:"📈", name:"Equity Grant", fx:"draft_extra", desc:"See an extra option in card drafts."},
   // SailHorse — the megacorp: process, protection, politics
+  assistant:{icon:"🗂️", name:"Executive Assistant", fx:"focus_plus", desc:"+1 Focus each week."},
   corpcard:{icon:"💳", name:"Corporate Card", fx:"corp_card", desc:"Once per level, prevent a termination."},
   unionrep:{icon:"✊", name:"Union Rep", fx:"ally", desc:"Ignore the first exposure check each level."},
   parking: {icon:"🅿️", name:"Reserved Parking", fx:"big_hand", desc:"Draw +1 card each week."},
   pension: {icon:"🏦", name:"Pension Vesting", fx:"start_capital", desc:"Start each level with +2 Capital."},
   badge:   {icon:"🪪", name:"Badge Access", fx:"skip_boss", desc:"Once per level, auto-skip a manager move."},
   // McCrapsey — the consultancy: leverage, billability, status
+  analyst:{icon:"📊", name:"Junior Analyst", fx:"focus_plus", desc:"+1 Focus each week."},
   expense: {icon:"🧾", name:"Expense Account", fx:"cap_gen", desc:"+1 Capital after each Friday."},
   rolodex: {icon:"📇", name:"The Rolodex", fx:"cheap_escape", desc:"Job Hunt & escape cards give +1 Job."},
   corner:  {icon:"🚪", name:"Corner Office", fx:"deep_boost", desc:"Deep Work gives +2 more progress."},
@@ -526,13 +532,13 @@ const BOSSES = {
 const COMPANIES = [
   {id:"redflonic", name:"RedFlonic", icon:"🚩", archetype:"Series-C Startup",
     blurb:'"We\'re not a company, we\'re a family." A family that feeds. Equity vests posthumously.',
-    bosses:["founder","culturefit"], boss5:"beelzebub", perks:["coldbrew","movefast","hoodie","pingpong","equity"], pipBase:8, jsBase:10},
+    bosses:["founder","culturefit"], boss5:"beelzebub", perks:["coldbrew","movefast","hoodie","pingpong","equity","standdesk"], pipBase:8, jsBase:10},
   {id:"sailhorse", name:"SailHorse", icon:"🏢", archetype:"Legacy Megacorp",
     blurb:"Forty thousand souls. Nobody's sure what it does. The paperwork is eternal, literally.",
-    bosses:["middlemgr","thereorg"], boss5:"leviathan", perks:["corpcard","unionrep","parking","pension","badge"], pipBase:12, jsBase:14},
+    bosses:["middlemgr","thereorg"], boss5:"leviathan", perks:["corpcard","unionrep","parking","pension","badge","assistant"], pipBase:12, jsBase:14},
   {id:"mccrapsey", name:"McCrapsey", icon:"💼", archetype:"Elite Consultancy",
     blurb:"Up or out — and here, 'out' has a specific, sulfurous meaning.",
-    bosses:["partner","managingdir"], boss5:"lucifer", perks:["expense","rolodex","corner","billable","airline"], pipBase:16, jsBase:18},
+    bosses:["partner","managingdir"], boss5:"lucifer", perks:["expense","rolodex","corner","billable","airline","analyst"], pipBase:16, jsBase:18},
 ];
 
 /* ============ ROLES (deliverable decks) ============ */
@@ -609,7 +615,7 @@ function startLevel(){
   R.jsGoal =co.jsBase +(R.level-1);
   R.pip=0; R.js=0; R.heat=0;                 // Capital persists across the run
   if(fx('start_capital')) R.cap=clamp(R.cap+2,0,CAP_MAX);
-  R.focus=BASE_FOCUS; R.nextFocusPenalty=0;
+  R.focus=focusBase(); R.nextFocusPenalty=0;
   R.week=1; R.completedThisWeek=0; R.shipsThisLevel=0; R.skipIntent=false; R.pipSnapshot=0; R.jsSnapshot=0;
   R.allyUsed=false; R.corpUsed=false; R.skipBossUsed=false;
   R.pendingTerminate=null; R.over=false; R.phase="play"; R.selecting=null; R.seenEnc=new Set();
@@ -659,6 +665,8 @@ const g = {
   spendCap(n){ if(R.cap>=n){ R.cap-=n; spawnJuice("cap","-"+n); return true; } return false; },
 };
 function fx(tag){ return R.perks && R.perks.some(id=>PERKS[id].fx===tag); }
+function countFx(tag){ return R.perks ? R.perks.filter(id=>PERKS[id].fx===tag).length : 0; }
+function focusBase(){ return BASE_FOCUS + countFx('focus_plus'); }
 function mhMax(){ return MH_BASE + (fx('max_mh')?2:0); }
 function hasPerk(id){ return R.perks && R.perks.includes(id); }
 
@@ -799,7 +807,7 @@ function meter(key,label,cls,val,max,goal){
   return w;
 }
 function renderStrip(){
-  const focDots=Array.from({length:Math.max(R.focus,BASE_FOCUS)},(_,i)=>"<i class='"+(i<R.focus?"on":"")+"'></i>").join("");
+  const focDots=Array.from({length:Math.max(R.focus,focusBase())},(_,i)=>"<i class='"+(i<R.focus?"on":"")+"'></i>").join("");
   let perkHtml = R.perks.length ? ("<span class='relicbar'>"+R.perks.map(id=>{ const p=PERKS[id]; const spent=(p.fx==="ally"&&R.allyUsed)||(p.fx==="corp_card"&&R.corpUsed)||(p.fx==="skip_boss"&&R.skipBossUsed); return "<span class='relic"+(spent?" spent":"")+"' title='"+p.name+" — "+p.desc+"'>"+p.icon+"</span>"; }).join("")+"</span>") : "<span style='color:var(--ink-faint)'>No perks yet</span>";
   const curses=R.deck.filter(id=>CARDS[id]&&CARDS[id].curse).length;
   $("#strip").innerHTML="<span class='focuschip'>Focus</span> <span class='focusdots'>"+focDots+"</span>"
@@ -1017,7 +1025,7 @@ function offerPerkDraft(done){
 
 /* ============ WEEK ADVANCE ============ */
 function advanceWeek(){
-  R.week++; R.focus=Math.max(1,BASE_FOCUS-R.nextFocusPenalty); R.nextFocusPenalty=0; R.completedThisWeek=0; R.skipIntent=false; R.phase="play";
+  R.week++; R.focus=Math.max(1,focusBase()-R.nextFocusPenalty); R.nextFocusPenalty=0; R.completedThisWeek=0; R.skipIntent=false; R.phase="play";
   if(!R.deliverables.some(d=>!d.done&&!d.missed)) addDeliverable(Math.min(R.week+2,MAX_WEEKS)); // the pile never empties
   chooseIntent(); drawHand();
   $("#veil").classList.remove("show"); render();
