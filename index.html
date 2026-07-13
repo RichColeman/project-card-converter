@@ -336,10 +336,7 @@ const BEST_KEY="pip_best_v2";
 const CARDS = {
   work:     {name:"Work", cost:1, r:"common", type:"Action", target:"any", pool:false,
     desc:"+1 progress · −1 MH",
-    play:(g,d)=>{ const n=1+(fx('work_boost')?1:0); d.progress=Math.min(d.cost,d.progress+n); return prog(n,d)+" "+g.hit("mh",-1); }},
-  shipit:   {name:"Ship It", cost:1, r:"common", type:"Action", target:"ready",
-    desc:"Ship a ready deliverable → PIP",
-    play:(g,d)=>{ d.done=true; R.completedThisWeek++; R.shipsThisLevel++; let l=g.hit("pip",d.reward); if(fx('billable')) l+=" "+g.hit("js",1); return l; }},
+    play:(g,d)=>{ const n=1+(fx('work_boost')?1:0); return addProgress(d,n)+" "+g.hit("mh",-1); }},
   jobhunt:  {name:"Job Hunt", cost:1, r:"common", type:"Escape",
     desc:"+2 Job · +2 Heat · −1 MH",
     play:(g)=>g.hit("js",2+(fx('cheap_escape')?1:0))+" "+g.hit("heat",2)+" "+g.hit("mh",-1)},
@@ -354,10 +351,10 @@ const CARDS = {
   // ---- weekly-draft pool ----
   deepwork: {name:"Deep Work", cost:2, r:"uncommon", type:"Action", target:"any", pool:true,
     desc:"+3 progress · −2 MH",
-    play:(g,d)=>{ const n=3+(fx('work_boost')?1:0)+(fx('deep_boost')?2:0); d.progress=Math.min(d.cost,d.progress+n); return prog(n,d)+" "+g.hit("mh",-2); }},
+    play:(g,d)=>{ const n=3+(fx('work_boost')?1:0)+(fx('deep_boost')?2:0); return addProgress(d,n)+" "+g.hit("mh",-2); }},
   sandbag:  {name:"Sandbag", cost:1, r:"uncommon", type:"Action", target:"any", pool:true,
     desc:"+2 progress",
-    play:(g,d)=>{ d.progress=Math.min(d.cost,d.progress+2); return prog(2,d); }},
+    play:(g,d)=>addProgress(d,2)},
   resume:   {name:"Update Résumé", cost:1, r:"uncommon", type:"Escape", pool:true,
     desc:"+2 Job · quiet",
     play:(g)=>g.hit("js",2+(fx('cheap_escape')?1:0))},
@@ -375,7 +372,7 @@ const CARDS = {
     play:(g,d)=>{ d.deadline++; return "“"+d.title+"” → <b class='foc'>Week "+d.deadline+"</b>."; }},
   delegate: {name:"Delegate", cost:1, r:"uncommon", type:"Action", target:"any", pool:true,
     desc:"+3 progress · +1 Heat",
-    play:(g,d)=>{ d.progress=Math.min(d.cost,d.progress+3); return prog(3,d)+" "+g.hit("heat",1); }},
+    play:(g,d)=>addProgress(d,3)+" "+g.hit("heat",1)},
   blitz:    {name:"LinkedIn Blitz", cost:2, r:"rare", type:"Escape", pool:true,
     desc:"+4 Job · +3 Heat",
     play:(g)=>g.hit("js",4+(fx('cheap_escape')?1:0))+" "+g.hit("heat",3)},
@@ -392,7 +389,7 @@ const CARDS = {
     play:(g)=>g.hit("js",5+(fx('cheap_escape')?1:0))},
   portfolio:{name:"Portfolio Piece", cost:2, r:"rare", type:"Action", target:"any", rare:true,
     desc:"Complete any deliverable",
-    play:(g,d)=>{ d.done=true; R.completedThisWeek++; R.shipsThisLevel++; return g.hit("pip",d.reward)+" — “"+d.title+"” done."; }},
+    play:(g,d)=>{ d.progress=d.cost; return completeD(d); }},
   signing:  {name:"Signing Bonus", cost:1, r:"rare", type:"Recover", rare:true,
     desc:"+2 Capital · +3 MH",
     play:(g)=>g.hit("cap",2)+" "+g.hit("mh",3)},
@@ -403,9 +400,9 @@ const CARDS = {
     desc:"+4 MH · draw 2",
     play:(g)=>{ const l=g.hit("mh",4); gDraw(2); return l+" · <b class='foc'>drew 2</b>"; }},
   // ---- evolved forms (via Break Room upgrade only) ----
-  overdeliver:{name:"Overdeliver", cost:1, r:"uncommon", type:"Action", target:"ready",
-    desc:"Ship a ready deliverable → PIP +1",
-    play:(g,d)=>{ d.done=true; R.completedThisWeek++; R.shipsThisLevel++; let l=g.hit("pip",d.reward+1); if(fx('billable')) l+=" "+g.hit("js",1); return l; }},
+  flowstate:{name:"Flow State", cost:1, r:"uncommon", type:"Action", target:"any",
+    desc:"+3 progress",
+    play:(g,d)=>addProgress(d,3)},
   powerlunch:{name:"Power Lunch", cost:1, r:"uncommon", type:"Social", choose:true,
     desc:"Internal or external, doubled."},
   crunch:   {name:"Crunch Mode", cost:0, r:"uncommon", type:"Tempo",
@@ -421,12 +418,14 @@ const CARDS = {
     desc:"Unplayable · −1 MH if held Friday"},
 };
 function prog(n,d){ return "<b class='good'>+"+n+" progress</b> ("+d.progress+"/"+d.cost+")"; }
+function completeD(d){ d.done=true; R.completedThisWeek++; R.shipsThisLevel++; let l="“"+d.title+"” <b class='good'>done</b> · "+g.hit("pip",d.reward); if(fx('billable')) l+=" "+g.hit("js",1); return l; }
+function addProgress(d,n){ d.progress=Math.min(d.cost,d.progress+n); if(d.progress>=d.cost) return completeD(d); return prog(n,d); }
 const RARES=["referral","portfolio","signing","burnbridge","freshstart"];
 const CURSES=["busywork","redtape","dread"];
 
 // ---- evolution chains: starter cards upgrade INTO their stronger forms (Break Room) ----
 // Physical analog: double-sided starter cards — flip on upgrade.
-const EVOLVE={ work:"deepwork", breathe:"therapy", jobhunt:"blitz", shipit:"overdeliver", network:"powerlunch", overtime:"crunch" };
+const EVOLVE={ work:"deepwork", breathe:"therapy", jobhunt:"blitz", sandbag:"flowstate", network:"powerlunch", overtime:"crunch" };
 function isUpgradeable(id){ return !!EVOLVE[id]; }
 
 // ---- bespoke illustrations for the escape-reward rares (replace the generic sigil motif) ----
@@ -594,8 +593,8 @@ function unlockEscape(){ if(!escapeUnlocked){ escapeUnlocked=true; try{ localSto
 function newRun(){
   Object.assign(R,{ companyIdx:0, level:1, mh:MH_BASE, cap:0,
     deck: escapeUnlocked
-      ? ["work","work","work","work","shipit","shipit","jobhunt","jobhunt","network","breathe","breathe","overtime"]
-      : ["work","work","work","work","work","work","shipit","shipit","network","breathe","breathe","overtime"],
+      ? ["work","work","work","work","work","sandbag","jobhunt","jobhunt","network","breathe","breathe","overtime"]
+      : ["work","work","work","work","work","work","sandbag","sandbag","network","breathe","breathe","overtime"],
     perks:[], unlockedThisRun:[], lastBoss:null, journey:[] });
   startLevel();
 }
@@ -828,7 +827,7 @@ function renderHand(){
   R.hand.forEach((cid,idx)=>{
     const c=CARDS[cid]; if(!c) return; const b=document.createElement("button"); b.className="pcard"; b.setAttribute("data-r",c.r); b.setAttribute("data-idx",idx);
     const affordable=c.cost<=R.focus, extra=c.playable?c.playable():true;
-    const targetable=!c.target||R.deliverables.some(d=> c.target==="ready"?(!d.done&&d.progress>=d.cost):(!d.done&&!d.missed));
+    const targetable=!c.target||R.deliverables.some(d=>!d.done&&!d.missed);
     const ok=affordable&&extra&&targetable&&R.phase==="play";
     if(!ok) b.classList.add("unplayable");
     if(R.selecting && R.selecting.idx===idx) b.classList.add("selarm");

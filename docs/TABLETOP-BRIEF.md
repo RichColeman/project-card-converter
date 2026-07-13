@@ -34,6 +34,8 @@ The digital build let us run **thousands of automated playthroughs**. Things tha
   BURNED OUT, not cheap instakills. Only fully-visible states (Heat maxed) kill instantly.
 - **The grind drains you**: working deliverables costs Mental Health. This is the
   emotional core — do not remove it to "clean up" the economy.
+- **No cash-in card.** Deliverables score the moment their track fills. An earlier "Ship
+  It" card gated scoring behind a draw and was pure RNG frustration — cut after playtest.
 
 What digital **cannot** answer — this is your domain:
 - Upkeep burden. Digital automates the whole Friday sequence. Physical needs a clean,
@@ -46,8 +48,8 @@ What digital **cannot** answer — this is your domain:
 
 **Week turn (repeat ×4 per level):**
 1. Draw a hand of **5** cards. You have **4 Focus**.
-2. Play cards (cost 0–3 Focus). Targeted cards place progress on deliverables.
-   Unplayed cards discard. Discards reshuffle when the draw pile empties.
+2. Play cards (cost 0–3 Focus). Targeted cards place progress on deliverables; **a filled
+   deliverable scores immediately** — there is no separate "complete" action. Unplayed cards discard. Discards reshuffle when the draw pile empties.
 3. **End Week → Friday reckoning**, in order:
    a. **Boss move** — the one telegraphed since the week began.
    b. **Office events** — 1 (weeks 1–2) or 2 (weeks 3–4) drawn from the encounter deck.
@@ -98,11 +100,11 @@ top (*Partner*).
 
 | Component | Count | Notes |
 |---|---|---|
-| Starter deck | 12 | 4 Work, 2 Ship It, 2 Job Hunt, 1 Network, 2 Breathe, 1 Overtime |
+| Starter deck | 12 | 5 Work, 1 Sandbag, 2 Job Hunt, 1 Network, 2 Breathe, 1 Overtime |
 | Draftable pool | ~24 | 11 designs ×2–3 copies (Deep Work, Sandbag, Résumé, Coffee Chat, Kiss Up, Skip the Meeting, Ghost a Task, Delegate, LinkedIn Blitz, Therapy, Two Weeks' Notice) |
 | Rare cards | 5 | Escape rewards only (Insider Referral, Portfolio Piece, Signing Bonus, Burn Bridge, Fresh Start) |
 | Curses | ~9 | Busywork / Red Tape / Dread ×3 |
-| **Card evolutions** | — | The 6 starter designs evolve into stronger forms: Work→Deep Work · Breathe→Therapy · Job Hunt→LinkedIn Blitz · Ship It→Overdeliver · Network→Power Lunch · Overtime→Crunch Mode → **print starter cards double-sided**, flip on upgrade. No extra cards |
+| **Card evolutions** | — | The 6 starter designs evolve into stronger forms: Work→Deep Work · Breathe→Therapy · Job Hunt→LinkedIn Blitz · Sandbag→Flow State · Network→Power Lunch · Overtime→Crunch Mode → **print starter cards double-sided**, flip on upgrade. No extra cards |
 | Deliverables | 18 | 3 role decks (Engineering / Design / Operations) × 6; face shows work cost, deadline, reward |
 | Encounter deck | 13 | Office events; ~5 are decision cards (choose A/B), 1 uses a coin flip → die roll |
 | Manager bosses | 6 | 2 per company, 3 intents each → per-boss intent mini-deck or a boss board with a cube |

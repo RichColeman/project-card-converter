@@ -76,8 +76,8 @@ each level. Your score is how far you climbed.
 
 ### The deck
 
-- **Actions** — *Work* / *Deep Work* / *Sandbag* build deliverable progress; *Ship It*
-  converts a finished deliverable into PIP credit.
+- **Actions** — *Work* / *Deep Work* / *Sandbag* build deliverable progress; a filled
+  deliverable scores its PIP immediately.
 - **Escape** — *Job Hunt*, *Update Résumé*, *LinkedIn Blitz*, *Two Weeks' Notice*. Fast,
   but they raise **Heat**.
 - **Social** — *Network* (internal capital vs. external leads), *Coffee Chat*, *Kiss Up*
